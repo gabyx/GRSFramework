@@ -39,7 +39,7 @@
 
 class InclusionSolverCO
 {
-    public:
+public:
     DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -70,7 +70,7 @@ class InclusionSolverCO
         return m_nContacts;
     }
 
-    protected:
+protected:
     static const unsigned int NDOFFriction;
     static const unsigned int ContactDim;
 

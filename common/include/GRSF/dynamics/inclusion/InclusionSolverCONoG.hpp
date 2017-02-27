@@ -40,7 +40,7 @@
 
 class InclusionSolverCONoG
 {
-    public:
+public:
     DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -67,7 +67,7 @@ class InclusionSolverCONoG
         return m_nContacts;
     }
 
-    protected:
+protected:
     unsigned int m_globalIterationCounter;
     bool         m_bConverged;
     PREC         m_maxResidual;

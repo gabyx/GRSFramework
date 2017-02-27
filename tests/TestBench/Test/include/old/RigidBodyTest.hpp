@@ -19,7 +19,7 @@ using namespace std;
 // template von LayoutConfig
 class RigidBodyStateBase
 {
-    public:
+public:
     Eigen::Matrix<double, 6, 1> u;
     Eigen::Matrix<double, 7, 1> q;
 
@@ -48,7 +48,7 @@ struct MyMatrix
 class RigidBodyState            /*<DynamicLayoutConfig<PREC,7,6> >*/
     : public RigidBodyStateBase /*<DynamicLayoutConfig<PREC,7,6> > */
 {
-    public:
+public:
     Matrix<double, 3, 3> A_IK;
 
     MatrixBlock<MyMatrix::VectorQObj, 4, 1>::const_type getQuaternion() const
@@ -86,7 +86,7 @@ class RigidBodyState            /*<DynamicLayoutConfig<PREC,7,6> >*/
         return u.tail<3>();
     }
 
-    private:
+private:
     // Make also const as it should not be changed from outside!
     MatrixBlock<MyMatrix::VectorQObj, 4, 1>::type getQuaternionRef()
     {
@@ -96,7 +96,7 @@ class RigidBodyState            /*<DynamicLayoutConfig<PREC,7,6> >*/
 
 class SolverData
 {
-    public:
+public:
     // MAtric zeugs, Masse, h term usw...
 
     SolverData(RigidBodyState& state) : uBack(state.u)
@@ -112,7 +112,7 @@ class SolverData
     Eigen::Matrix<double, 6, 1>& uBack;
     Eigen::Matrix<double, 6, 1>  uFront;
 
-    private:
+private:
 };
 
 void frissQuaternion(const Matrix<double, 4, 1>& quat)
@@ -122,7 +122,7 @@ void frissQuaternion(const Matrix<double, 4, 1>& quat)
 
 class RigidBody
 {
-    public:
+public:
     RigidBody() : solvData(state){};
     ~RigidBody(){};
 

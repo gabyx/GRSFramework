@@ -43,12 +43,12 @@ enum class EdgeDataTypesEnum : int
 
 class EdgeBase
 {
-    public:
+public:
     EdgeBase(const EdgeDataTypesEnum& t) : m_type(t)
     {
     }
 
-    protected:
+protected:
     EdgeDataTypesEnum m_type;
 };
 
@@ -60,12 +60,12 @@ enum class NodeDataTypesEnum : int
 
 class NodeBase
 {
-    public:
+public:
     NodeBase(const NodeDataTypesEnum& t) : m_type(t)
     {
     }
 
-    protected:
+protected:
     NodeDataTypesEnum m_type;
 };
 
@@ -75,7 +75,7 @@ template <typename TEdgeData,
           typename TEdgeTwin  = EdgeBase>
 class Edge : public EdgeBase
 {
-    public:
+public:
     using EdgeDataType = TEdgeData;
 
     template <typename... T>
@@ -114,7 +114,7 @@ class Edge : public EdgeBase
         return m_data;
     }
 
-    private:
+private:
     EdgeDataType m_data;
     std::size_t  m_counter;
 
@@ -126,7 +126,7 @@ class Edge : public EdgeBase
 template <typename TNodeData>
 class Node : public NodeBase
 {
-    public:
+public:
     using NodeDataType = TNodeData;
     using EdgeList     = std::vector<EdgeBase*>;
 
@@ -144,7 +144,7 @@ class Node : public NodeBase
         return m_edges;
     }
 
-    private:
+private:
     NodeDataType m_data;
     std::size_t  m_counter;
 
@@ -154,7 +154,7 @@ class Node : public NodeBase
 /** Example EdgeData */
 class EdgeDataAA
 {
-    public:
+public:
     EdgeDataAA(int _a) : a(_a)
     {
     }
@@ -165,7 +165,7 @@ const EdgeDataTypesEnum EdgeDataAA::enumType = EdgeDataTypesEnum::EDGE_AA;
 
 class EdgeDataAB
 {
-    public:
+public:
     EdgeDataAB(float _a) : a(_a)
     {
     }
@@ -176,7 +176,7 @@ const EdgeDataTypesEnum EdgeDataAB::enumType = EdgeDataTypesEnum::EDGE_AB;
 
 class EdgeDataBB
 {
-    public:
+public:
     EdgeDataBB(double _a) : a(_a)
     {
     }
@@ -188,7 +188,7 @@ const EdgeDataTypesEnum EdgeDataBB::enumType = EdgeDataTypesEnum::EDGE_BB;
 /** Example NodeData */
 class NodeDataA
 {
-    public:
+public:
     NodeDataA(){};
     NodeDataA(int                  _a) : a(_a){};
     static const NodeDataTypesEnum enumType;
@@ -198,7 +198,7 @@ const NodeDataTypesEnum NodeDataA::enumType = NodeDataTypesEnum::NODE_A;
 
 class NodeDataB
 {
-    public:
+public:
     NodeDataB(){};
     NodeDataB(double               _a) : a(_a){};
     static const NodeDataTypesEnum enumType;
@@ -209,7 +209,7 @@ const NodeDataTypesEnum NodeDataB::enumType = NodeDataTypesEnum::NODE_B;
 template <typename TNode>
 class NodeStorage
 {
-    public:
+public:
     using NodeType = TNode;
 
     ~NodeStorage()
@@ -282,7 +282,7 @@ class NodeStorage
         return m_storage[i];
     }
 
-    private:
+private:
     std::vector<NodeType*> m_storage;
     // Take care, if you want to switch this to a value-type all returned pointer in insertNode are invalidate if
     // reallocation happens
@@ -558,7 +558,7 @@ struct ContactGraphTraits<std::tuple<TNodaData...>, std::tuple<TEdgeData...>>
 template <typename ContactGraphTraits>
 class ContactGraph
 {
-    public:
+public:
     using Traits    = ContactGraphTraits;
     using NodeTypes = typename Traits::NodeTypes;
     using EdgeTypes = typename Traits::EdgeTypes;
@@ -566,7 +566,7 @@ class ContactGraph
     using NodeStorageTuple = typename Traits::NodeStorageTuple;
     using EdgeStorageTuple = typename Traits::EdgeStorageTuple;
 
-    private:
+private:
     NodeStorageTuple m_nodeStorage;
     EdgeStorageTuple m_edgeStorage;
 
@@ -644,7 +644,7 @@ class ContactGraph
         return std::get<Traits::template edgeStorageTypeByEdgeType<TEdge>::idx>(m_edgeStorage);  // get container
     }
 
-    public:
+public:
     ~ContactGraph()
     {
     }

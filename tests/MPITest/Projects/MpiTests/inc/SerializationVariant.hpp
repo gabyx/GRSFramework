@@ -43,7 +43,7 @@
 
 class IntPtrClass
 {
-    public:
+public:
     int* a;
     IntPtrClass(int i)
     {

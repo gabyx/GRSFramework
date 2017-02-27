@@ -14,7 +14,7 @@
 
 class Foo
 {
-    public:
+public:
     // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     // std::vector<Eigen::Vector2d> vec; // VECTOR2d has 2x 8byte = 16byte => vectorizable!! so

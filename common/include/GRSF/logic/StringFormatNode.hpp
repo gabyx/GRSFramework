@@ -24,11 +24,11 @@ namespace LogicNodes
 {
 class StringFormatNode : public LogicNode
 {
-    private:
+private:
     /** Light-weight argument storage which can be passed to tfm::vformat function to format with the format string */
     class VFormatList
     {
-        public:
+    public:
         /**
                 Two versions of add(), to avoid copying and storing the value where possible.
             */
@@ -64,7 +64,7 @@ class StringFormatNode : public LogicNode
             m_argStore.clear();
         }
 
-        private:
+    private:
         struct Any
         {
             virtual ~Any(){};
@@ -146,7 +146,7 @@ class StringFormatNode : public LogicNode
         std::stringstream* m_s;
     };
 
-    public:
+public:
     struct Inputs
     {
         enum
@@ -224,10 +224,10 @@ class StringFormatNode : public LogicNode
         }
     }
 
-    protected:
+protected:
     std::stringstream m_s;
 
-    private:
+private:
     VFormatList     m_formatList;
     FormatListAdder m_adder;
     ValueSetter     m_setter;

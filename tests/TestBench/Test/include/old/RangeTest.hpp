@@ -37,7 +37,7 @@ struct get_pointer : boost::static_visitor<void*>
 template <typename T>
 class Range
 {
-    public:
+public:
     template <typename TYPE, typename TYPE2 = TYPE>
     struct ListOrRangeTypes
     {
@@ -68,7 +68,7 @@ class Range
     template <typename T1>
     class iterator
     {
-        public:
+    public:
         iterator(VariantType& var, bool end = false)
         {
             m_atEnd    = end;
@@ -181,7 +181,7 @@ class Range
             }
         }
 
-        private:
+    private:
         typename ListOrRangeType::ListType*          m_listPtr;
         typename ListOrRangeType::ListType::iterator m_listIt;
 
@@ -200,7 +200,7 @@ class Range
         return iterator<T>(m_rangeVariant, true);
     }
 
-    private:
+private:
     VariantType m_rangeVariant;
 };
 

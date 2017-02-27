@@ -39,7 +39,7 @@ using ContactGraphTraits =
 // #define RESIDUAL_SORTED_ITERATION   ///< Define this macro here to get a residual sorted iteration for SOR_CONTACT
 class ContactGraph : public Graph::GeneralGraph<ContactGraphTraits>
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     DEFINE_CONTACT_GRAPH_VISITORS_AS_FRIEND
@@ -187,7 +187,7 @@ class ContactGraph : public Graph::GeneralGraph<ContactGraphTraits>
         return m_maxResidual;
     }
 
-    private:
+private:
     ContactParameterMap*
         m_pContactParameterMap;  ///< A contact parameter map which is used to get the parameters for one contact.
 

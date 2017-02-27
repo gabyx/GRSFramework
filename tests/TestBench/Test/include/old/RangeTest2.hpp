@@ -54,7 +54,7 @@ struct RangeTypes
 
     class Iterator
     {
-        public:
+    public:
         Iterator() : m_rangePtr(nullptr), m_currVal(0){};
         ~Iterator(){};
         Iterator(RangeType& range, bool atEnd = false) : m_rangePtr(&range)
@@ -107,14 +107,14 @@ struct RangeTypes
             return m_currVal;
         }
 
-        private:
+    private:
         RangeType* m_rangePtr;
         Type       m_currVal;
     };
 
     class ContainerType : public RangeType
     {
-        public:
+    public:
         typedef Iterator iterator;
 
         ContainerType(RangeType& range) : RangeType(range)
@@ -152,7 +152,7 @@ struct ComboTypes
 
     class Iterator
     {
-        public:
+    public:
         Iterator(ComboType& comboRange, bool atEnd = false)
         {
             get_pointer vis;
@@ -358,7 +358,7 @@ struct ComboTypes
             }
         }
 
-        private:
+    private:
         void*        m_comboRangePtr   = nullptr;
         void*        m_comboRangeItPtr = nullptr;
         unsigned int m_which           = 0;
@@ -367,7 +367,7 @@ struct ComboTypes
 
     class ContainerType : public ComboType
     {
-        public:
+    public:
         typedef Iterator iterator;
 
         ContainerType() : ComboType()
@@ -545,7 +545,7 @@ void doTest()
 template <typename Type>
 class Range
 {
-    public:
+public:
     typedef std::pair<Type, Type> Pair;
     typedef std::set<Type> Set;
 
@@ -642,7 +642,7 @@ class Range
 
     class iterator
     {
-        public:
+    public:
         iterator() : m_r(nullptr), m_cur(0){};
 
         iterator(Range* r, bool atEnd = false) : m_r(r)
@@ -741,7 +741,7 @@ class Range
             }
         }
 
-        private:
+    private:
         Range*                 m_r;
         typename Set::iterator m_it;
         Type                   m_cur;
@@ -757,7 +757,7 @@ class Range
         return iterator(this, true);
     }
 
-    private:
+private:
     unsigned int m_which = 0;
     void*        m_ptr   = nullptr;
 };

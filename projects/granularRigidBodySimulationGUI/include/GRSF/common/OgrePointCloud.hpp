@@ -70,7 +70,7 @@ inline CollObjectHandle colorToHandle(const Ogre::ColourValue& color)
 class OgrePointCloud;
 class OgrePointCloudRenderable : public Ogre::SimpleRenderable
 {
-    public:
+public:
     OgrePointCloudRenderable(OgrePointCloud* parent, int num_points, bool use_tex_coords);
     ~OgrePointCloudRenderable();
 
@@ -90,7 +90,7 @@ class OgrePointCloudRenderable : public Ogre::SimpleRenderable
     virtual void getWorldTransforms(Ogre::Matrix4* xform) const;
     virtual const Ogre::LightList& getLights() const;
 
-    private:
+private:
     Ogre::MaterialPtr material_;
     OgrePointCloud*   parent_;
 };
@@ -112,7 +112,7 @@ typedef std::vector<OgrePointCloudRenderablePtr>  V_OgrePointCloudRenderable;
  */
 class OgrePointCloud : public Ogre::MovableObject
 {
-    public:
+public:
     enum RenderMode
     {
         RM_POINTS,
@@ -223,7 +223,7 @@ class OgrePointCloud : public Ogre::MovableObject
         mName = name;
     }
 
-    private:
+private:
     uint32_t                    getVerticesPerPoint();
     OgrePointCloudRenderablePtr createRenderable(int num_points);
     void regenerateAll();

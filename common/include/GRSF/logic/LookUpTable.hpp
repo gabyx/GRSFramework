@@ -18,7 +18,7 @@ namespace LogicNodes
 template <typename TKey, typename TValue, typename TMap>
 class LookUpTable : public LogicNode
 {
-    public:
+public:
     struct Inputs
     {
         enum
@@ -81,7 +81,7 @@ class LookUpTable : public LogicNode
 
     virtual void initialize(){};
 
-    private:
+private:
     TMap*  m_map;
     TValue m_default;
 };

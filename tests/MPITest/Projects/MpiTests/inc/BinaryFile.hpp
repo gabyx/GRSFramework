@@ -19,7 +19,7 @@
 */
 class BinaryFile
 {
-    public:
+public:
     /**
    * @brief Open a binary file.
    */
@@ -60,7 +60,7 @@ class BinaryFile
         return *this;
     }
 
-    private:
+private:
     std::fstream m_file_stream;  ///< The file stream which represents the binary data.
     enum BuffSize
     {

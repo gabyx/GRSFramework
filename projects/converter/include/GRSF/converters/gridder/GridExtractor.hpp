@@ -32,7 +32,7 @@
 
 class GridExtractor
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     GridExtractor(GridExtractionSettings* settings, Logging::Log* m_log);
@@ -69,7 +69,7 @@ class GridExtractor
     template <typename T>
     using Grid = CartesianGrid<T, std::size_t>;
 
-    private:
+private:
     void writeGridSettings();
 
     template <typename TGrid, typename StateContainer>
@@ -77,7 +77,7 @@ class GridExtractor
 
     class CellDataMaxBuffer
     {
-        public:
+    public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         static const unsigned char maxIdx = 2;
 

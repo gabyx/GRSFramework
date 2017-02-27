@@ -23,8 +23,8 @@
 
 class ExecutionTreeInOut
 {
-    private:
-    public:
+private:
+public:
     using NodeListT           = std::vector<LogicNode*>;
     using NodeMapT            = std::unordered_map<unsigned int, LogicNode*>;
     using NodeSetT            = std::unordered_set<LogicNode*>;
@@ -250,10 +250,10 @@ class ExecutionTreeInOut
         return s.str();
     }
 
-    protected:
+protected:
     class ExecutionOrderSolver
     {
-        public:
+    public:
         void solve(NodeListT& c, NodeListT& orderedNodes)
         {
             // Solve Execution order,
@@ -272,7 +272,7 @@ class ExecutionTreeInOut
             });
         }
 
-        private:
+    private:
         /**
         * Depth first search: this function returns recursively the priority
         * lowest number has the highest priority
@@ -320,7 +320,7 @@ class ExecutionTreeInOut
     // Only for directed graphs, does not detect cycles -> endless loop!
     class ReachNodeCheck
     {
-        public:
+    public:
         // From end to start node
         bool check(LogicNode* endNode, LogicNode* startNode)
         {
@@ -345,7 +345,7 @@ class ExecutionTreeInOut
             return m_reached;
         }
 
-        private:
+    private:
         /**
         * Breath first search:
         */

@@ -24,7 +24,7 @@ namespace ParserModules
 template <typename TParserTraits>
 class VisModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
 
     DEFINE_MATRIX_TYPES
@@ -65,7 +65,7 @@ class VisModule
     Vector3 m_currScale;
     bool    m_currScaleLikeGeom;
 
-    public:
+public:
     ScalesList* getScalesGroup()
     {
         return &m_scalesGroup;
@@ -146,7 +146,7 @@ class VisModule
                     "===================================================================" << std::endl;)
     }
 
-    private:
+private:
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void parseMesh(XMLNodeType meshNode)
     {
@@ -819,13 +819,13 @@ template <typename TDynamicsSystem, template <typename P, typename D> class TPar
 class SceneParserGUI
     : public SceneParser<TDynamicsSystem, TParserTraits, SceneParserGUI<TDynamicsSystem, TParserTraits>>
 {
-    private:
+private:
     using BaseType = SceneParser<TDynamicsSystem, TParserTraits, SceneParserGUI<TDynamicsSystem, TParserTraits>>;
 
-    public:
+public:
     using DynamicsSystemType = TDynamicsSystem;
 
-    public:
+public:
     template <typename ModuleGeneratorType>
     SceneParserGUI(ModuleGeneratorType& moduleGen, Logging::Log* log, const boost::filesystem::path& mediaDir)
         : BaseType(moduleGen, log, mediaDir)

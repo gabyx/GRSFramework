@@ -41,7 +41,7 @@
 
 class StateRecorderMPI
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -60,7 +60,7 @@ class StateRecorderMPI
     // Collective operation
     bool closeAll();
 
-    protected:
+protected:
     unsigned int        m_nSimBodies;
     MultiBodySimFileMPI m_fh;
 

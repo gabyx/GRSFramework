@@ -18,7 +18,7 @@ namespace LogicNodes
 template <typename T>
 class ConstantNode : public LogicNode
 {
-    public:
+public:
     struct Inputs
     {
         enum

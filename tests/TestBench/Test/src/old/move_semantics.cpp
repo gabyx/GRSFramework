@@ -17,7 +17,7 @@ class A
 {
     int* data;
 
-    public:
+public:
     A(int v)
     {
         data  = new int;

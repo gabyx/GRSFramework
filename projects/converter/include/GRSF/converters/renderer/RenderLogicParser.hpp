@@ -31,12 +31,12 @@ template <typename TDataStorage, template <typename P, typename C> class TParser
 class RenderLogicParser
     : public LogicParser<TDataStorage, TParserTraits, RenderLogicParser<TDataStorage, TParserTraits>>
 {
-    public:
+public:
     using Base         = LogicParser<TDataStorage, TParserTraits, RenderLogicParser<TDataStorage, TParserTraits>>;
     using ParserTraits = TParserTraits<RenderLogicParser, TDataStorage>;
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(ParserTraits);
 
-    public:
+public:
     /**
     * Constructor takes a module function which constructs all modules.
     */

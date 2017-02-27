@@ -16,7 +16,7 @@
 
 class ColorGradient
 {
-    private:
+private:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     struct ColorPoint
@@ -29,7 +29,7 @@ class ColorGradient
     };
     std::vector<ColorPoint> m_color;  // An array of m_color points in ascending value.
 
-    public:
+public:
     //-- Default constructor:
     ColorGradient()
     {

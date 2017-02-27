@@ -17,7 +17,7 @@ namespace LogicNodes
 {
 class StopNode : public LogicNode
 {
-    public:
+public:
     struct Inputs
     {
         enum

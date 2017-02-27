@@ -30,7 +30,7 @@ class SharedBufferDynSys;
 
 class SimulationManager
 {
-    public:
+public:
     DEFINE_CONFIG_TYPES
 
     SimulationManager();
@@ -48,7 +48,7 @@ class SimulationManager
 
     void startSim();
 
-    private:
+private:
     CPUTimer m_global_time;
 
     void             writeAllOutput();

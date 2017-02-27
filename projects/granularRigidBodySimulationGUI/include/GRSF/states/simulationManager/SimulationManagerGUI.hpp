@@ -38,7 +38,7 @@ class SharedBufferDynSys;
 
 class SimulationManagerGUI : public SimulationManagerBase, public OIS::KeyListener
 {
-    public:
+public:
     DEFINE_CONFIG_TYPES
 
     SimulationManagerGUI(std::shared_ptr<Ogre::SceneManager> pSceneMgr);
@@ -67,7 +67,7 @@ class SimulationManagerGUI : public SimulationManagerBase, public OIS::KeyListen
     bool keyReleased(const OIS::KeyEvent& keyEventRef);
     void enableInput(bool value);
 
-    private:
+private:
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
     Ogre::SceneNode*                    m_pBaseNode;
     void                                setShadowTechniques();

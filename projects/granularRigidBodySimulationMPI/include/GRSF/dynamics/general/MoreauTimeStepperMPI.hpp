@@ -48,7 +48,7 @@ struct MoreauTimeStepperMPITraits
 
 class MoreauTimeStepperMPI : public TimeStepperBase<MoreauTimeStepperMPI, MoreauTimeStepperMPITraits>
 {
-    public:
+public:
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
@@ -78,7 +78,7 @@ class MoreauTimeStepperMPI : public TimeStepperBase<MoreauTimeStepperMPI, Moreau
     inline void writeHeaderToSystemDataFile();
     inline void writeIterationToCollisionDataFile();
 
-    protected:
+protected:
     inline void afterFirstTimeStep(){};
     inline void afterSecondTimeStep(){};
     inline void doInputTimeStep(PREC T){};

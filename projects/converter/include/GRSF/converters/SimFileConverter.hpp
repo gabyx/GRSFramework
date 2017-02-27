@@ -43,12 +43,12 @@
 
 class SimFileConverter
 {
-    public:
+public:
     using XMLNodeType      = pugi::xml_node;
     using XMLNodeItType    = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
-    protected:
+protected:
     using StateIdxType = std::size_t;
     struct StateIndex
     {
@@ -73,7 +73,7 @@ class SimFileConverter
 
     bool m_abort;
 
-    public:
+public:
     SimFileConverter(const std::vector<boost::filesystem::path>& inputFiles)
     {
         m_inputFiles = inputFiles;
@@ -355,7 +355,7 @@ class SimFileConverter
         }
     }
 
-    protected:
+protected:
     void callbackAbort()
     {
         m_abort = true;

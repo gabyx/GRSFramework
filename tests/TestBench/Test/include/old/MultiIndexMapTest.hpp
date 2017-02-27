@@ -34,7 +34,7 @@ struct A
 
 class Container
 {
-    private:
+private:
     // Tags for accesing the index
     struct by_insertion
     {
@@ -44,7 +44,7 @@ class Container
     };
     // struct by_ordered_id {};
 
-    public:
+public:
     typedef A Type;
 
     // This container grants only const access with its iterators with (RigidBodyType* const)

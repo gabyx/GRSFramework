@@ -24,7 +24,7 @@ namespace MPILayer
 {
 class DataTypes
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     template <typename T>
@@ -49,7 +49,7 @@ class DataTypes
         commitVector3();
     }
 
-    private:
+private:
     template <typename T>
     static inline MPI_Datatype getDataType_impl()
     {
@@ -101,7 +101,7 @@ inline void* DataTypes::getDataTypeBuffer_impl<typename DataTypes::Vector3>(type
 
 class ReduceFunctions
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     static MPI_Op MinVector3;

@@ -21,13 +21,13 @@ class LogicSocket;
 
 class LogicNodeGroup : LogicNode
 {
-    public:
+public:
     using SocketListType = LogicSocketCommon::SocketListType;
     using SocketIterator = LogicSocketCommon::SocketIterator;
 
     const unsigned int m_id;
 
-    public:
+public:
     LogicNodeGroup(unsigned int id);
 
     virtual ~LogicNodeGroup();

@@ -33,7 +33,7 @@ class StateRecorderMPI;
 
 class SimulationManagerMPI
 {
-    public:
+public:
     DEFINE_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -45,7 +45,7 @@ class SimulationManagerMPI
 
     void startSim();
 
-    private:
+private:
     CPUTimer m_globalTimer;
 
     void initSim();

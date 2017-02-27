@@ -30,7 +30,7 @@
 */
 class FileManager : public Utilities::Singleton<FileManager>
 {
-    public:
+public:
     /**
       globalDirPath = first simulation directory, localDirPath = process specific simulation directory
     */
@@ -54,7 +54,7 @@ class FileManager : public Utilities::Singleton<FileManager>
 
     boost::filesystem::path copyFile(boost::filesystem::path from, boost::filesystem::path to, bool overwrite = false);
 
-    private:
+private:
     void init(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath);
 
     void scanAllSimFolders(const boost::filesystem::path& directory,

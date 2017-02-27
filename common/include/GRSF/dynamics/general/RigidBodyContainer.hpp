@@ -28,7 +28,7 @@
 
 class RigidBodyContainer
 {
-    private:
+private:
     // Tags for accesing the index
     struct by_insertion
     {
@@ -40,7 +40,7 @@ class RigidBodyContainer
     {
     };
 
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     using RigidBodyIdType = RigidBodyType::RigidBodyIdType;
@@ -65,7 +65,7 @@ class RigidBodyContainer
                                                                           &RigidBodyType::AbsoluteBaseType::m_id>>>>
         MapType;
 
-    private:
+private:
     MapType m_map;
 
     using MapByInsertionType = typename MapType::index<by_insertion>::type;
@@ -84,7 +84,7 @@ class RigidBodyContainer
         }
     };
 
-    public:
+public:
     RigidBodyContainer()
         : m_mapByHashedId(m_map.get<by_hashed_id>())
         , m_mapByInsertion(m_map.get<by_insertion>())

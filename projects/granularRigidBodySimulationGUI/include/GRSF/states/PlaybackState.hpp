@@ -47,7 +47,7 @@ _________________________________________________________*/
 
 class PlaybackState : public AppState, OgreBites::SdkTrayListener
 {
-    public:
+public:
     PlaybackState();
     ~PlaybackState();
 
@@ -66,7 +66,7 @@ class PlaybackState : public AppState, OgreBites::SdkTrayListener
 
     std::shared_ptr<PlaybackManager> m_pPlaybackMgr;
 
-    private:
+private:
     Ogre::Log* m_pAppLog;
 
     void setupParamsPanel();

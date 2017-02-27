@@ -41,7 +41,7 @@
 
 class MultiBodySimFileMPI
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -70,7 +70,7 @@ class MultiBodySimFileMPI
         return m_errorString.str();
     }
 
-    private:
+private:
     using RigidBodyIdType = typename RigidBodyType::RigidBodyIdType;
 
     // Communicator which is used to write the file in parallel, this communicator is duplicated from the one inputed

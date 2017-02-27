@@ -21,7 +21,7 @@
 template <typename TData>
 class NeighbourMap
 {
-    public:
+public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     // Neighbour data definitions
@@ -79,7 +79,7 @@ class NeighbourMap
         m_nbDataMap.clear();
     }
 
-    private:
+private:
     RankIdType m_rank;
     Type       m_nbDataMap;
 };

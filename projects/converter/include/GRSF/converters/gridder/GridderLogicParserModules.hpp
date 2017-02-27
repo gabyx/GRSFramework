@@ -78,7 +78,7 @@ namespace GridderLogicParserModules
 template <typename TParserTraits>
 class LogicModule
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     DEFINE_GRIDDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
@@ -307,7 +307,7 @@ class LogicModule
         m_extractorNames.clear();
     }
 
-    private:
+private:
     LogType*                 m_pLog;
     GridExtSettingsListType* m_gridSettingsList;
 

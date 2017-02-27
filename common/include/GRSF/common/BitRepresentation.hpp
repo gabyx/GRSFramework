@@ -26,12 +26,12 @@ std::ostream& operator<<(std::ostream& s, const BitRepresentation<T>& r);
 template <typename T>
 class BitRepresentation
 {
-    public:
+public:
     BitRepresentation(const T& a) : m_a(a)
     {
     }
 
-    private:
+private:
     friend std::ostream& operator<<<T>(std::ostream& s, const BitRepresentation<T>& r);
 
     const T& m_a;

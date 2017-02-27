@@ -25,7 +25,7 @@
 template <typename TContactGraph>
 class SorProxStepNodeVisitor
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
@@ -140,7 +140,7 @@ class SorProxStepNodeVisitor
         nodeData.m_R_i_inv_diag(2) = r_T;
     }
 
-    protected:
+protected:
     Logging::Log*                      m_pSolverLog = nullptr;
     PREC                               m_alpha;
     const InclusionSolverSettingsType& m_settings;
@@ -168,7 +168,7 @@ class SorProxStepNodeVisitor
 template <typename TContactGraph>
 class ContactSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGraph>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     DEFINE_SORPROXSTEPNODE_BASE
@@ -424,7 +424,7 @@ class ContactSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGrap
 template <typename TContactGraph>
 class FullSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGraph>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_SORPROXSTEPNODE_BASE
 
@@ -640,7 +640,7 @@ class FullSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGraph>
 template <typename TContactGraph>
 class NormalSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGraph>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_SORPROXSTEPNODE_BASE
 
@@ -745,7 +745,7 @@ class NormalSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGraph
 template <typename TContactGraph>
 class TangentialSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactGraph>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_SORPROXSTEPNODE_BASE
 
@@ -919,7 +919,7 @@ class TangentialSorProxStepNodeVisitor : public SorProxStepNodeVisitor<TContactG
 template <typename TContactGraph>
 class SorProxInitNodeVisitor
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType   = TContactGraph;
@@ -950,10 +950,10 @@ class SorProxInitNodeVisitor
 
     class GetRotJacobi
     {
-        private:
+    private:
         Matrix33 m_I_r_SiCi_hat;
 
-        public:
+    public:
         GetRotJacobi()
         {
             m_I_r_SiCi_hat.setZero();
@@ -971,7 +971,7 @@ class SorProxInitNodeVisitor
     template <int bodyNr>
     class ComputeW_UCF : public boost::static_visitor<void>
     {
-        public:
+    public:
         DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
         ComputeW_UCF(GetRotJacobi& jacobi) : m_rotJacobi(jacobi)
         {
@@ -1085,7 +1085,7 @@ class SorProxInitNodeVisitor
             }
         }
 
-        private:
+    private:
         const CollisionData* m_pCollData = nullptr;
         UCFNodeDataType*     m_pNodeData = nullptr;
         GetRotJacobi&        m_rotJacobi;
@@ -1257,7 +1257,7 @@ class SorProxInitNodeVisitor
         }
     }
 
-    private:
+private:
     template <typename CollDataType>
     inline void computeTotalOverlap(CollDataType* pColData)
     {

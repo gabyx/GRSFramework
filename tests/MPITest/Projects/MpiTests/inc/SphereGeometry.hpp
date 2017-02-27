@@ -16,13 +16,13 @@
 template <class PREC>
 class SphereGeometry
 {
-    public:
+public:
     SphereGeometry(PREC r) : m_radius(r){};
     SphereGeometry() : m_radius(0){};
 
     PREC m_radius;
 
-    private:
+private:
     friend class boost::serialization::access;
 };
 

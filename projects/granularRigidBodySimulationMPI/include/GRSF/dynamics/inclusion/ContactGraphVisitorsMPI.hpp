@@ -28,7 +28,7 @@
 template <typename TContactGraph>
 class SorProxStepSplitNodeVisitor
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
@@ -84,7 +84,7 @@ class SorProxStepSplitNodeVisitor
         node.m_pBody->m_pSolverData->m_uBuffer.m_front = node.m_uFront;
     }
 
-    private:
+private:
     Logging::Log*                      m_pSolverLog;
     const InclusionSolverSettingsType& m_settings;
     bool&                              m_bConverged;              ///< Access to global flag for cancelation criteria
@@ -97,7 +97,7 @@ class SorProxStepSplitNodeVisitor
 template <typename TContactGraph>
 class SorProxInitSplitNodeVisitor
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     using ContactGraphType = TContactGraph;
 
@@ -121,7 +121,7 @@ class SorProxInitSplitNodeVisitor
 template <typename TContactGraph>
 class SplitNodeCheckUpdateVisitor
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     using ContactGraphType = TContactGraph;
 
@@ -160,7 +160,7 @@ class SplitNodeCheckUpdateVisitor
 template <typename TContactGraph>
 class SetWeightingLocalBodiesSplitNodeVisitor
 {
-    public:
+public:
     using ContactGraphType = TContactGraph;
 
     using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
@@ -183,7 +183,7 @@ class SetWeightingLocalBodiesSplitNodeVisitor
 template <typename TContactGraph>
 class ResetWeightingLocalBodiesSplitNodeVisitor
 {
-    public:
+public:
     using ContactGraphType = TContactGraph;
 
     using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;

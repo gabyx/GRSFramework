@@ -32,7 +32,7 @@
 
 class StateRingPoolVisBackFront : public StatePool<DynamicsState>
 {
-    public:
+public:
     DECLERATIONS_STATEPOOL
 
     DEFINE_LAYOUT_CONFIG_TYPES
@@ -73,7 +73,7 @@ class StateRingPoolVisBackFront : public StatePool<DynamicsState>
     template <typename RigidBodyStateContainerType>
     void resetStateRingPool(const RigidBodyStateContainerType& state_init);
     /** @} */
-    protected:
+protected:
     boost::mutex             m_mutexStateInit;  ///< Mutex for the initial state.
     std::ofstream            m_logfile;
     static const std::size_t m_ringPoolSize = 8;  ///< The ring pool size, must not exceed 256 and be lower than 3!,

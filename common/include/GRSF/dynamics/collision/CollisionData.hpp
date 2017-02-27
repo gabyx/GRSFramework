@@ -31,7 +31,7 @@
 /** @{ */
 class CollisionData
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

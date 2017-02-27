@@ -31,12 +31,12 @@ template <typename TCollection = void,
 class AnalyzerLogicParser
     : public LogicParser<TCollection, TParserTraits, AnalyzerLogicParser<TCollection, TParserTraits>>
 {
-    public:
+public:
     using Base         = LogicParser<TCollection, TParserTraits, AnalyzerLogicParser<TCollection, TParserTraits>>;
     using ParserTraits = TParserTraits<AnalyzerLogicParser, TCollection>;
     DEFINE_ANALZERLOGICPARSER_TYPE_TRAITS(ParserTraits);
 
-    public:
+public:
     /**
     * Constructor takes a module function which constructs all modules.
     */

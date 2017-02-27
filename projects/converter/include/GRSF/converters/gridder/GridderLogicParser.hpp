@@ -30,12 +30,12 @@ template <typename TDataStorage, template <typename P, typename C> class TParser
 class GridderLogicParser
     : public LogicParser<TDataStorage, TParserTraits, GridderLogicParser<TDataStorage, TParserTraits>>
 {
-    public:
+public:
     using Base         = LogicParser<TDataStorage, TParserTraits, GridderLogicParser<TDataStorage, TParserTraits>>;
     using ParserTraits = TParserTraits<GridderLogicParser, TDataStorage>;
     DEFINE_GRIDDERLOGICPARSER_TYPE_TRAITS(ParserTraits);
 
-    public:
+public:
     /**
     * Constructor takes a module function which constructs all modules.
     */

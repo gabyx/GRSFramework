@@ -18,7 +18,7 @@
 /// Abstract base class providing mechanisms for dynamically growing hardware buffers.
 class DynamicRenderable : public Ogre::SimpleRenderable
 {
-    public:
+public:
     /// Constructor
     DynamicRenderable();
     /// Virtual destructor
@@ -39,7 +39,7 @@ class DynamicRenderable : public Ogre::SimpleRenderable
     /// Implementation of Ogre::SimpleRenderable
     virtual Ogre::Real getSquaredViewDepth(const Ogre::Camera* cam) const;
 
-    protected:
+protected:
     /// Maximum capacity of the currently allocated vertex buffer.
     size_t mVertexBufferCapacity;
     /// Maximum capacity of the currently allocated index buffer.

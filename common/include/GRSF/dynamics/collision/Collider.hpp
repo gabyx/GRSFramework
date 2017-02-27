@@ -43,10 +43,10 @@
 
 class ColliderAABBBase
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
-    protected:
+protected:
     mutable const AABB3d* m_aabb = nullptr;
 
     mutable bool m_bOverlapTest =
@@ -56,7 +56,7 @@ class ColliderAABBBase
 
     mutable const RigidBodyType* m_pBody = nullptr;  ///< Shared pointer to the first RigidBodyBase class instance.
 
-    public:
+public:
     inline bool overlapSphere(const Vector3& p, PREC radius, const AABB3d& aabb) const
     {
         // Intersection test by Thomas Larsson "On Faster Sphere-Box Overlap Testing"
@@ -80,7 +80,7 @@ class ColliderAABBBase
 
 class ColliderAABB : protected ColliderAABBBase, public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
@@ -130,7 +130,7 @@ class ColliderAABB : protected ColliderAABBBase, public boost::static_visitor<>
 
 class ColliderOOBB : protected ColliderAABBBase, public boost::static_visitor<>
 {
-    public:
+public:
     /**
     * Here aabb is in coordinates of frame K!
     */
@@ -164,7 +164,7 @@ class ColliderOOBB : protected ColliderAABBBase, public boost::static_visitor<>
                                                                                    << " and AABB not supported!");
     }
 
-    private:
+private:
     mutable const Matrix33*
         m_A_KI;  ///< Transformation from frame K to frame I where the body coordinates are represented in
 };
@@ -180,7 +180,7 @@ class ColliderOOBB : protected ColliderAABBBase, public boost::static_visitor<>
 template <typename TreeType>
 class ColliderKdTree
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
@@ -384,7 +384,7 @@ class ColliderKdTree
         mutable PREC                             m_splitPos;
     };
 
-    private:
+private:
     LeftRightAxisHalfspace<true>  m_isLRAligned;
     LeftRightAxisHalfspace<false> m_isLR;
 
@@ -406,7 +406,7 @@ class ColliderKdTree
 
 class ColliderRay : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
     ColliderRay()
@@ -458,7 +458,7 @@ class ColliderRay : public boost::static_visitor<>
                                                                                   << " and Ray not supported!");
     }
 
-    private:
+private:
     Ray*           m_ray;
     CollisionData* m_pCollData;
 
@@ -510,7 +510,7 @@ void ColliderRay::intersect(const HalfspaceGeometry* halfspace)
 
 class ColliderPoint : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     ColliderPoint()
@@ -569,7 +569,7 @@ class ColliderPoint : public boost::static_visitor<>
                                                                                     << " and point not supported!");
     }
 
-    private:
+private:
     Vector3* m_p;
 
     bool m_bIntersection;  ///< Boolean which tells if the intersection test gave a feasible result.
@@ -591,7 +591,7 @@ boost::apply_visitor(...)
 template <typename TCollisionSet>
 class ColliderBody : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
     using CollisionSetType = TCollisionSet;
@@ -686,7 +686,7 @@ class ColliderBody : public boost::static_visitor<>
     /** @} */
     // =================================================================================
 
-    private:
+private:
     const RigidBodyType* m_pBody[2];  ///< Shared pointer to the first RigidBodyBase class instance.
 
     boost::variant<const AABB3d*> otherGeoms;  ///< Used for other intersection tests

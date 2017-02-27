@@ -19,7 +19,7 @@ class MortonKey;
 template <>
 class MortonKey<uint32_t>
 {
-    public:
+public:
     using uint32_t = Type;
 
     static Type encodeMorton2(Type x, Type y)
@@ -57,7 +57,7 @@ class MortonKey<uint32_t>
         return compact1By2(code >> 2);
     }
 
-    private:
+private:
     // "Insert" a 0 bit after each of the 16 low bits of x
     Type part1By1(Type x)
     {
@@ -106,7 +106,7 @@ class MortonKey<uint32_t>
 template <>
 class MortonKey<uint64_t>
 {
-    public:
+public:
     using uint64_t = Type;
 
     static Type encodeMorton2(Type x, Type y)
@@ -144,7 +144,7 @@ class MortonKey<uint64_t>
         return compact1By2(code >> 2);
     }
 
-    private:
+private:
     // "Insert" a 0 bit after each of the 32 low bits of x
     Type part1By1(Type x)
     {

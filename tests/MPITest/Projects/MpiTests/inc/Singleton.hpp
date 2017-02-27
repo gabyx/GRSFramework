@@ -23,17 +23,17 @@ namespace Utilities
 template <typename T>
 class Singleton
 {
-    private:
+private:
     /** \brief Explicit private copy constructor. This is a forbidden operation.*/
     Singleton(const Singleton<T>&);
 
     /** \brief Private operator= . This is a forbidden operation. */
     Singleton& operator=(const Singleton<T>&);
 
-    protected:
+protected:
     static T* ms_Singleton;
 
-    public:
+public:
     Singleton(void)
     {
         WARNINGMSG(ms_Singleton == 0, "ms_Singleton == 0 : " << typeid(*ms_Singleton).name());

@@ -31,7 +31,7 @@ namespace test4
 template <typename IntType, typename Allocator = std::allocator<IntType>>
 class Range
 {
-    public:
+public:
     typedef std::list<IntType, Allocator> RangeType;
 
     // STATIC_ASSERT2( std::is_integral<IntType>::value , IntType_Needs_to_be_Integeral);
@@ -105,7 +105,7 @@ class Range
 
     class iterator : public std::iterator_traits<typename RangeType::iterator>
     {
-        public:
+    public:
         typedef std::iterator_traits<typename RangeType::iterator> iterator_traits;
 
         iterator() : m_diffValue(0){};
@@ -167,7 +167,7 @@ class Range
             return *m_it;
         }
 
-        private:
+    private:
         IntType                      m_diffValue;
         typename RangeType::iterator m_it;
     };
@@ -191,7 +191,7 @@ class Range
         m_v.clear();
     }
 
-    private:
+private:
     bool      m_linear;
     RangeType m_v;
 
@@ -209,7 +209,7 @@ namespace test3
 template <typename Type>
 class Range
 {
-    public:
+public:
     Range(const Range& r) : m_v(r.m_v)
     {
     }
@@ -264,7 +264,7 @@ class Range
 
     class iterator
     {
-        public:
+    public:
         iterator(const typename std::vector<Type>::iterator& it) : m_it(it), m_diffValue(0)
         {
         }
@@ -310,7 +310,7 @@ class Range
             return *m_it;
         }
 
-        private:
+    private:
         Type                                 m_diffValue;
         typename std::vector<Type>::iterator m_it;
     };
@@ -324,7 +324,7 @@ class Range
         return iterator(m_v.end());
     }
 
-    private:
+private:
     std::vector<Type> m_v;
     void              sort()
     {
@@ -338,7 +338,7 @@ namespace test2
 template <typename Type>
 class Range : public std::vector<Type>
 {
-    public:
+public:
     Range() : std::vector<Type>(){};
     Range(const Range& v) : std::vector<Type>(v)
     {
@@ -394,7 +394,7 @@ class Range : public std::vector<Type>
 
     class iterator : public std::vector<Type>::iterator
     {
-        public:
+    public:
         iterator(const typename std::vector<Type>::iterator& v) : std::vector<Type>::iterator(v), m_diffValue(0)
         {
         }
@@ -413,7 +413,7 @@ class Range : public std::vector<Type>
             return *(*this) - m_diffValue;
         }
 
-        private:
+    private:
         Type m_diffValue;
     };
 
@@ -426,7 +426,7 @@ class Range : public std::vector<Type>
         return iterator(std::vector<Type>::end());
     }
 
-    private:
+private:
     void sort()
     {
         std::sort(std::vector<Type>::begin(), std::vector<Type>::end());
@@ -453,7 +453,7 @@ namespace test1
 template <typename Type>
 class Range
 {
-    public:
+public:
     typedef std::pair<Type, Type> Pair;
     typedef std::vector<Type> Set;
 
@@ -523,7 +523,7 @@ class Range
 
     class iterator
     {
-        public:
+    public:
         iterator() : m_r(nullptr), m_cur(0){};
 
         iterator(Range* r, bool atEnd = false) : m_r(r)
@@ -626,7 +626,7 @@ class Range
             }
         }
 
-        private:
+    private:
         Range*                 m_r;
         typename Set::iterator m_it;
         Type                   m_cur;
@@ -642,7 +642,7 @@ class Range
         return iterator(this, true);
     }
 
-    private:
+private:
     unsigned int m_which = 0;
     void*        m_ptr   = nullptr;
 

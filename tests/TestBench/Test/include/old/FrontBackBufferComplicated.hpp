@@ -31,7 +31,7 @@ class FrontBackBuffer;
 template <typename TF, typename TB>
 class FrontBackBuffer<TF, TB, false>
 {
-    public:
+public:
     // If <const * int , int&> --> this result in is_same< int , int >
     // GRSF_STATIC_ASSERT( (std::is_same< typename StripModifiers<TF>::type, typename StripModifiers<TB>::type >::value
     // ) );
@@ -185,7 +185,7 @@ class FrontBackBuffer<TF, TB, false>
         m_pBack    = temp;
     }
 
-    private:
+private:
     TFPtr m_pFront;  ///< The pointer to front buffer
     TBPtr m_pBack;   ///< The pointer to back buffer
 
@@ -196,7 +196,7 @@ class FrontBackBuffer<TF, TB, false>
 template <typename TF, typename TB>
 class FrontBackBuffer<TF, TB, true>
 {
-    public:
+public:
     // If <const * int , int&> --> this result in is_same< int , int >
     // GRSF_STATIC_ASSERT( (std::is_same< typename StripModifiers<TF>::type, typename StripModifiers<TB>::type >::value
     // ) );
@@ -357,7 +357,7 @@ class FrontBackBuffer<TF, TB, true>
         // m_Front.swap(m_Back);
     }
 
-    private:
+private:
     boost::shared_ptr<TF> m_Front;  ///< The front buffer
     boost::shared_ptr<TB> m_Back;   ///< The back buffer
 };

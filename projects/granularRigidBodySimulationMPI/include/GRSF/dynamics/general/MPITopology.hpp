@@ -31,14 +31,14 @@ namespace MPILayer
 */
 class ProcessTopology
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     using NeighbourRanksListType        = std::unordered_set<RankIdType>;
     using AdjacentNeighbourRanksMapType = std::unordered_map<RankIdType, NeighbourRanksListType>;
 
-    private:
+private:
     /** Delete visitor for the variant */
     struct Deleter : public boost::static_visitor<void>
     {
@@ -52,7 +52,7 @@ class ProcessTopology
         }
     };
 
-    public:
+public:
     ProcessTopology()
     {
     }
@@ -150,7 +150,7 @@ class ProcessTopology
             m_nbRanks, m_adjNbRanks, m_rank, masterRank, std::forward<T>(args)...);
     }
 
-    private:
+private:
     boost::variant<boost::blank, ProcessTopologyGrid<ProcessTopology>*, ProcessTopologyKdTree<ProcessTopology>*>
         m_procTopo;
 

@@ -137,7 +137,7 @@ struct RunImpl<Ref, 1>
 template <int _nArgs>
 class Variant
 {
-    public:
+public:
     static const int nArgs = _nArgs;
 
     Variant() : m_RunImpl(this)
@@ -153,7 +153,7 @@ class Variant
 template <typename Ref, typename Ref2>
 class RunDispatchBase
 {
-    public:
+public:
     RunDispatchBase(Ref* ptr, Ref2* ptr2)
     {
         m_pRef  = ptr;
@@ -169,7 +169,7 @@ struct RunDispatch;
 template <typename Ref, typename Ref2>
 class RunDispatch<Ref, Ref2, 2> : public RunDispatchBase<Ref, Ref2>
 {
-    public:
+public:
     RunDispatch(Ref* ptr, Ref2* ptr2) : RunDispatchBase(ptr, ptr2)
     {
     }

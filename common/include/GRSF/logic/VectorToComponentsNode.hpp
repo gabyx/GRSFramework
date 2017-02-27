@@ -18,7 +18,7 @@ namespace LogicNodes
 template <typename T>
 class VectorToComponent : public LogicNode
 {
-    public:
+public:
     using PREC = typename T::Scalar;
 
     struct Inputs

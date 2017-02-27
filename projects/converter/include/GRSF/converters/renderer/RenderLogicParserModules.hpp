@@ -28,7 +28,7 @@ namespace RenderLogicParserModules
 template <typename TParserTraits>
 class MaterialsModule
 {
-    public:
+public:
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
     using MaterialMapType = typename DataStorageType::MaterialMapType;
@@ -71,7 +71,7 @@ class MaterialsModule
         return m_materials;
     }
 
-    private:
+private:
     ParserType*      m_parser;
     LogType*         m_pLog;
     MaterialMapType* m_materials;
@@ -87,7 +87,7 @@ namespace RenderLogicParserModules
 template <typename TParserTraits>
 class LogicModule : public LogicParserModules::LogicModule<TParserTraits>
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     DEFINE_RENDERLOGICPARSER_TYPE_TRAITS(TParserTraits)
 
@@ -165,7 +165,7 @@ class LogicModule : public LogicParserModules::LogicModule<TParserTraits>
     {
     }
 
-    private:
+private:
     void parseColor(XMLNodeType& cNode, Vector3& rgb)
     {
         auto att = cNode.attribute("rgb");

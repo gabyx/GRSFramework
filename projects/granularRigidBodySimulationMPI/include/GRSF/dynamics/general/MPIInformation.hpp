@@ -26,7 +26,7 @@ namespace MPILayer
 {
 class ProcessInformation
 {
-    public:
+public:
     using ProcessTopologyType = ProcessTopology;
 
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
@@ -104,7 +104,7 @@ class ProcessInformation
         return &m_procTopo;
     };
 
-    protected:
+protected:
     static const int MASTER_RANK = 0;
 
     void initialize()

@@ -31,7 +31,7 @@
 */
 class StateRecorderResampler : public StateRecorder
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -112,7 +112,7 @@ class StateRecorderResampler : public StateRecorder
         m_folderPath = folderPath;
     }
 
-    private:
+private:
     std::vector<DynamicsState> m_pStateArray;
     DynamicsState*             m_pPrevState;
     DynamicsState*             m_pNextState;

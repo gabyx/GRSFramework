@@ -36,7 +36,7 @@
 template <typename StateType>
 class StatePool
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     StatePool(const unsigned int nIndices)
@@ -51,7 +51,7 @@ class StatePool
         delete[] m_idx;
     };
 
-    protected:
+protected:
     boost::mutex m_change_pointer_mutex;  ///< This is the mutex which is used to have a mutual exclusion if the
                                           /// pointers on the buffer changes.
     std::vector<StateType> m_pool;        ///< This is the vector of states which are present in the pool. The subclass

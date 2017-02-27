@@ -22,7 +22,7 @@ using namespace std;
 
 class A
 {
-    public:
+public:
     A()
     {
         cout << this << "::CTOR" << endl;

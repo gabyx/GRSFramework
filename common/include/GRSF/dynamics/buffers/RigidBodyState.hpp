@@ -31,7 +31,7 @@ void lerp(const RigidBodyState& A, const RigidBodyState& B, RigidBodyState& X, P
 */
 class RigidBodyState
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_LAYOUT_CONFIG_TYPES
     friend void Interpolate::lerp<PREC>(const RigidBodyState& A,
@@ -46,7 +46,7 @@ class RigidBodyState
     DisplacementType m_q;  ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
     VelocityType     m_u;  ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
 
-    public:
+public:
     RigidBodyState()
     {
         m_id = 0;
@@ -130,7 +130,7 @@ class RigidBodyState
 
 class RigidBodyStateAdd : public RigidBodyState
 {
-    public:
+public:
     RigidBodyStateAdd() : RigidBodyState(), m_data(nullptr)
     {
     }

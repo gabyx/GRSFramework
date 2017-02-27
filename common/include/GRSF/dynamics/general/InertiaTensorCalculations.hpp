@@ -25,7 +25,7 @@ namespace InertiaTensorComputations
 template <typename TRigidBody>
 class CalculateInertiaTensorVisitor : public boost::static_visitor<>
 {
-    public:
+public:
     using RigidBodyType = TRigidBody;
 
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
@@ -68,7 +68,7 @@ class CalculateInertiaTensorVisitor : public boost::static_visitor<>
         GRSF_ERRORMSG("HalfspaceGeometry InertiaCalculations: This has not been implemented yet!");
     }
 
-    private:
+private:
     RigidBodyType* m_rigidBody;
 };
 template <typename TRigidBody>
@@ -83,7 +83,7 @@ namespace MassComputations
 template <typename TRigidBody>
 class CalculateMassVisitor : public boost::static_visitor<>
 {
-    public:
+public:
     using RigidBodyType = TRigidBody;
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
     using PREC = typename RigidBodyType::PREC;
@@ -120,7 +120,7 @@ class CalculateMassVisitor : public boost::static_visitor<>
         GRSF_ERRORMSG("HalfspaceGeometry CalculateMassVisitor: This has not been implemented yet!");
     }
 
-    private:
+private:
     RigidBodyType* m_rigidBody;
     PREC           m_density;
 };

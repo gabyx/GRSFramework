@@ -20,7 +20,7 @@
 /** Light-weight argument storage which can be passed to tfm::vformat function to format with the format string */
 class VFormatList
 {
-    public:
+public:
     VFormatList()
     {
         m_argStore.reserve(100);
@@ -38,7 +38,7 @@ class VFormatList
         m_argStore.clear();
     }
 
-    private:
+private:
     struct Any
     {
         virtual ~Any(){};

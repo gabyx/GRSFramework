@@ -20,7 +20,7 @@
 
 class SharedBufferDynSys : public StatePoolVisBackFront
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     template <typename TRigidBodyIterator>
@@ -28,7 +28,7 @@ class SharedBufferDynSys : public StatePoolVisBackFront
 
     ~SharedBufferDynSys(){DESTRUCTOR_MESSAGE};
 
-    private:
+private:
 };
 
 #endif

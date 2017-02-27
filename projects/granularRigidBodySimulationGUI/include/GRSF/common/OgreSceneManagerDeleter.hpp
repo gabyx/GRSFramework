@@ -25,7 +25,7 @@
 */
 class OgreSceneManagerDeleter
 {
-    public:
+public:
     /** @brief Functor which deletets the Ogre::SceneManager.
 */
     void operator()(Ogre::SceneManager* p)

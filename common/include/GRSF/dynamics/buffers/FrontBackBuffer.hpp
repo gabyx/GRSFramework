@@ -50,7 +50,7 @@ class FrontBackBuffer;
 template <typename TBufferType>
 class FrontBackBuffer<TBufferType, FrontBackBufferPtrType::SharedPtr, typename FrontBackBufferMode::BackConst>
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     FrontBackBuffer(){};
     FrontBackBuffer(std::shared_ptr<TBufferType> pfront, std::shared_ptr<const TBufferType> pback)
@@ -72,7 +72,7 @@ class FrontBackBuffer<TBufferType, FrontBackBufferPtrType::SharedPtr, typename F
 template <typename TBufferType>
 class FrontBackBuffer<TBufferType, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst>
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     FrontBackBuffer() : m_pFront(nullptr), m_pBack(nullptr)
@@ -89,7 +89,7 @@ class FrontBackBuffer<TBufferType, FrontBackBufferPtrType::NormalPtr, FrontBackB
 template <typename TBufferType>
 class FrontBackBuffer<TBufferType, FrontBackBufferPtrType::NoPtr, FrontBackBufferMode::NoConst>
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     FrontBackBuffer(){};

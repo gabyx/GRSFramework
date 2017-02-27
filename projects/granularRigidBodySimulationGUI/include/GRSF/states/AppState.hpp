@@ -33,7 +33,7 @@ _________________________________________________________*/
 **/
 class AppStateListener
 {
-    public:
+public:
     AppStateListener(void){};
     virtual ~AppStateListener(void){};
 
@@ -59,7 +59,7 @@ _________________________________________________________*/
 **/
 class RenderAppState
 {
-    public:
+public:
     //! @todo	<debug> should be protected, but RenderContext needs Access over m_pCurrentState
 
     static void create(std::shared_ptr<AppStateListener> parent, const Ogre::String name){};
@@ -77,7 +77,7 @@ class RenderAppState
 
     virtual ~RenderAppState(){};
 
-    protected:
+protected:
     bool m_bEntered;
 
     RenderAppState(void){};

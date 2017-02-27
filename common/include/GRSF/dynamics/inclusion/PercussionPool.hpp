@@ -30,7 +30,7 @@ struct PercussionPoolSettings
 */
 class PercussionPool
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using PercussionMap = std::unordered_map<ContactTag, ContactPercussion*, ContactTagHash>;
@@ -120,7 +120,7 @@ class PercussionPool
         return std::make_pair(s, s ? (double)m_usedPercussions / (double)s : 0);
     }
 
-    private:
+private:
     template <bool removeUnused>
     void           resetPercussions()
     {
@@ -154,7 +154,7 @@ class PercussionPool
 template <typename TContactGraph>
 class LambdaInitLogic
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType = TContactGraph;
@@ -192,7 +192,7 @@ class LambdaInitLogic
         nodeData.m_LambdaFront.setZero();
     }
 
-    private:
+private:
     unsigned int    m_updatedNodes = 0;
     PercussionPool* m_pool;
 };
@@ -203,7 +203,7 @@ class LambdaInitLogic
 template <typename TContactGraph>
 class CachePercussionNodeVisitor
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ContactGraphType   = TContactGraph;
@@ -224,7 +224,7 @@ class CachePercussionNodeVisitor
         }
     }
 
-    private:
+private:
     PercussionPool* m_pool;
 };
 

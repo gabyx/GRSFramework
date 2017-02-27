@@ -17,7 +17,7 @@ namespace LogicNodes
 {
 class Transform3D : public LogicNode
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
 
     struct Inputs

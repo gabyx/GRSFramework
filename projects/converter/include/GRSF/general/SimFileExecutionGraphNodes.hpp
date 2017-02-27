@@ -25,7 +25,7 @@ namespace LogicNodes
 {
 class SimFileInfo : public LogicNode
 {
-    public:
+public:
     struct Inputs
     {
         enum
@@ -103,7 +103,7 @@ class SimFileInfo : public LogicNode
 
 class StateData : public LogicNode
 {
-    public:
+public:
     struct Inputs
     {
         enum
@@ -171,7 +171,7 @@ namespace ABD = AdditionalBodyData;
 
 class BodyData : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES;
 
@@ -244,7 +244,7 @@ class BodyData : public LogicNode
         }
     }
 
-    private:
+private:
     struct AddBytesVisitor
     {
         AddBytesVisitor(BodyData* p) : m_p(p){};
@@ -289,7 +289,7 @@ class BodyData : public LogicNode
 
 class DisplacementToPosQuat : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -345,7 +345,7 @@ class DisplacementToPosQuat : public LogicNode
 
 class VelocityToVelRot : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -401,7 +401,7 @@ class VelocityToVelRot : public LogicNode
 
 class OOBBCollider : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -457,7 +457,7 @@ class OOBBCollider : public LogicNode
         }
     }
 
-    private:
+private:
     Vector3  p;       ///< temporary point
     AABB3d   m_aabb;  ///< in K Frame
     Matrix33 m_R_KI;  ///< rotation R_KI

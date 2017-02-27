@@ -25,12 +25,12 @@
 
 class SimFileJoiner
 {
-    public:
+public:
     struct RangeAll
     {
     };
 
-    private:
+private:
     template <typename TYPE, typename TYPE2 = TYPE>
     struct ListOrRangeTypes
     {
@@ -87,12 +87,12 @@ class SimFileJoiner
 
     using InListOrInRangeBodyVisitorType = InListOrInRangeVisitor<unsigned int, long long int>;
 
-    public:
+public:
     using TypesTimeRange = ListOrRangeTypes<double>;
     using TypesBodyRange =
         ListOrRangeTypes<unsigned int, long long int>;  // long long int for the range, it can be -1 -1
 
-    private:
+private:
     struct SimFileJoinerAllVisitor : public boost::static_visitor<bool>
     {
         SimFileJoinerAllVisitor(TypesTimeRange::VariantType& var1, TypesBodyRange::VariantType& var2)
@@ -134,7 +134,7 @@ class SimFileJoiner
         TypesBodyRange::VariantType& m_var2;
     };
 
-    public:
+public:
     void join(const std::vector<boost::filesystem::path>& inputFiles,
               boost::filesystem::path                     outputFile,
               const TypesTimeRange::VariantType&          timeRange,
@@ -157,7 +157,7 @@ class SimFileJoiner
         }
     }
 
-    private:
+private:
     std::vector<boost::filesystem::path> m_iFiles;
     boost::filesystem::path              m_oFile;
 

@@ -105,7 +105,7 @@ struct KdTreeBuilderSettings
 
 class TopologyBuilderSettings
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using TopologyBuilderEnumType = TopologyBuilderEnum;
@@ -154,7 +154,7 @@ class TopologyBuilderSettings
         unsigned int m_allowSplitAbove = 10;  // kdTree settings
     };
 
-    public:
+public:
     TopologyBuilderEnumType m_type;
 
     GridBuilderSettings   m_gridBuilderSettings;

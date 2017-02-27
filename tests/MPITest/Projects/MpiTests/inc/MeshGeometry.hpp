@@ -34,7 +34,7 @@
 template <class PREC>
 class MeshGeometry
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -154,7 +154,7 @@ class MeshGeometry
     std::vector<ozcollide::Polygon> m_ozPolys;  ///< A set of polygons used in ozcollide, only referenced!
 #endif
 
-    private:
+private:
     friend class boost::serialization::access;
 };
 

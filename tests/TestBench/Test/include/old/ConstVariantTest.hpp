@@ -25,7 +25,7 @@
 template <typename TDynamicsSystemConfig>
 class Collider : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES_OF(TDynamicsSystemConfig);
 
     bool checkCollision(const RigidBodyType* pBody1, const RigidBodyType* pBody2)
@@ -49,7 +49,7 @@ class Collider : public boost::static_visitor<>
     void operator()(const boost::shared_ptr<Geom1>& g1, const boost::shared_ptr<Geom2>& g2);
     // =================================================================================
 
-    private:
+private:
     RigidBodyType* m_pBody1;  ///< Shared pointer to the first RigidBodyBase class instance.
     RigidBodyType* m_pBody2;  ///< Shared pointer to the second RigidBodyBase class instance.
 

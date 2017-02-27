@@ -19,10 +19,10 @@
 template <unsigned int Dim>
 class AABBnD
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    private:
+private:
     template <unsigned int D = Dim, bool = true>
     struct unite_impl
     {
@@ -84,7 +84,7 @@ class AABBnD
         }
     };
 
-    public:
+public:
     AABBnD()
     {
         reset();

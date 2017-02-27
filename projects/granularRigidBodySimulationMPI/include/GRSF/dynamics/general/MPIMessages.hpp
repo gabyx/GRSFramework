@@ -64,7 +64,7 @@ namespace MPILayer
 template <typename... T1>
 class GenericMessage
 {
-    public:
+public:
     using Tuple                        = std::tuple<T1...>;
     static const std::size_t TupleSize = std::tuple_size<Tuple>::value;
 
@@ -102,7 +102,7 @@ class NeighbourMessageWrapperBodies
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::BODY_MESSAGE;
@@ -121,7 +121,7 @@ class NeighbourMessageWrapperBodies
     using NeighbourDataMapType = typename NeighbourCommunicatorType::NeighbourMapType;
     using NeighbourDataType    = typename NeighbourDataMapType::DataType;
 
-    private:
+private:
     NeighbourCommunicatorType* m_nc;
     RankIdType m_neighbourRank;  ///< This is the neighbour rank where the message is send to or received from!
 
@@ -135,7 +135,7 @@ class NeighbourMessageWrapperBodies
     Logging::Log* m_pSerializerLog;
     Logging::Log* m_pSimulationLog;
 
-    public:
+public:
     NeighbourMessageWrapperBodies(NeighbourCommunicatorType* nc) : m_nc(nc)
     {
         if (Logging::LogManager::getSingleton().existsLog("SimulationLog"))
@@ -384,7 +384,7 @@ class NeighbourMessageWrapperBodies
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-    private:
+private:
     template <class Archive>
     void saveRemoval(Archive& ar, RigidBodyType* body) const
     {
@@ -1024,7 +1024,7 @@ class NeighbourMessageWrapperBodies
 template <typename TNeighbourCommunicator>
 class NeighbourMessageWrapperInclusion
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     using NeighbourCommunicatorType = TNeighbourCommunicator;
@@ -1068,7 +1068,7 @@ class NeighbourMessageWrapperInclusion
         m_time = time;
     }
 
-    protected:
+protected:
     mutable RigidBodyType::PREC m_time;
 
     NeighbourCommunicatorType* m_nc;
@@ -1088,7 +1088,7 @@ class NeighbourMessageWrapperInclusionContact
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::EXTERNALCONTACTS_MESSAGE;
@@ -1250,7 +1250,7 @@ class NeighbourMessageWrapperInclusionContact
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-    private:
+private:
     mutable NeighbourDataType* m_neighbourData;
 };
 
@@ -1261,7 +1261,7 @@ class NeighbourMessageWrapperInclusionMultiplicity
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYFACTOR_MESSAGE;
@@ -1469,7 +1469,7 @@ class NeighbourMessageWrapperInclusionMultiplicity
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-    private:
+private:
     mutable NeighbourDataType* m_neighbourData;
 };
 
@@ -1480,7 +1480,7 @@ class NeighbourMessageWrapperInclusionSplitBodyUpdate
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYUPDATE_MESSAGE;
@@ -1639,7 +1639,7 @@ class NeighbourMessageWrapperInclusionSplitBodyUpdate
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-    private:
+private:
     mutable unsigned int       m_step;
     mutable NeighbourDataType* m_neighbourData;
 };
@@ -1651,7 +1651,7 @@ class NeighbourMessageWrapperInclusionSplitBodySolution
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::SPLITBODYSOLUTION_MESSAGE;
@@ -1820,7 +1820,7 @@ class NeighbourMessageWrapperInclusionSplitBodySolution
 
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
-    private:
+private:
     mutable unsigned int       m_step;
     mutable NeighbourDataType* m_neighbourData;
 };
@@ -1831,7 +1831,7 @@ class TopologyBuilderMessageWrapperBodies
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
@@ -1959,7 +1959,7 @@ class TopologyBuilderMessageWrapperBodies
         m_rank = rank;
     }
 
-    private:
+private:
     TTopologyBuilder* m_pTopoBuilder;
     RankIdType        m_rank;
 };
@@ -1970,7 +1970,7 @@ class TopologyBuilderMessageWrapperOrientation
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_POINTGATHER;
@@ -1987,7 +1987,7 @@ class TopologyBuilderMessageWrapperOrientation
         serializeEigen(ar, m_pTopoBuilder->m_A_IK);
     }
 
-    private:
+private:
     TTopologyBuilder* m_pTopoBuilder;
     RankIdType        m_rank;
 };
@@ -2007,7 +2007,7 @@ class TopologyBuilderMessageWrapperResults
                                           boost::serialization::object_serializable,
                                           boost::serialization::track_never>
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     static const MPIMessageTag m_tag = MPIMessageTag::TOPOLOGYBUILDER_RESULTS;
@@ -2170,7 +2170,7 @@ class TopologyBuilderMessageWrapperResults
         m_rank = rank;
     }
 
-    private:
+private:
     TTopologyBuilder* m_pTopoBuilder;
     RankIdType        m_rank;
 };

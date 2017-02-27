@@ -73,7 +73,7 @@ void serialize(Archive& ar, MeshGeometry& g, const unsigned int version)
 
 class GeomSerialization
 {
-    private:
+private:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
@@ -132,7 +132,7 @@ class GeomSerialization
         Archive& m_ar;
     };
 
-    public:
+public:
     GeomSerialization(GeometryType& g) : m_g(g)
     {
         m_w = m_g.which();

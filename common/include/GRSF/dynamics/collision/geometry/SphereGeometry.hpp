@@ -15,7 +15,7 @@
 
 class SphereGeometry
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
 
     SphereGeometry(PREC r) : m_radius(r){};
@@ -23,7 +23,7 @@ class SphereGeometry
 
     PREC m_radius;
 
-    private:
+private:
     friend class boost::serialization::access;
 };
 

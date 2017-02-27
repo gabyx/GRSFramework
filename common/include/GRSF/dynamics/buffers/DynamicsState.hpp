@@ -34,7 +34,7 @@ void lerp(const DynamicsStateBase& A, const DynamicsStateBase& B, DynamicsStateB
 */
 class DynamicsStateBase
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     DynamicsStateBase() : m_t(0.0), m_StateType(NONE)
@@ -69,7 +69,7 @@ class DynamicsStateBase
 
 class DynamicsState : public DynamicsStateBase
 {
-    public:
+public:
     DynamicsState() : DynamicsStateBase(), m_randomAccess(true)
     {
     }
@@ -304,7 +304,7 @@ class DynamicsState : public DynamicsStateBase
         return m_randomAccess;
     }
 
-    private:
+private:
     /** For access to specific ids:
     * if m_randomAccess is false, then the ids in RigidBodyStateListType are not continous, therefore we need
     * m_pIdToState

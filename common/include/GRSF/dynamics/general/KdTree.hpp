@@ -36,7 +36,7 @@ namespace KdTree
 template <typename TTraits>
 class NodeSimpleS : public NodeSimple<TTraits, NodeSimpleS<TTraits>>
 {
-    public:
+public:
     using Traits = TTraits;
     using Base   = NodeSimple<TTraits, NodeSimpleS<TTraits>>;
 
@@ -58,7 +58,7 @@ class NodeSimpleS : public NodeSimple<TTraits, NodeSimpleS<TTraits>>
 template <typename TTraits = TreeSimpleTraits<KdTree::NoData<3>, KdTree::NodeSimpleS>>
 class TreeSimpleS : public TreeSimple<TTraits>
 {
-    public:
+public:
     template <typename Tree>
     friend class ::KdTreeSerializer;
 

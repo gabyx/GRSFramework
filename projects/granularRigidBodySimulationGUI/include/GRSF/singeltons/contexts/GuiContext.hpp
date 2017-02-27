@@ -26,7 +26,7 @@
 **/
 class GuiContext : public Ogre::Singleton<GuiContext>, OgreBites::SdkTrayListener
 {
-    public:
+public:
     GuiContext();
     ~GuiContext();
 
@@ -35,7 +35,7 @@ class GuiContext : public Ogre::Singleton<GuiContext>, OgreBites::SdkTrayListene
 
     void updateGuiContext(double timeSinceLastFrame);
 
-    private:
+private:
     std::shared_ptr<OgreBites::SdkTrayManager> m_pTrayMgr;
     Ogre::FrameEvent                           m_FrameEvent;
     Ogre::OverlaySystem*                       m_overlaySystem = nullptr;

@@ -15,7 +15,7 @@
 
 class RigidBodySolverData
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     RigidBodySolverData() : m_t(0), m_overlapTotal(0){};
@@ -32,7 +32,7 @@ class RigidBodySolverData
 /** Class with  Data Structure for the Solver! */
 class RigidBodySolverDataCONoG : public RigidBodySolverData
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
@@ -64,7 +64,7 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData
     */
     class VelocityBuffer
     {
-        public:
+    public:
         VelocityBuffer() /*: m_front(m_front_internal.data()), m_back(m_back_internal.data()) */
         {
         }
@@ -73,7 +73,7 @@ class RigidBodySolverDataCONoG : public RigidBodySolverData
         VectorUBody m_front;
         VectorUBody m_back;
 
-        private:
+    private:
         // Uncomment for faster switch!
         //        VectorUBody m_front_internal;
         //        VectorUBody m_back_internal;

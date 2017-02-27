@@ -19,7 +19,7 @@
 
 class RendermanGeometryWriter : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
 
@@ -49,7 +49,7 @@ class RendermanGeometryWriter : public boost::static_visitor<>
         GRSF_ERRORMSG("Not implemented")
     }
 
-    private:
+private:
     std::stringstream* m_s;
 };
 

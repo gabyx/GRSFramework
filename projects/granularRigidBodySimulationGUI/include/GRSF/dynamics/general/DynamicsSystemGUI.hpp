@@ -28,7 +28,7 @@
 
 class RigidBodyGraphics
 {
-    public:
+public:
     RigidBodyGraphics() : m_node(nullptr), m_id(0)
     {
     }
@@ -71,7 +71,7 @@ class RigidBodyGraphics
 template <typename TRigidBodyGraphics>
 class RigidBodyGraphicsContainer
 {
-    private:
+private:
     using ContainerType = std::vector<TRigidBodyGraphics>;
     ContainerType m_mapByInsertion;
 
@@ -84,7 +84,7 @@ class RigidBodyGraphicsContainer
         }
     };
 
-    public:
+public:
     RigidBodyGraphicsContainer()                                    = default;
     RigidBodyGraphicsContainer(const RigidBodyGraphicsContainer& o) = default;
     RigidBodyGraphicsContainer(RigidBodyGraphicsContainer&& o)      = default;
@@ -135,7 +135,7 @@ class RigidBodyGraphicsContainer
 
 class DynamicsSystemGUI : public DynamicsSystemBase
 {
-    public:
+public:
     DynamicsSystemGUI(std::shared_ptr<Ogre::SceneManager> s, Ogre::SceneNode* pBaseNode)
         : m_pSceneMgr(s), m_pBaseNode(pBaseNode)
     {
@@ -232,7 +232,7 @@ class DynamicsSystemGUI : public DynamicsSystemBase
         }
     };
 
-    public:
+public:
     using RigidBodyGraphicsType = RigidBodyGraphics;
 
     using RigidBodyGraphicsContType = RigidBodyGraphicsContainer<RigidBodyGraphicsType>;
@@ -242,7 +242,7 @@ class DynamicsSystemGUI : public DynamicsSystemBase
 
     Ogre::SceneNode* m_pContactFramesNode;
 
-    private:
+private:
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
 
     Ogre::SceneNode* m_pBodiesNode;
@@ -251,7 +251,7 @@ class DynamicsSystemGUI : public DynamicsSystemBase
 
 class DynamicsSystemPlayback
 {
-    public:
+public:
     DEFINE_DYNAMICSYSTEM_BASE_TYPES
 
     DynamicsSystemPlayback(std::shared_ptr<Ogre::SceneManager> s, Ogre::SceneNode* pBaseNode)
@@ -356,7 +356,7 @@ class DynamicsSystemPlayback
 
     Ogre::SceneNode* m_pContactFramesNode;
 
-    private:
+private:
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
 
     Ogre::SceneNode* m_pBodiesNode;

@@ -27,11 +27,11 @@ namespace Logging
 {
 class LogSink
 {
-    protected:
+protected:
     std::string   m_sinkName;
     std::ostream* m_pOutStream;
 
-    public:
+public:
     std::string getName();
 
     void operator<<(std::stringstream& s);
@@ -46,24 +46,24 @@ class LogSink
 
 class LogSinkFile : public LogSink
 {
-    private:
+private:
     boost::filesystem::ofstream m_fileStream;
 
-    public:
+public:
     LogSinkFile(const std::string& sink_name, boost::filesystem::path filePath = "");
     ~LogSinkFile();
 };
 
 class LogSinkCout : public LogSink
 {
-    public:
+public:
     LogSinkCout(const std::string& sink_name);
     ~LogSinkCout();
 };
 
 class Log
 {
-    protected:
+protected:
     std::string  m_logName;
     boost::mutex m_busy_mutex;
 
@@ -84,7 +84,7 @@ class Log
 
     friend class expression;
 
-    public:
+public:
     virtual ~Log();
     Log(std::string log_name);
 
@@ -129,7 +129,7 @@ class Log
     // Expression to write all " myLogSink << a << b << c " first into a stringstream and the flush!
     class expression
     {
-        public:
+    public:
         expression(Log& _log, std::stringstream* _s);
         // Destructor pushes message!
         ~expression();
@@ -145,7 +145,7 @@ class Log
         // For std::endl;
         expression operator<<(std::ostream& (*f)(std::ostream&));
 
-        private:
+    private:
         std::stringstream* s;
         bool               flag;  // When flag is false, the flush gets executed in deconstructor!
         Log&               m_log;
@@ -154,14 +154,14 @@ class Log
 
 class LogManager : public Utilities::Singleton<LogManager>
 {
-    private:
+private:
     typedef std::map<std::string, Log*>           LogListType;
     typedef std::map<std::string, Log*>::iterator LogListIteratorType;
     LogListType m_logList;
 
     boost::mutex m_busy_mutex;
 
-    public:
+public:
     ~LogManager();
 
     Log* createLog(const std::string& name, bool toConsole, bool toFile, boost::filesystem::path filePath);

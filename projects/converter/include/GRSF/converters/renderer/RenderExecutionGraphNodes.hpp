@@ -27,7 +27,7 @@ namespace LogicNodes
 template <typename IndexType>
 class ColorList : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using Vector3Vec    = StdVecAligned<Vector3>;
@@ -140,13 +140,13 @@ class ColorList : public LogicNode
         }
     }
 
-    private:
+private:
     ColorListType m_colors;
 };
 
 class ColorGradientNode : public LogicNode, public ColorGradient
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -202,13 +202,13 @@ class ColorGradientNode : public LogicNode, public ColorGradient
         }
     }
 
-    private:
+private:
     PREC m_min, m_max;
 };
 
 class MatteMaterial : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -272,13 +272,13 @@ class MatteMaterial : public LogicNode
         }
     }
 
-    private:
+private:
     RenderMaterial m_material;
 };
 
 class BxdfDisneyMaterial : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -399,13 +399,13 @@ class BxdfDisneyMaterial : public LogicNode
         }
     }
 
-    private:
+private:
     RenderMaterial m_material;
 };
 
 class RenderScriptWriter : public LogicNode
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Inputs
@@ -497,12 +497,12 @@ class RenderScriptWriter : public LogicNode
     virtual ~RenderScriptWriter(){};
     void compute(){GRSF_ERRORMSG("Should not be evaluated!")};
 
-    protected:
+protected:
 };
 
 class RendermanWriter : public RenderScriptWriter
 {
-    public:
+public:
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
     using GeometryMapType = typename RenderDataType::GeometryMapType;
 
@@ -610,7 +610,7 @@ class RendermanWriter : public RenderScriptWriter
         closeFile();
     }
 
-    protected:
+protected:
     void openNewFile()
     {
         // open new RIB file at this path and name

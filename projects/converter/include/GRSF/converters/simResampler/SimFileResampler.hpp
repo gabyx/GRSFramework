@@ -25,7 +25,7 @@
 
 class SimFileResampler
 {
-    public:
+public:
     void resample(const std::vector<boost::filesystem::path>& inputFiles,
                   boost::filesystem::path                     outputFile,
                   std::streamsize                             stepSize      = 1,
@@ -44,7 +44,7 @@ class SimFileResampler
         resample();
     }
 
-    private:
+private:
     std::vector<boost::filesystem::path> m_iFiles;
     boost::filesystem::path              m_oFile;
 

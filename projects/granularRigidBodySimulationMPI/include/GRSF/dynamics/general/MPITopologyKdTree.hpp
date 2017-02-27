@@ -31,7 +31,7 @@ namespace MPILayer
 template <typename ProcessTopologyBase>
 class ProcessTopologyKdTree
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -178,7 +178,7 @@ class ProcessTopologyKdTree
         return neighbourProcessRanks.size() > 0;
     }
 
-    private:
+private:
     /**
     * Gets the common cells between all cellNumbers and the neighbours of cell number cellNumber2
     */

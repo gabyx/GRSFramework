@@ -17,7 +17,7 @@
 template <class PREC>
 class BoxGeometry
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -41,7 +41,7 @@ class BoxGeometry
         return point;
     }
 
-    private:
+private:
     friend class boost::serialization::access;
     static char m_pointIdx[8 * 3];
 };

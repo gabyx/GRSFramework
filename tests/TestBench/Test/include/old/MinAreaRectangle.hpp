@@ -30,7 +30,7 @@
 */
 class MinAreaRectangle
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -90,7 +90,7 @@ class MinAreaRectangle
         computeRectangle();
     }
 
-    private:
+private:
     using Vector2U = MyMatrix<unsigned int>::Vector2;
 
     void computeRectangle()

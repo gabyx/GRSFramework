@@ -24,7 +24,7 @@
 
 class PrintGeometryDetailsVisitor : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     PrintGeometryDetailsVisitor(Logging::Log* pLog, RigidBodyType::GeometryType& pGeom, std::string prefix)
@@ -58,7 +58,7 @@ class PrintGeometryDetailsVisitor : public boost::static_visitor<>
         GRSF_ERRORMSG("HalfspaceGeometry PrintDetails: This has not been implemented yet!");
     }
 
-    private:
+private:
     std::string   m_prefix;
     Logging::Log* m_pLog;
 };

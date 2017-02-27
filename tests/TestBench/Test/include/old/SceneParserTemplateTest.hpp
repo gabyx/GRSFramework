@@ -99,7 +99,7 @@
     using UniformDistType = typename BaseParser::template UniformDistType<T>;
 
 #define DEFINE_MODULETYPES_AND_FRIENDS(_ModuleTraitsType_)                                  \
-    public:                                                                                 \
+public:                                                                                     \
     using SettingsModuleType       = typename _ModuleTraitsType_::SettingsModuleType;       \
     using ExternalForcesModuleType = typename _ModuleTraitsType_::ExternalForcesModuleType; \
     using ContactParamModuleType   = typename _ModuleTraitsType_::ContactParamModuleType;   \
@@ -110,7 +110,7 @@
                                                                                             \
     using VisModuleType = typename _ModuleTraitsType_::VisModuleType;                       \
                                                                                             \
-    protected:                                                                              \
+protected:                                                                                  \
     friend typename _ModuleTraitsType_::SettingsModuleType;                                 \
     friend typename _ModuleTraitsType_::ExternalForcesModuleType;                           \
     friend typename _ModuleTraitsType_::ContactParamModuleType;                             \
@@ -123,7 +123,7 @@
 
 class DynamicsSystemGUI
 {
-    public:
+public:
     template <typename TParser>
     std::tuple<std::unique_ptr<typename TParser::SettingsModuleType>,
                std::unique_ptr<typename TParser::ExternalForcesModuleType>,
@@ -169,7 +169,7 @@ class DynamicsSystemGUI
                                std::move(vis));
     }
 
-    public:
+public:
     //    using RigidBodyGraphicsType = RigidBodyGraphics;
     //
     //    using RigidBodyGraphicsContType = RigidBodyGraphicsContainer<RigidBodyGraphicsType>;
@@ -177,7 +177,7 @@ class DynamicsSystemGUI
     //    RigidBodyGraphicsContType	m_SceneNodeSimBodies;
     //    RigidBodyGraphicsContType	m_SceneNodeBodies;
 
-    private:
+private:
     //    std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
     //
     //    Ogre::SceneNode * m_pBodiesNode;
@@ -190,7 +190,7 @@ namespace ParserModules
 template <typename TParser>
 class SettingsModule
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -204,7 +204,7 @@ class SettingsModule
 
     ParserType* m_parser;
 
-    public:
+public:
     TimeStepperSettingsType* getTimeStepperSettings()
     {
         return m_timestepperSettings;
@@ -465,7 +465,7 @@ class SettingsModule
 template <typename TParser>
 class GeometryModule
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -481,7 +481,7 @@ class GeometryModule
 
     GlobalGeometryMapType* m_globalGeometries;
 
-    public:
+public:
     GeometryModule(ParserType* p, GlobalGeometryMapType* g)
         : m_parser(p), m_globalGeometries(g){GRSF_ASSERTMSG(m_globalGeometries, "this should not be null")};
 
@@ -518,7 +518,7 @@ class GeometryModule
         parseGeometry_imp(geom, bodyList, startId);
     }
 
-    private:
+private:
     void parseGeometry_imp(XMLNodeType geometryNode, BodyListType* bodyList = nullptr, RigidBodyIdType startId = 0)
     {
         m_startIdGroup     = startId;
@@ -1100,7 +1100,7 @@ class GeometryModule
 template <typename TParser>
 class ContactParamModule
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -1111,7 +1111,7 @@ class ContactParamModule
 
     ParserType* m_parser;
 
-    public:
+public:
     ContactParamModule(ParserType* p, ContactParameterMapType* c) : m_parser(p), m_contactParams(c){};
 
     void parse(XMLNodeType sceneSettings)
@@ -1145,7 +1145,7 @@ class ContactParamModule
                     "===================================================================" << std::endl;)
     }
 
-    private:
+private:
     void parseContactParameter(XMLNodeType contactParam, bool stdMaterial = false)
     {
         typename RigidBodyType::BodyMaterialType material1, material2;
@@ -1252,7 +1252,7 @@ class ContactParamModule
 template <typename TParser>
 class ExternalForcesModule
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -1263,7 +1263,7 @@ class ExternalForcesModule
 
     ParserType* m_parser;
 
-    public:
+public:
     ExternalForcesModule(ParserType* p, ExternalForceListType* f) : m_parser(p), m_forceList(f){};
 
     void parse(XMLNodeType sceneSettings)
@@ -1290,7 +1290,7 @@ class ExternalForcesModule
                     "===================================================================" << std::endl;)
     }
 
-    private:
+private:
     void parseForceField(XMLNodeType forceField)
     {
         bool enabled = false;
@@ -1403,9 +1403,9 @@ class ExternalForcesModule
 template <typename TParser>
 class VisModuleDummy
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
-    public:
+public:
     VisModuleDummy(ParserType* p, BodyModuleType* b){};
 
     template <typename... Args>
@@ -1423,7 +1423,7 @@ class VisModuleDummy
 template <typename TParser>
 class InitStatesModule
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -1438,7 +1438,7 @@ class InitStatesModule
     BodyListType*   m_bodyListGroup;
     RigidBodyIdType m_startIdGroup;
 
-    public:
+public:
     InitStatesModule(ParserType* p, RigidBodyStatesContainerType* c, SettingsModuleType* s)
         : m_parser(p), m_initStates(c), m_settings(s)
     {
@@ -1619,7 +1619,7 @@ class InitStatesModule
         // "==================================================================="<<std::endl;)
     }
 
-    private:
+private:
     void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath, double& time, short which)
     {
         InitialConditionBodies::setupInitialConditionBodiesFromFile(relpath, *m_initStates, time, true, true, which);
@@ -2007,7 +2007,7 @@ struct BodyModuleOptions
 template <typename TParser>
 class BodyModule
 {
-    private:
+private:
     DEFINE_PARSER_CONFIG_TYPES_FOR_MODULE
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -2020,7 +2020,7 @@ class BodyModule
 
     ParserType* m_parser;
 
-    public:
+public:
     using OptionsType = BodyModuleOptions;
 
     BodyModule(ParserType*                   p,
@@ -2086,7 +2086,7 @@ class BodyModule
         m_startRangeIdIt = m_parsingOptions.m_bodyIdRange.begin();
     }
 
-    private:
+private:
     void parseRigidBodies(XMLNodeType rigidbodies)
     {
         LOGSCLEVEL1(m_parser->m_pSimulationLog,
@@ -2486,10 +2486,10 @@ class BodyModule
         RigidBodyState m_initState;
     };
 
-    public:
+public:
     using BodyListType = std::vector<BodyData>;
 
-    private:
+private:
     BodyListType m_bodyListGroup;  ///< Used to parse a RigidBody Node
 
     /// Other Modules
@@ -2528,7 +2528,7 @@ template <typename TDynamicsSystem,
           typename TDerived                         = void>
 class SceneParser
 {
-    public:
+public:
     using DynamicsSystemType = TDynamicsSystem;
 
     using XMLNodeType      = pugi::xml_node;
@@ -2548,7 +2548,7 @@ class SceneParser
 
     using BodyModuleOptionsType = typename BodyModuleType::OptionsType;
 
-    public:
+public:
     SceneParser(std::shared_ptr<DynamicsSystemType> pDynSys) : m_pDynSys(pDynSys)
     {
         // Get all Modules from DynamicsSystem
@@ -2602,7 +2602,7 @@ class SceneParser
         //        }
     }
 
-    protected:
+protected:
     bool parseSceneIntern(const boost::filesystem::path& file)
     {
         //

@@ -28,7 +28,7 @@ class SimFileInfo;
 
 class SimFileExecutionGraph : public ExecutionTreeInOut
 {
-    public:
+public:
     struct NodeGroups
     {
         enum
@@ -117,7 +117,7 @@ class SimFileExecutionGraph : public ExecutionTreeInOut
     static const std::map<std::string, unsigned int> m_nameToExecGroupId;
     static const std::map<std::string, unsigned int> m_nameToInitGroupId;
 
-    private:
+private:
     bool checkStop(unsigned int groupId);
 
     LogicNodes::BodyData*    m_bodyDataNode = nullptr;

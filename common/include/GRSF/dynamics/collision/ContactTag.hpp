@@ -25,7 +25,7 @@
 /** @{ */
 class ContactTag
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     using ContactTagTuple =
@@ -42,7 +42,7 @@ class ContactTag
 
     friend class ContactTagHash;
 
-    private:
+private:
     /**
     * This tuple builds up the hash. It consists of:
     * - Body with smaller id is always first!
@@ -62,7 +62,7 @@ class ContactTag
 */
 class ContactTagHash : std::unary_function<ContactTag, std::size_t>
 {
-    public:
+public:
     std::size_t operator()(ContactTag const& c) const
     {
         TupleHash<ContactTag::ContactTagTuple> hasher;

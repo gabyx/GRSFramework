@@ -28,12 +28,12 @@
 */
 class ApplicationSignalHandler : public Utilities::Singleton<ApplicationSignalHandler>
 {
-    public:
+public:
     using FuncType = std::function<void(int)>;
 
     class CallBackWrapper
     {
-        public:
+    public:
         CallBackWrapper(const FuncType& f, const std::string& name) : m_func(f), m_name(name)
         {
         }
@@ -58,7 +58,7 @@ class ApplicationSignalHandler : public Utilities::Singleton<ApplicationSignalHa
             return m_name;
         }
 
-        private:
+    private:
         FuncType    m_func;
         std::string m_name;
     };
@@ -252,7 +252,7 @@ class ApplicationSignalHandler : public Utilities::Singleton<ApplicationSignalHa
         m_handlingStack->clear();
     }
 
-    private:
+private:
     static void globalSigCatcher(int signum, siginfo_t* siginfo, void* context)
     {
         ApplicationSignalHandler& s = ApplicationSignalHandler::getSingleton();

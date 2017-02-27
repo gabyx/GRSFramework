@@ -19,7 +19,7 @@ namespace LogicNodes
 template <typename TValue>
 class LineWriter : public LogicNode
 {
-    public:
+public:
     struct Inputs
     {
         enum
@@ -94,7 +94,7 @@ class LineWriter : public LogicNode
         }
     }
 
-    private:
+private:
     boost::filesystem::path m_openedFile = "";
     std::ofstream           m_file;
     bool                    m_truncate = true;

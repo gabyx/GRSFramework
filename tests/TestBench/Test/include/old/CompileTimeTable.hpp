@@ -19,14 +19,14 @@ const int ARRAY_SIZE = 5;
 template <int N, int I = N - 1>
 class Table : public Table<N, I - 1>
 {
-    public:
+public:
     static const int dummy;
 };
 
 template <int N>
 class Table<N, 0>
 {
-    public:
+public:
     static const int dummy;
     static int       array[N];
 };

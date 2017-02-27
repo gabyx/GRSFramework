@@ -32,7 +32,7 @@
 
 class GridderData
 {
-    public:
+public:
     DEFINE_GRIDDERCONVERTERDATA_TYPES
 
     /** Data storage from the Logic file*/

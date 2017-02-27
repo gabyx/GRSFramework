@@ -36,7 +36,7 @@ template <unsigned int NTensorIndices, /* 3d grid has 3 indices*/
           typename TensorScalar>
 class TensorStorage
 {
-    public:
+public:
     DEFINE_MATRIX_STORAGEOPTIONS
     using TensorType    = typename MyMatrix::TensorDyn<TensorScalar, NTensorIndices, MatrixRowMajorOption>;
     using TensorMapType = TensorMap<TensorType>;
@@ -64,7 +64,7 @@ class TensorStorage
     std::string m_dataName;  /// Data extraction name
     TensorType  m_tensor;
 
-    private:
+private:
     template <typename IndexType, std::size_t... Is>
     void resizeTensor(const IndexType& dimensions, std::index_sequence<Is...>)
     {
@@ -96,7 +96,7 @@ class TensorStorage
 template <unsigned int _DimIn, unsigned int _DimOut, typename TScalar = PREC>
 class ProjectiveTransformComponent
 {
-    public:
+public:
     static const unsigned int DimIn  = _DimIn;
     static const unsigned int DimOut = _DimOut;
 
@@ -119,7 +119,7 @@ template <unsigned int CellDimIn      = 3,
 class ExtractorProjection : public ProjectiveTransformComponent<CellDimIn, CellDimOut, TScalar>,
                             public TensorStorage<nTensorIndices, TCellData>
 {
-    public:
+public:
     using BaseStorage = TensorStorage<nTensorIndices, TCellData>;
     DEFINE_TENSORSTORAGE_TYPE(BaseStorage)
 
@@ -146,7 +146,7 @@ template <unsigned int CellDimOut     = 3,
           typename TCellData          = typename MyMatrix::VectorStat<TScalar, CellDimOut>>
 class ExtractorNormal : public TensorStorage<nTensorIndices, TCellData>
 {
-    public:
+public:
     using Scalar                        = TScalar;
     using DataVectorType                = VectorStat<CellDimOut>;
     static const unsigned int Dimension = CellDimOut;
@@ -166,7 +166,7 @@ class ExtractorNormal : public TensorStorage<nTensorIndices, TCellData>
         return this->resizeTensor(gridDimension);
     }
 
-    public:
+public:
     /** TensorMap does not provide setData() functionality and ptr needs to be set in cosntructor,
             *   Therefore we make a unique_ptr to construct it while resizing the buffer
             */
@@ -177,7 +177,7 @@ class ExtractorNormal : public TensorStorage<nTensorIndices, TCellData>
 template <unsigned int nTensorIndices = 3>
 class ExtractorTransVelocityProj1D : public details::ExtractorProjection<3, 1, PREC, nTensorIndices>
 {
-    public:
+public:
     using Base = details::ExtractorProjection<3, 1, PREC, nTensorIndices>;
 
     DEFINE_TENSORSTORAGE_TYPE(Base)
@@ -236,7 +236,7 @@ class ExtractorTransVelocityProj1D : public details::ExtractorProjection<3, 1, P
 template <unsigned int nTensorIndices = 3>
 class ExtractorTransVelocityProj2D : public details::ExtractorProjection<3, 2, PREC, nTensorIndices>
 {
-    public:
+public:
     using Base = details::ExtractorProjection<3, 2, PREC, nTensorIndices>;
 
     DEFINE_TENSORSTORAGE_TYPE(Base)
@@ -295,7 +295,7 @@ class ExtractorTransVelocityProj2D : public details::ExtractorProjection<3, 2, P
 template <unsigned int nTensorIndices = 3>
 class ExtractorTransVelocity : public details::ExtractorNormal<3, PREC, nTensorIndices>
 {
-    public:
+public:
     using Base = details::ExtractorNormal<3, PREC, nTensorIndices>;
     DEFINE_TENSORSTORAGE_TYPE(Base)
 
@@ -340,7 +340,7 @@ class ExtractorTransVelocity : public details::ExtractorNormal<3, PREC, nTensorI
 template <unsigned int nTensorIndices = 3>
 class ExtractorBodyMask : public details::ExtractorNormal<1, unsigned char, nTensorIndices>
 {
-    public:
+public:
     using Base = details::ExtractorNormal<1, unsigned char, nTensorIndices>;
     DEFINE_TENSORSTORAGE_TYPE(Base)
 
@@ -378,7 +378,7 @@ class ExtractorBodyMask : public details::ExtractorNormal<1, unsigned char, nTen
 
 class GridExtractionSettings
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -433,7 +433,7 @@ class GridExtractionSettings
     template <typename TGrid>
     class DataWriterVisitor
     {
-        public:
+    public:
         using GridType            = TGrid;
         using GridExtSettingsType = GridExtractionSettings;
 
@@ -486,7 +486,7 @@ class GridExtractionSettings
             }
         }
 
-        private:
+    private:
         GridType*            m_grid;
         GridExtSettingsType* m_settings;
     };

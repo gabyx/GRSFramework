@@ -25,7 +25,7 @@
 
 class PlaybackManagerBase
 {
-    public:
+public:
     PlaybackManagerBase();
 
     ~PlaybackManagerBase();
@@ -58,7 +58,7 @@ class PlaybackManagerBase
     virtual void   startPlaybackThread()             = 0;
     virtual void stopPlaybackThread(bool force_stop) = 0;
 
-    protected:
+protected:
     virtual void initBeforeThreads(){};
 
     virtual void initSimThread(){};

@@ -43,7 +43,7 @@
 template <typename TLayoutConfig, typename TDynamicsSystem, typename TCollisionSolver, typename TContactGraph>
 class InclusionSolverNTContactOrdered
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -81,7 +81,7 @@ class InclusionSolverNTContactOrdered
 
     unsigned int getNObjects();
 
-    protected:
+protected:
     unsigned int m_nDofq, m_nDofu, m_nDofqObj, m_nDofuObj, m_nDofFriction, m_nSimBodies;
 
     unsigned int m_nExpectedContacts;

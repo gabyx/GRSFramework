@@ -29,7 +29,7 @@ class SimFileInfo
 {
     ;
 
-    public:
+public:
     using XMLDocumentType = pugi::xml_document;
     using XMLNodeType     = pugi::xml_node;
 
@@ -95,7 +95,7 @@ class SimFileInfo
             }
         }
 
-        private:
+    private:
         std::streamsize m_startIdx;
         std::streamoff  m_endIdx;
         std::streamsize m_increment;
@@ -179,7 +179,7 @@ class SimFileInfo
         }
     }
 
-    private:
+private:
     void addInfoFile(DetailsList&            detailList,
                      boost::filesystem::path f,
                      //                        std::streamsize & states,

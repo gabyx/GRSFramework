@@ -24,7 +24,7 @@ class RenderMaterial;
 
 class RenderExecutionGraph : public SimFileExecutionGraph
 {
-    public:
+public:
     using Base       = SimFileExecutionGraph;
     using NodeGroups = Base::NodeGroups;
 
@@ -35,7 +35,7 @@ class RenderExecutionGraph : public SimFileExecutionGraph
     void finalizeState();
     void addBodyState(RigidBodyStateAdd* s);
 
-    private:
+private:
     std::unordered_set<LogicNodes::RenderScriptWriter*> m_scriptWritterNodes;
 };
 

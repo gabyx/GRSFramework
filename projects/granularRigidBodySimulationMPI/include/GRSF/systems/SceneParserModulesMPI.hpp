@@ -18,7 +18,7 @@ namespace ParserModules
 template <typename TParserTraits>
 class SettingsModuleMPI : public SettingsModule<TParserTraits>
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -26,7 +26,7 @@ class SettingsModuleMPI : public SettingsModule<TParserTraits>
     using TimeStepperSettingsType     = typename SettingsModule<TParserTraits>::TimeStepperSettingsType;
     using InclusionSolverSettingsType = typename SettingsModule<TParserTraits>::InclusionSolverSettingsType;
 
-    public:
+public:
     SettingsModuleMPI(ParserType*                  p,
                       RecorderSettingsType*        r,
                       TimeStepperSettingsType*     t,
@@ -73,7 +73,7 @@ class SettingsModuleMPI : public SettingsModule<TParserTraits>
 template <typename TParserTraits>
 class MPIModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -82,7 +82,7 @@ class MPIModule
     using TopologyBuilderSettingsType = typename DynamicsSystemType::TopologyBuilderSettingsType;
     TopologyBuilderSettingsType* m_topoSettings;
 
-    public:
+public:
     MPIModule(ParserType* p, BodyModuleType* b, TopologyBuilderSettingsType* t)
         : m_pSimulationLog(p->getSimLog()), m_topoSettings(t)
     {

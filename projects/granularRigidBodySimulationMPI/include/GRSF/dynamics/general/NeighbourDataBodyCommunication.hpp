@@ -51,14 +51,14 @@ struct LocalData
 class NeighbourDataBodyCommunication : public NeighbourData<NeighbourDataBodyCommunication_impl::LocalData,
                                                             NeighbourDataBodyCommunication_impl::RemoteData>
 {
-    public:
+public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
-    private:
+private:
     typedef NeighbourData<NeighbourDataBodyCommunication_impl::LocalData,
                           NeighbourDataBodyCommunication_impl::RemoteData>
         NeighbourDataDerived;
 
-    public:
+public:
     NeighbourDataBodyCommunication(const RankIdType& neighbourRank) : NeighbourDataDerived(neighbourRank){};
 
     using RemoteIterator = NeighbourDataDerived::RemoteIterator;

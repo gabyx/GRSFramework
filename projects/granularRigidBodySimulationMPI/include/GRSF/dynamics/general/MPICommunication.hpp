@@ -45,7 +45,7 @@ namespace MPILayer
 */
 class MessageBinarySerializer
 {
-    public:
+public:
     MessageBinarySerializer(std::size_t reserve_bytes)
     {
         m_buffer.reserve(reserve_bytes);
@@ -119,7 +119,7 @@ class MessageBinarySerializer
         m_buffer.reserve(bytes);
     }
 
-    private:
+private:
     std::vector<char> m_buffer;
 };
 
@@ -141,7 +141,7 @@ struct SendMessageAndRequest
 */
 class ProcessCommunicator : public ProcessInformation
 {
-    public:
+public:
     // DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using ProcessInfoType = ProcessInformation;
@@ -668,7 +668,7 @@ class ProcessCommunicator : public ProcessInformation
         m_communicators.clear();
     }
 
-    private:
+private:
     Logging::Log* m_pSimulationLog;
 
     // Standart binary message for standart communication

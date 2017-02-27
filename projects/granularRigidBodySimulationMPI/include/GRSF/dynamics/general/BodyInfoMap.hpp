@@ -15,7 +15,7 @@
 
 class BodyProcessInfo
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 

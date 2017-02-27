@@ -25,16 +25,16 @@
 */
 class ApplicationCLOptions : public Utilities::Singleton<ApplicationCLOptions>
 {
-    private:
+private:
     std::vector<boost::filesystem::path> m_localDirs;
     boost::filesystem::path              m_globalDir = "./";
     boost::filesystem::path              m_mediaDir  = "./";
     boost::filesystem::path              m_sceneFile;
 
-    public:
+public:
     class PostProcessTask
     {
-        public:
+    public:
         PostProcessTask(const std::string& name) : m_name(name){};
 
         std::string getName() const
@@ -51,7 +51,7 @@ class ApplicationCLOptions : public Utilities::Singleton<ApplicationCLOptions>
 
         virtual ~PostProcessTask(){};
 
-        protected:
+    protected:
         friend std::ostream& operator<<(std::ostream& s, const PostProcessTask& p);
 
         std::string m_name;
@@ -60,7 +60,7 @@ class ApplicationCLOptions : public Utilities::Singleton<ApplicationCLOptions>
 
     class PostProcessTaskBash : public PostProcessTask
     {
-        public:
+    public:
         PostProcessTaskBash(const std::string& name) : PostProcessTask(name)
         {
         }
@@ -72,7 +72,7 @@ class ApplicationCLOptions : public Utilities::Singleton<ApplicationCLOptions>
 
     class PostProcessTaskCopyLocalTo : public PostProcessTask
     {
-        public:
+    public:
         PostProcessTaskCopyLocalTo(const std::string& name) : PostProcessTask(name)
         {
         }
@@ -305,7 +305,7 @@ class ApplicationCLOptions : public Utilities::Singleton<ApplicationCLOptions>
         }
     }
 
-    private:
+private:
     // If I would like to have some posst process tasks going on afterwards
     // Like bash command and so one
     // This is not needed sofar in MPI mode, because I can do this with mpirun -npernode 1 command and so on which lets

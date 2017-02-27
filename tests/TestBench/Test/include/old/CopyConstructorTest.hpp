@@ -17,7 +17,7 @@
 template <typename RigidBodyType>
 class SpatialUniformTimeRandomForceField
 {
-    public:
+public:
     typedef double PREC;
 
     SpatialUniformTimeRandomForceField(unsigned int seed, PREC boostTime, PREC pauseTime, PREC amplitude)
@@ -61,7 +61,7 @@ class SpatialUniformTimeRandomForceField
     //        SpatialUniformTimeRandomForceField(const SpatialUniformTimeRandomForceField &){
     //            std::cout << "COPY CONSRUCTOR!" << std::endl;
     //        }
-    private:
+private:
     boost::variate_generator<boost::mt19937, boost::uniform_real<PREC>>* m_randomG;
     PREC         m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ;
     unsigned int m_seed;

@@ -27,7 +27,7 @@
 template <typename TCombo>
 class InclusionCommunicator
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -87,7 +87,7 @@ class InclusionCommunicator
         return &m_nbDataMap;
     }
 
-    private:
+private:
     InclusionSolverSettingsType m_settings;
 
     /** Functions are executed in this order in communicateRemoteContacts() */

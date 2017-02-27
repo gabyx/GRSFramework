@@ -27,7 +27,7 @@
 
 class ContactDelegateSupport
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     typedef srutil::delegate1<void, CollisionData*> ContactDelegateType;  ///< This is the delegate type which is used,
@@ -52,7 +52,7 @@ class ContactDelegateSupport
         m_contactDelegateList.clear();
     }
 
-    private:
+private:
     std::vector<ContactDelegateType> m_contactDelegateList;
 };
 

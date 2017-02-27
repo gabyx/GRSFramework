@@ -44,13 +44,13 @@
 
 class App
 {
-    public:
+public:
     App();
     ~App();
 
     void startApp();  ///< Starts the Application.
 
-    private:
+private:
 };
 //=========================================================
 

@@ -27,7 +27,7 @@
     */
 class ConvexHull2D
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
     DEFINE_POINTS_CONFIG_TYPES
@@ -180,7 +180,7 @@ class ConvexHull2D
         return m_indicesCH;
     }
 
-    private:
+private:
     std::vector<unsigned int>         m_indicesCH;
     const MatrixRef<const Matrix2Dyn> m_p;
 };

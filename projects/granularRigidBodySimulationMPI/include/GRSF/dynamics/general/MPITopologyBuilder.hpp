@@ -47,7 +47,7 @@ namespace MPILayer
 template <typename TProcCommunicator>
 class TopologyBuilder
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -113,7 +113,7 @@ class TopologyBuilder
     {
     }
 
-    protected:
+protected:
     bool communicateRebuild(bool rebuild)
     {
         // Synchronize rebuilding over all processes by communication
@@ -153,7 +153,7 @@ class TopologyBuilder
 };
 
 #define DEFINE_TOPOLOGYBUILDER_BASE_TYPES(_Base_)                                                   \
-    public:                                                                                         \
+public:                                                                                             \
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES                                                               \
     DEFINE_MPI_INFORMATION_CONFIG_TYPES                                                             \
     using RigidBodyStatesContainerType = typename DynamicsSystemType::RigidBodyStatesContainerType; \
@@ -163,7 +163,7 @@ class TopologyBuilder
     using TopologyBuilderEnumType = typename _Base_::TopologyBuilderEnumType;                       \
     using ProcessCommunicatorType = typename _Base_::ProcessCommunicatorType;                       \
                                                                                                     \
-    protected:                                                                                      \
+protected:                                                                                          \
     using RebuildSettingsType = typename _Base_::RebuildSettingsType;                               \
     using _Base_::m_pSimulationLog;                                                                 \
     using _Base_::m_pDynSys;                                                                        \
@@ -176,7 +176,7 @@ class TopologyBuilder
 
 class MassPointPrediction
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using MassPointPredSettingsType = TopologyBuilderSettings::MassPointPredSettings;
@@ -212,10 +212,10 @@ class MassPointPrediction
         return m_massPointPredSettings;
     };
 
-    protected:
+protected:
     MassPointPredSettingsType m_massPointPredSettings;
 
-    public:
+public:
     MassPointPrediction(const MassPointPredSettingsType& settings) : m_massPointPredSettings(settings)
     {
     }
@@ -305,13 +305,13 @@ class MassPointPrediction
 
 class OutlierFilter
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using OutlierFilterSettingsType = TopologyBuilderSettings::OutlierFilterSettings;
     using MassPointType             = typename MassPointPrediction::MassPointType;
 
-    private:
+private:
     using PointType = VectorBStat<const typename MassPointType::StateType::DisplacementType, 3>;
     struct PointGetter
     {
@@ -321,17 +321,17 @@ class OutlierFilter
         }
     };
 
-    public:
+public:
     using DistCompTraits  = KdTree::DefaultDistanceCompTraits<Vector3, PointGetter>;
     using PointDataTraits = KdTree::DefaultPointDataTraits<3, PointType, MassPointType*, PointGetter, DistCompTraits>;
     using PointListType   = typename PointDataTraits::PointListType;
     using Filter          = KdTree::NearestNeighbourFilter<PointDataTraits>;
 
-    private:
+private:
     OutlierFilterSettingsType m_settings;
     Filter                    m_filter;
 
-    public:
+public:
     OutlierFilter(const OutlierFilterSettingsType& f) : m_settings(f)
     {
     }
@@ -388,11 +388,11 @@ class OutlierFilter
 template <typename TProcCommunicator, typename TSetting>
 class GridTopologyBuilderBase : public TopologyBuilder<TProcCommunicator>
 {
-    public:
+public:
     using TopoBase = TopologyBuilder<TProcCommunicator>;
     DEFINE_TOPOLOGYBUILDER_BASE_TYPES(TopoBase)
 
-    public:
+public:
     using SettingsType = TSetting;
     DEFINE_MASSPOINTPREDICTION_TYPES
     DEFINE_OUTLIERFILTER_TYPES
@@ -403,7 +403,7 @@ class GridTopologyBuilderBase : public TopologyBuilder<TProcCommunicator>
     };
     using TimeStepperSettingsType = TimeStepperSettings;
 
-    protected:
+protected:
     friend class TopologyBuilderMessageWrapperOrientation<GridTopologyBuilderBase>;
     friend class TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase>;
 
@@ -459,7 +459,7 @@ class GridTopologyBuilderBase : public TopologyBuilder<TProcCommunicator>
     MassPointPrediction m_massPointPrediction;
     OutlierFilter       m_globalOutlierFilter;
 
-    protected:
+protected:
     template <typename... T>
     GridTopologyBuilderBase(const SettingsType&              setting,
                             const MassPointPredSettingsType& massSettings,
@@ -1010,15 +1010,15 @@ class GridTopologyBuilderBase : public TopologyBuilder<TProcCommunicator>
 
 #define DEFINE_TOPOLOGYBUILDERGRID_BASE_TYPES(_Base_)                         \
                                                                               \
-    public:                                                                   \
+public:                                                                       \
     DEFINE_TOPOLOGYBUILDER_BASE_TYPES(_Base_::TopoBase)                       \
     DEFINE_MASSPOINTPREDICTION_TYPES                                          \
     DEFINE_OUTLIERFILTER_TYPES                                                \
-    public:                                                                   \
+public:                                                                       \
     using SettingsType            = typename _Base_::SettingsType;            \
     using TimeStepperSettingsType = typename _Base_::TimeStepperSettingsType; \
                                                                               \
-    private:                                                                  \
+private:                                                                      \
     using _Base_::m_sceneFilePath;                                            \
     using _Base_::m_settings;                                                 \
     /*LOCAL*/                                                                 \
@@ -1049,11 +1049,11 @@ class GridTopologyBuilderBase : public TopologyBuilder<TProcCommunicator>
 template <typename TProcCommunicator>
 class GridTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, GridBuilderSettings>
 {
-    public:
+public:
     using Base = GridTopologyBuilderBase<TProcCommunicator, GridBuilderSettings>;
     DEFINE_TOPOLOGYBUILDERGRID_BASE_TYPES(Base)
 
-    private:
+private:
     friend class ParserModulesCreatorTopoBuilder<GridTopologyBuilder>;
     friend class TopologyBuilderMessageWrapperResults<GridTopologyBuilder>;
 
@@ -1065,7 +1065,7 @@ class GridTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, Gr
 
     TopologyBuilderMessageWrapperResults<GridTopologyBuilder> m_messageWrapperResults;
 
-    public:
+public:
     GridTopologyBuilder(std::shared_ptr<DynamicsSystemType>      pDynSys,
                         std::shared_ptr<ProcessCommunicatorType> pProcCommunicator,
                         const RebuildSettingsType&               rebuildSettings,
@@ -1284,7 +1284,7 @@ class GridTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, Gr
         LOGTB(m_pSimulationLog, "---> GridTopoBuilder: rebuild topology finished!" << std::endl;)
     }
 
-    private:
+private:
     void cleanUpGlobal()
     {
         Base::cleanUpGlobal();
@@ -1590,21 +1590,21 @@ class GridTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, Gr
 template <typename TProcCommunicator>
 class KdTreeTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, KdTreeBuilderSettings>
 {
-    public:
+public:
     using Base = GridTopologyBuilderBase<TProcCommunicator, KdTreeBuilderSettings>;
     DEFINE_TOPOLOGYBUILDERGRID_BASE_TYPES(Base)
 
-    public:
+public:
     using TreeType =
         KdTree::Tree<KdTree::TreeTraits<>>;  ///< Standart kdTree is already setup to use std::vector<Vector3 *>
     using TreeSimpleType =
         KdTree::TreeSimpleS<>;  ///< Standart serializable simple kdTree is already setup to use std::vector<Vector3 *>
 
-    private:
+private:
     friend class ParserModulesCreatorTopoBuilder<KdTreeTopologyBuilder>;
     friend class TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder>;
 
-    private:
+private:
     unsigned int m_nGlobalSimBodies = 0;  ///< Only for a check with MassPoints
 
     /** GLOBAL STUFF ================================================================ */
@@ -1618,7 +1618,7 @@ class KdTreeTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, 
 
     TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
 
-    public:
+public:
     KdTreeTopologyBuilder(std::shared_ptr<DynamicsSystemType>                   pDynSys,
                           std::shared_ptr<ProcessCommunicatorType>              pProcCommunicator,
                           const TopologyBuilderSettings::RebuildSettings&       rebuildSettings,
@@ -1828,7 +1828,7 @@ class KdTreeTopologyBuilder : public GridTopologyBuilderBase<TProcCommunicator, 
         LOGTB(m_pSimulationLog, "---> KdTreeTopoBuilder: rebuild topology finished!" << std::endl;)
     }
 
-    private:
+private:
     void cleanUpGlobal()
     {
         Base::cleanUpGlobal();

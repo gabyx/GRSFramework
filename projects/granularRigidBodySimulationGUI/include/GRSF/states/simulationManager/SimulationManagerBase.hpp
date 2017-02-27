@@ -21,7 +21,7 @@
 
 class SimulationManagerBase
 {
-    public:
+public:
     SimulationManagerBase();
 
     ~SimulationManagerBase();
@@ -55,7 +55,7 @@ class SimulationManagerBase
 
     virtual void setup(boost::filesystem::path sceneFilePath) = 0;
 
-    protected:
+protected:
     boost::thread* m_pThread;
 
     boost::mutex m_mutexIterationtime;

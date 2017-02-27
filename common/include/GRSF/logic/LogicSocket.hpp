@@ -29,7 +29,7 @@ class LogicSocket;
 
 class LogicSocketBase
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     using SocketListType = LogicSocketCommon::SocketListType;
@@ -98,7 +98,7 @@ class LogicSocketBase
         return m_from;
     }
 
-    protected:
+protected:
     bool m_isInput;
 
     /** from socket to 'this' (used to link an input socket with an output socket)
@@ -113,7 +113,7 @@ class LogicSocketBase
     */
     SocketListType m_to;
 
-    private:
+private:
     bool m_connected;
     // owner node
     LogicNode* m_parent;
@@ -122,11 +122,11 @@ class LogicSocketBase
 template <typename T>
 class LogicSocket : public LogicSocketBase
 {
-    private:
+private:
     typedef typename boost::mpl::find<TypeSeq, T>::type iter;
     typedef boost::mpl::end<TypeSeq>::type endIter;
 
-    public:
+public:
     /** This assert fails if the type T of the LogicSocket is not properly added to the mpl list in LogicSocketBase*/
     GRSF_STATIC_ASSERT(iter::pos::value != endIter::pos::value)
 
@@ -150,7 +150,7 @@ class LogicSocket : public LogicSocketBase
 
     T& getValueRef();
 
-    private:
+private:
     T m_data;  ///< Default value! or the output value if output socket
 };
 

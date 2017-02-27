@@ -20,7 +20,7 @@
 /** @{ */
 class ContactPercussion
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

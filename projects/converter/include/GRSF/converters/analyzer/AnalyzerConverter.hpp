@@ -29,7 +29,7 @@
 
 class AnalyzerConverter : public SimFileConverter
 {
-    public:
+public:
     using XMLNodeType      = pugi::xml_node;
     using XMLNodeItType    = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
@@ -43,7 +43,7 @@ class AnalyzerConverter : public SimFileConverter
 
     void convert();
 
-    private:
+private:
     ExecutionGraphType m_executionGraph;
 
     void setupExecutionGraph();

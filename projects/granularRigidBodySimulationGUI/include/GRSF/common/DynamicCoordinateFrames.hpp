@@ -22,7 +22,7 @@
 */
 class DynamicCoordinateFrames
 {
-    public:
+public:
     DynamicCoordinateFrames()
         : m_xAxis(DynamicLines::OperationType::OT_LINE_LIST)
         , m_yAxis(DynamicLines::OperationType::OT_LINE_LIST)
@@ -114,7 +114,7 @@ class DynamicCoordinateFrames
         m_dynCoordFrameNode->needUpdate();
     };
 
-    private:
+private:
     boost::mutex     m_mutexLock;  // SimThread locks and updates points, vis thread locks and
     Ogre::SceneNode* m_dynCoordFrameNode;
     DynamicLines     m_xAxis;

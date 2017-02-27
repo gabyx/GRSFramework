@@ -34,7 +34,7 @@
 */
 class OrbitCamera : public OIS::KeyListener, OIS::MouseListener
 {
-    public:
+public:
     /** @brief Constructs an orbiting Camera in the given Scene Manager pSceneMgr.
     * @param pSceneMgr Pointer to en existing Scene Manager of Ogre.
     * @param name The name of the camera.
@@ -81,7 +81,7 @@ class OrbitCamera : public OIS::KeyListener, OIS::MouseListener
 
     /* @} */
 
-    protected:
+protected:
     /// The actual index of the m_OrbitNodeList where m_pOrbitNode is positionated (meaning where the Camera points to)
     unsigned int m_OrbitNodeIndex;
 

@@ -149,7 +149,7 @@ bool checkPointsInOOBB(const MatrixBase<Derived>& points, OOBB oobb)
 
 class ConvexHullTest
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -307,7 +307,7 @@ void convexHullTest()
 
 class MinAreaRectangleTest
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -508,7 +508,7 @@ void minAreaBoxTest()
 
 class DiameterTest
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -641,7 +641,7 @@ void diameterTest()
 
 class MVBBTests
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 

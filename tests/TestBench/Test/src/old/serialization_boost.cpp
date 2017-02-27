@@ -18,13 +18,13 @@ using namespace std;
 
 class Object
 {
-    public:
+public:
     int a;
 }
 
 class Test
 {
-    private:
+private:
     friend class boost::serialization::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version)
@@ -40,7 +40,7 @@ class Test
 
     boost::shared_ptr<Object> pObj;
 
-    public:
+public:
     inline Test(int a, int b, float c)
     {
         this->a = a;

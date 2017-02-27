@@ -17,7 +17,7 @@
 
 class RigidBodyBaseMPI : public RigidBodyBase
 {
-    public:
+public:
     using AbsoluteBaseType =
         RigidBodyBase;  ///< The absolut base type where m_id is defined, for the rigid body container
     using BodyInfoType = BodyProcessInfo;

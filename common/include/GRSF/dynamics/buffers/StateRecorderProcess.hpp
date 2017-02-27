@@ -39,7 +39,7 @@
 
 class StateRecorderProcess
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -53,7 +53,7 @@ class StateRecorderProcess
     bool createSimFile(bool truncate = true);
     bool closeSimFile();
 
-    protected:
+protected:
     boost::filesystem::path m_directoryPath;  ///< The path where the sim body part file is opened!
 
     void getSimFilePartName(std::stringstream& s);

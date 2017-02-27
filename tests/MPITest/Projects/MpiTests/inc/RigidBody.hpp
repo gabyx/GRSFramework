@@ -41,7 +41,7 @@ class RigidBodySolverData
 {
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
 
-    public:
+public:
     RigidBodySolverData() : m_t(0){};
 
     ///< The actual time, which belongs to FrontBuffer and m_r_S and I_q_IK
@@ -52,7 +52,7 @@ class RigidBodySolverData
 template <typename TLayoutConfig>
 class RigidBodySolverDataCONoG : public RigidBodySolverData<TLayoutConfig>
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig);
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
@@ -89,7 +89,7 @@ class RigidBodyBase;
 
 class RigidBodyId
 {
-    public:
+public:
     typedef uint64_t Type;
 
     template <typename TRigidBodyConfig>
@@ -124,7 +124,7 @@ struct GeomIndexedType
 template <typename TRigidBodyConfig>
 class RigidBodyBase
 {
-    public:
+public:
     typedef TRigidBodyConfig RigidBodyConfigType;
     DEFINE_RIGIDBODY_CONFIG_TYPES_OF(TRigidBodyConfig);
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -173,7 +173,7 @@ class RigidBodyBase
     typedef boost::variant<boost::shared_ptr<SphereGeometry<PREC>>,
                            boost::shared_ptr<HalfspaceGeometry<PREC>>,
                            boost::shared_ptr<BoxGeometry<PREC>> /*,
-                             boost::shared_ptr<MeshGeometry<PREC> >*/
+                              boost::shared_ptr<MeshGeometry<PREC> >*/
                            >
         GeometryType;
 

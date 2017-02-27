@@ -20,7 +20,7 @@
 template <typename TLocalData, typename TRemoteData = TLocalData>
 class NeighbourData
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -156,7 +156,7 @@ class NeighbourData
         m_remoteDataMap.clear();
     }
 
-    protected:
+protected:
     RankIdType m_neighbourRank;  // This is the rank to which this data structure belongs!
 
     /** Private because we do not want that the operator[] is called anywhere in these maps!

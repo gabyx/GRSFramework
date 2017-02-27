@@ -79,7 +79,7 @@ class MultiBodySimFile
     friend class SimFileJoiner;
     friend class SimFileResampler;
     MAKE_ADDITIONALBODYDATA_FRIEND
-    public:
+public:
     MultiBodySimFile(unsigned int bufferSize = 1 << 14);
     ~MultiBodySimFile();
 
@@ -346,7 +346,7 @@ class MultiBodySimFile
         return d;
     }
 
-    private:
+private:
     bool openWrite_impl(const boost::filesystem::path& file_path,
                         unsigned int                   nDOFqBody,
                         unsigned int                   nDOFuBody,

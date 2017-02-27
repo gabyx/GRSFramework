@@ -54,7 +54,7 @@ template <typename TDynamicsSystem,
           typename TDerived = void>
 class SceneParser
 {
-    public:
+public:
     using DerivedType = typename std::conditional<std::is_same<TDerived, void>::value, SceneParser, TDerived>::type;
 
     /** Modules defintions
@@ -68,7 +68,7 @@ class SceneParser
     using SceneParserDynamicOptionsType = SceneParserDynamicOptions;
     using BodyModuleDynamicOptionsType  = typename BodyModuleType::DynamicOptionsType;
 
-    public:
+public:
     /**
     * Constructor takes a module function which constructs all modules.
     */
@@ -262,7 +262,7 @@ class SceneParser
         return m_pMPIModule.get();
     }
 
-    protected:
+protected:
     bool parseSceneIntern(const boost::filesystem::path& file)
     {
         LOGSCLEVEL1(m_pSimulationLog,

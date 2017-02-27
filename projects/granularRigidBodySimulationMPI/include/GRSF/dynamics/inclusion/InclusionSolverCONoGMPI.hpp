@@ -47,7 +47,7 @@
 
 class InclusionSolverCONoGMPI
 {
-    public:
+public:
     DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -85,7 +85,7 @@ class InclusionSolverCONoGMPI
 
     InclusionSolverSettingsType m_settings;
 
-    protected:
+protected:
     // MPI Stuff
 
     //    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;

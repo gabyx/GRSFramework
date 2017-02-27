@@ -21,7 +21,7 @@
 
 class VideoDropper
 {
-    public:
+public:
     VideoDropper()
     {
         reset();
@@ -111,7 +111,7 @@ class VideoDropper
         m_folderPath = folderPath;
     }
 
-    private:
+private:
     boost::filesystem::path m_folderPath;
 
     boost::mutex m_mutex;

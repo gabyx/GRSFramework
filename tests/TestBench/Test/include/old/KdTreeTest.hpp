@@ -40,7 +40,7 @@
 */
 class MessageBinarySerializer
 {
-    public:
+public:
     MessageBinarySerializer(std::size_t reserve_bytes)
     {
         m_buffer.reserve(reserve_bytes);
@@ -110,7 +110,7 @@ class MessageBinarySerializer
         m_buffer.reserve(bytes);
     }
 
-    private:
+private:
     std::vector<char> m_buffer;
 };
 

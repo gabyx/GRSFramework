@@ -16,7 +16,7 @@ using namespace std;
 
 class A
 {
-    public:
+public:
     virtual void foo()
     {
         cout << "A" << endl;
@@ -26,7 +26,7 @@ class A
 template <typename T>
 class B : public A
 {
-    public:
+public:
     void foo()
     {
         cout << "B" << endl;

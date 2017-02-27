@@ -15,10 +15,10 @@
 
 class SomeClass
 {
-    protected:
+protected:
     void* m_pValue;
 
-    public:
+public:
     SomeClass()
     {
     }

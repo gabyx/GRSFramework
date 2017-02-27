@@ -27,7 +27,7 @@ struct NoCellData
 template <typename TCellData = NoCellData, typename TSize = std::size_t, typename TLongInt = long int>
 class CartesianGrid
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -255,7 +255,7 @@ class CartesianGrid
     template <typename IteratorType>
     class iterator : public std::iterator_traits<IteratorType>
     {
-        public:
+    public:
         using iterator_traits = std::iterator_traits<IteratorType>;
 
         explicit iterator(CartesianGrid* grid, IteratorType it) : m_grid(grid), m_it(it)
@@ -328,7 +328,7 @@ class CartesianGrid
             return m_indices;
         }
 
-        private:
+    private:
         void incrementIndex()
         {
             unsigned int i = 0;
@@ -383,7 +383,7 @@ class CartesianGrid
         return ConstIteratorType(this, m_cellData->cend());
     }
 
-    protected:
+protected:
     template <typename T1, typename T2, typename T3>
     inline SizeType getLinearIndex(T1 x, T2 y, T3 z)
     {
@@ -407,7 +407,7 @@ class CartesianGrid
 
     static char m_nbIndicesOff[26 * 3];
 
-    private:
+private:
     // temporary
     mutable IndexLongType m_temp;
 

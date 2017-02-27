@@ -58,7 +58,7 @@ namespace ParserModules
 {
 class DummyModule
 {
-    public:
+public:
     DummyModule(const char* type)
     {
         GRSF_ERRORMSG("This is a standart dummy module: " << type << "which does nothing!"
@@ -91,16 +91,16 @@ class DummyModule
 template <typename TParserTraits>
 class SettingsModule
 {
-    protected:
+protected:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using RecorderSettingsType = typename DynamicsSystemType::RecorderSettingsType;
 
-    public:
+public:
     using TimeStepperSettingsType = typename DynamicsSystemType::TimeStepperSettingsType;
 
-    protected:
+protected:
     using InclusionSolverSettingsType = typename DynamicsSystemType::InclusionSolverSettingsType;
 
     RecorderSettingsType*        m_recorderSettings;
@@ -110,7 +110,7 @@ class SettingsModule
     ParserType* m_parser;
     LogType*    m_pSimulationLog;
 
-    public:
+public:
     void cleanUp()
     {
     }
@@ -508,7 +508,7 @@ class SettingsModule
 template <typename TParserTraits>
 class SettingsModuleDummy : public DummyModule
 {
-    public:
+public:
     using TimeStepperSettingsType = void;
 
     template <typename... Args>
@@ -534,7 +534,7 @@ struct GeometryModuleStaticOptions
 template <typename TParserTraits, typename TStaticOptions = GeometryModuleStaticOptions<>>
 class GeometryModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -556,14 +556,14 @@ class GeometryModule
 
     using Options = TStaticOptions;
 
-    public:
+public:
     using GeometryMap = std::unordered_map<RigidBodyIdType, typename GlobalGeometryMapType::mapped_type>;
     using ScalesList  = std::vector<Vector3>;
 
-    private:
+private:
     GeometryMap* m_externalGeometryCache    = nullptr;  ///< external list to cache geometry
     ScalesList*  m_externalScalesGroupCache = nullptr;  ///< external list to cache the scales for the parsed group
-    public:
+public:
     void cleanUp()
     {
         m_scalesGlobal.clear();
@@ -615,7 +615,7 @@ class GeometryModule
         parseGeometry_imp(geom, bodyList, startId);
     }
 
-    private:
+private:
     void parseGeometry_imp(XMLNodeType geometryNode, BodyListType* bodyList = nullptr, RigidBodyIdType startId = 0)
     {
         m_startIdGroup     = startId;
@@ -1534,7 +1534,7 @@ class GeometryModule
 
     class GetScaleOfGeomVisitor : public boost::static_visitor<>
     {
-        public:
+    public:
         DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
         GetScaleOfGeomVisitor(Vector3& scale) : m_scale(scale){};
@@ -1561,7 +1561,7 @@ class GeometryModule
 template <typename TParserTraits>
 class GeometryModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     GeometryModuleDummy(Args&&... args) : DummyModule("GeometryModule")
     {
@@ -1580,7 +1580,7 @@ class GeometryModuleDummy : public DummyModule
 template <typename TParserTraits>
 class ContactParamModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -1591,7 +1591,7 @@ class ContactParamModule
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
 
-    public:
+public:
     void cleanUp()
     {
     }
@@ -1630,7 +1630,7 @@ class ContactParamModule
                     "===================================================================" << std::endl;)
     }
 
-    private:
+private:
     void parseContactParameter(XMLNodeType contactParam, bool stdMaterial = false)
     {
         typename RigidBodyType::BodyMaterialType material1, material2;
@@ -1737,7 +1737,7 @@ class ContactParamModule
 template <typename TParserTraits>
 class ContactParamModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     ContactParamModuleDummy(Args&&... args) : DummyModule("ContactParamModule")
     {
@@ -1747,7 +1747,7 @@ class ContactParamModuleDummy : public DummyModule
 template <typename TParserTraits>
 class ExternalForcesModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -1758,7 +1758,7 @@ class ExternalForcesModule
 
     using RigidBodyType = typename DynamicsSystemType::RigidBodyType;
 
-    public:
+public:
     void cleanUp()
     {
     }
@@ -1789,7 +1789,7 @@ class ExternalForcesModule
                     "===================================================================" << std::endl;)
     }
 
-    private:
+private:
     void parseForceField(XMLNodeType forceField)
     {
         std::string apply = forceField.attribute("applyTo").value();
@@ -1895,7 +1895,7 @@ class ExternalForcesModule
 template <typename TParserTraits>
 class ExternalForcesModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     ExternalForcesModuleDummy(Args&&... args) : DummyModule("ExternalForcesModule")
     {
@@ -1971,7 +1971,7 @@ struct VisSubModuleScale
 template <typename TParserTraits>
 class VisModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     VisModuleDummy(Args&&... args) : DummyModule("VisModule"){};
 
@@ -1984,7 +1984,7 @@ class VisModuleDummy : public DummyModule
 template <typename TParserTraits>
 class InitStatesModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -2001,13 +2001,13 @@ class InitStatesModule
     BodyListType*   m_bodiesGroup;
     RigidBodyIdType m_startIdGroup;
 
-    public:
+public:
     using StatesGroupType = std::vector<RigidBodyState>;
 
-    private:
+private:
     StatesGroupType m_statesGroup;  ///< the internal states for the group!
 
-    public:
+public:
     void cleanUp()
     {
     }
@@ -2217,7 +2217,7 @@ class InitStatesModule
         return &m_statesGroup;
     };
 
-    private:
+private:
     void setupInitialConditionBodiesFromFile_imp(boost::filesystem::path relpath,
                                                  double&                 time,
                                                  short                   which,
@@ -2489,7 +2489,7 @@ class InitStatesModule
 template <typename TParserTraits>
 class InitStatesModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     InitStatesModuleDummy(Args&&... args) : DummyModule("InitStatesModule")
     {
@@ -2547,7 +2547,7 @@ struct BodyModuleStaticOptions
 template <typename TParserTraits, typename TStaticOptions = BodyModuleStaticOptions<>>
 class BodyModule
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -2562,10 +2562,10 @@ class BodyModule
 
     using Options = TStaticOptions;
 
-    public:
+public:
     using DynamicOptionsType = BodyModuleDynamicOptions;
 
-    private:
+private:
     DynamicOptionsType m_opts;
     using BodyRangeType = typename DynamicOptionsType::BodyRangeType;
     bool m_parseSelectiveBodyIds;  ///< Use the m_bodyIdRange to only load the selective ids in the group which use
@@ -2607,10 +2607,10 @@ class BodyModule
         RigidBodyIdType m_id;
     };
 
-    public:
+public:
     using BodyListType = std::vector<BodyData>;
 
-    private:
+private:
     unsigned int m_groupId = 0;  ///< The group id of the current parsing group
 
     BodyListType m_bodiesGroup;  ///< Used to parse a RigidBody Node
@@ -2625,7 +2625,7 @@ class BodyModule
     /// Some statistics
     std::map<unsigned int, PREC> m_totalMassGroup;
 
-    public:
+public:
     void cleanUp()
     {
         m_groupIdToNBodies.clear();
@@ -2794,7 +2794,7 @@ class BodyModule
         return s.str();
     }
 
-    private:
+private:
     void parseRigidBodies(XMLNodeType rigidbodies)
     {
         LOGSCLEVEL1(m_pSimulationLog,
@@ -3215,7 +3215,7 @@ class BodyModule
 template <typename TParserTraits>
 class BodyModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     BodyModuleDummy(Args&&... args) : DummyModule("BodyModule")
     {
@@ -3238,7 +3238,7 @@ class BodyModuleDummy : public DummyModule
 template <typename TParserTraits>
 class MPIModuleDummy : public DummyModule
 {
-    public:
+public:
     template <typename... Args>
     MPIModuleDummy(Args&&... args) : DummyModule("BodyModule")
     {

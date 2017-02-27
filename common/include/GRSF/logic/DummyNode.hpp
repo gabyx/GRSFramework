@@ -16,7 +16,7 @@
 template <unsigned int NIN, unsigned int NOUT>
 class DummyLogicNode : public LogicNode
 {
-    public:
+public:
     DummyLogicNode(unsigned int id) : LogicNode(id)
     {
         for (unsigned int i = 0; i < NIN; i++)

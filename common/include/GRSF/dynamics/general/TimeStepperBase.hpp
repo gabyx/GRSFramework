@@ -36,7 +36,7 @@
 template <typename TDerived, typename TTraits>
 class TimeStepperBase
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using Derived                 = TDerived;
@@ -81,7 +81,7 @@ class TimeStepperBase
         return m_bFinished;
     }
 
-    protected:
+protected:
     void initLogs_impl(const boost::filesystem::path& folder_path, const boost::filesystem::path& simDataFile = "");
     void closeAllFiles_impl();
     void reset_impl();

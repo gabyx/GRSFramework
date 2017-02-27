@@ -50,9 +50,9 @@
 
 class DynamicsSystemBase
 {
-    public:
+public:
     DEFINE_DYNAMICSYSTEM_BASE_TYPES
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     DynamicsSystemBase();
@@ -111,7 +111,7 @@ class DynamicsSystemBase
     PREC m_currentRotKinEnergy;
     PREC m_currentSpinNorm;
 
-    protected:
+protected:
     RecorderSettingsType        m_settingsRecorder;
     TimeStepperSettingsType     m_settingsTimestepper;
     InclusionSolverSettingsType m_settingsInclusionSolver;

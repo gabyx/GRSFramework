@@ -30,7 +30,7 @@
 */
 class StatePoolVisBackFront : public StatePool<DynamicsState>
 {
-    public:
+public:
     DECLERATIONS_STATEPOOL
     DEFINE_LAYOUT_CONFIG_TYPES
 
@@ -65,7 +65,7 @@ class StatePoolVisBackFront : public StatePool<DynamicsState>
     void resetStatePool(const RigidBodyStateContainerType& state_init);
     /** @} */
 
-    protected:
+protected:
     std::ofstream m_logfile;
 };
 /** @} */

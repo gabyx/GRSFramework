@@ -60,7 +60,7 @@
 */
 class MultiBodySimFilePart
 {
-    public:
+public:
     MultiBodySimFilePart(unsigned int bufferSize = 1 << 14);
     ~MultiBodySimFilePart();
 
@@ -104,7 +104,7 @@ class MultiBodySimFilePart
         return m_errorString.str();
     }
 
-    private:
+private:
     void setByteLengths();
 
     /**

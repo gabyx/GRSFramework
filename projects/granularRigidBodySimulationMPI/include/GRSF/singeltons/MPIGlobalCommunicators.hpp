@@ -25,7 +25,7 @@ namespace MPILayer
 
 class MPIGlobalCommunicators : public Utilities::Singleton<MPIGlobalCommunicators>
 {
-    public:
+public:
     MPIGlobalCommunicators()
     {
         // Add MPI WORLD
@@ -51,7 +51,7 @@ class MPIGlobalCommunicators : public Utilities::Singleton<MPIGlobalCommunicator
         return (res->second);
     }
 
-    private:
+private:
     std::map<unsigned int, MPI_Comm> m_communicators;
 };
 };

@@ -20,7 +20,7 @@
 
 class RecorderSettings
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     RecorderSettings()
@@ -89,7 +89,7 @@ class RecorderSettings
         return m_recordEveryXTimestep;
     }
 
-    private:
+private:
     RecorderMode m_eMode;
     unsigned int m_recordEveryXTimestep;
 };

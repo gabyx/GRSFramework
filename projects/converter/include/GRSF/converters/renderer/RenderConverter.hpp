@@ -33,7 +33,7 @@
 
 class RenderConverter : public SimFileConverter
 {
-    public:
+public:
     DEFINE_RENDERCONVERTERDATA_CONFIG_TYPES
 
     using XMLNodeType      = pugi::xml_node;
@@ -51,7 +51,7 @@ class RenderConverter : public SimFileConverter
                     Renderer                                    renderer);
     void convert();
 
-    private:
+private:
     RenderExecutionGraph m_executionGraph;
     RenderData           m_renderData;
     Renderer             m_renderer;

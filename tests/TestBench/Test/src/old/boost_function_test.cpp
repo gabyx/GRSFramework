@@ -16,13 +16,13 @@ using namespace std;
 
 class A
 {
-    public:
+public:
     virtual int foo(int a) = 0;
 };
 
 class B : public A
 {
-    public:
+public:
     int foo(int a)
     {
         cout << "B Class:" << a << endl;
@@ -32,7 +32,7 @@ class B : public A
 
 class C : public A
 {
-    public:
+public:
     void foo2()
     {
         cout << "C Class: void" << endl;
@@ -46,13 +46,13 @@ class C : public A
 
 class button
 {
-    public:
+public:
     boost::function<void()> onClick;
 };
 
 class player
 {
-    public:
+public:
     void play(){};
     void stop(){};
 };

@@ -29,7 +29,7 @@
 
 class GridderConverter : public SimFileConverter
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using XMLNodeType      = pugi::xml_node;
@@ -44,7 +44,7 @@ class GridderConverter : public SimFileConverter
 
     void convert();
 
-    private:
+private:
     void setup();
 
     GridderData m_gridderData;  ///< Parsed settings for grids;

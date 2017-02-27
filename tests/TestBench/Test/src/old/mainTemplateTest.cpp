@@ -93,8 +93,8 @@ struct IsEqual<M, M>
 
 class Test2
 {
-    protected:
-    protected:
+protected:
+protected:
     int  a;
     void foo();
 };

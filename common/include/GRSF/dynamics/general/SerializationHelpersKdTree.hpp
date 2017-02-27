@@ -53,7 +53,7 @@ class KdTreeSerializer : public boost::serialization::traits<KdTreeSerializer<Tr
                                                              boost::serialization::object_serializable,
                                                              boost::serialization::track_never>
 {
-    public:
+public:
     KdTreeSerializer(Tree& t) : m_t(t)
     {
     }
@@ -72,7 +72,7 @@ class KdTreeSerializer : public boost::serialization::traits<KdTreeSerializer<Tr
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-    private:
+private:
     using IndexType = std::size_t;
 
     using LinkListType = std::vector<IndexType>;

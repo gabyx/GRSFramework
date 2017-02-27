@@ -28,7 +28,7 @@
 template <typename TStatePool>
 class PlaybackLoader
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     PlaybackLoader(const unsigned int nSimBodies, std::shared_ptr<TStatePool> pStatePool);
@@ -48,7 +48,7 @@ class PlaybackLoader
 
     MultiBodySimFile m_binarySimFile;
 
-    private:
+private:
     Logging::Log* m_pThreadLog; /**< This log is set to the thread log which calls this loader thread.  */
 
     boost::thread* m_pThreadDynamics;

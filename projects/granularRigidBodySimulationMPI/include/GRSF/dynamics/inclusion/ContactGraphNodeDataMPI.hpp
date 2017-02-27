@@ -23,7 +23,7 @@
 
 class ContactGraphNodeDataSplitBody
 {
-    public:
+public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -124,7 +124,7 @@ class ContactGraphNodeDataSplitBody
     //        return m_LInvMatrices.LInv[mult-2];
     //    }
 
-    private:
+private:
     /** No more used, LInv matrix from derivation */
     static struct LInvMatrices
     {

@@ -39,7 +39,7 @@ using ContactGraphTraits =
 template <typename TCombo>
 class ContactGraph : public Graph::GeneralGraph<ContactGraphTraits>
 {
-    public:
+public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
@@ -150,7 +150,7 @@ class ContactGraph : public Graph::GeneralGraph<ContactGraphTraits>
         this->visitNodes<SplitBodyNodeDataType>(v);
     }
 
-    private:
+private:
     Logging::Log* m_pSolverLog;
 
     using ContactModelEnumIntType               = typename std::underlying_type<ContactModels::Enum>::type;

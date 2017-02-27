@@ -30,7 +30,7 @@
 **/
 class InputContext : public Ogre::Singleton<InputContext>, OIS::KeyListener, OIS::MouseListener, OIS::JoyStickListener
 {
-    public:
+public:
     InputContext(void);
     ~InputContext();
 
@@ -64,7 +64,7 @@ class InputContext : public Ogre::Singleton<InputContext>, OIS::KeyListener, OIS
 
     OgreBites::InputContext getInputContext();
 
-    private:
+private:
     OIS::Mouse*                 m_pMouse    = nullptr;
     OIS::Keyboard*              m_pKeyboard = nullptr;
     std::vector<OIS::JoyStick*> m_Joysticks;

@@ -21,14 +21,14 @@
 
 class DynamicLines : public DynamicRenderable
 {
-    public:
+public:
     using Vector3       = Ogre::Vector3;
     using Quaternion    = Ogre::Quaternion;
     using Camera        = Ogre::Camera;
     using Real          = Ogre::Real;
     using OperationType = Ogre::RenderOperation::OperationType;
 
-    public:
+public:
     /// Constructor - see setOperationType() for description of argument.
     DynamicLines(OperationType opType = Ogre::RenderOperation::OT_LINE_STRIP);
     virtual ~DynamicLines();
@@ -69,7 +69,7 @@ class DynamicLines : public DynamicRenderable
     void setOperationType(OperationType opType);
     OperationType getOperationType() const;
 
-    protected:
+protected:
     /// Implementation DynamicRenderable, creates a simple vertex-only decl
     virtual void createVertexDeclaration();
     /// Implementation DynamicRenderable, pushes point list out to hardware memory
@@ -82,7 +82,7 @@ class DynamicLines : public DynamicRenderable
     //
     //  }
 
-    private:
+private:
     using Vector3Vec = std::vector<Vector3>;
     Vector3Vec mPoints;
     bool       mDirty;

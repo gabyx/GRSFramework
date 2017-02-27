@@ -40,7 +40,7 @@ namespace LogicParserModules
 template <typename TParserTraits>
 class LogicModule
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     DEFINE_LOGICPARSER_TYPE_TRAITS(TParserTraits)
 
@@ -233,7 +233,7 @@ class LogicModule
         }
     }
 
-    protected:
+protected:
     /** Adds the tool to the groupId, if not specified it is added to the BODY group */
     template <bool needsResetGroup = false>
     void addNodeToGroup(XMLNodeType& logicNode, unsigned int id, std::string defaultGroupName = "")

@@ -32,7 +32,7 @@
 */
 class ApplicationCLOptionsSimConverter : public Utilities::Singleton<ApplicationCLOptionsSimConverter>
 {
-    public:
+public:
     using RangeAll       = SimFileJoiner::RangeAll;
     using TypesTimeRange = SimFileJoiner::TypesTimeRange;
     using TypesBodyRange = SimFileJoiner::TypesBodyRange;
@@ -259,7 +259,7 @@ class ApplicationCLOptionsSimConverter : public Utilities::Singleton<Application
         }
     }
 
-    private:
+private:
     void printErrorNoArg(std::string arg)
     {
         GRSF_ERRORMSG("Wrong options specified for arguement: '" << arg << "'")
@@ -303,7 +303,7 @@ class ApplicationCLOptionsSimConverter : public Utilities::Singleton<Application
 */
 class ApplicationCLOptionsSimInfo : public Utilities::Singleton<ApplicationCLOptionsSimInfo>
 {
-    public:
+public:
     bool         m_prettyPrint    = false;
     bool         m_noTimeList     = false;
     bool         m_skipFirstState = false;
@@ -435,7 +435,7 @@ class ApplicationCLOptionsSimInfo : public Utilities::Singleton<ApplicationCLOpt
         }
     }
 
-    private:
+private:
     void printErrorNoArg(std::string arg)
     {
         GRSF_ERRORMSG("Wrong options specified for arguement: '" << arg << "'")
@@ -469,14 +469,14 @@ class ApplicationCLOptionsSimInfo : public Utilities::Singleton<ApplicationCLOpt
 
 class ApplicationCLOptionsRenderer : public Utilities::Singleton<ApplicationCLOptionsRenderer>
 {
-    public:
+public:
     enum class Renderer : unsigned int
     {
         RENDERMAN = 0,
         LUXRENDER = 1
     };
 
-    private:
+private:
     std::vector<boost::filesystem::path> m_inputFiles;
 
     boost::filesystem::path m_outputFile;
@@ -488,7 +488,7 @@ class ApplicationCLOptionsRenderer : public Utilities::Singleton<ApplicationCLOp
 
     Renderer m_renderer;
 
-    public:
+public:
     void parseOptions(int argc, char** argv)
     {
         using namespace GetOpt;
@@ -657,7 +657,7 @@ class ApplicationCLOptionsRenderer : public Utilities::Singleton<ApplicationCLOp
         return m_renderer;
     }
 
-    private:
+private:
     void printErrorNoArg(std::string arg)
     {
         GRSF_ERRORMSG("Wrong options specified for argument: '" << arg << "'")
@@ -698,8 +698,8 @@ class ApplicationCLOptionsRenderer : public Utilities::Singleton<ApplicationCLOp
 
 class ApplicationCLOptionsAnalyzer : public Utilities::Singleton<ApplicationCLOptionsAnalyzer>
 {
-    public:
-    private:
+public:
+private:
     std::vector<boost::filesystem::path> m_inputFiles;
 
     boost::filesystem::path m_outputFile;
@@ -708,10 +708,10 @@ class ApplicationCLOptionsAnalyzer : public Utilities::Singleton<ApplicationCLOp
     boost::filesystem::path m_mediaDir = "./";
     boost::filesystem::path m_converterLogicFile;
 
-    protected:
+protected:
     std::string m_name = "Analyzer";
 
-    public:
+public:
     void parseOptions(int argc, char** argv)
     {
         using namespace GetOpt;
@@ -858,7 +858,7 @@ class ApplicationCLOptionsAnalyzer : public Utilities::Singleton<ApplicationCLOp
         return m_sceneFile;
     }
 
-    private:
+private:
     void printErrorNoArg(std::string arg)
     {
         GRSF_ERRORMSG("Wrong options specified for arguement: '" << arg << "'")
@@ -901,7 +901,7 @@ class ApplicationCLOptionsAnalyzer : public Utilities::Singleton<ApplicationCLOp
 
 class ApplicationCLOptionsGridder : public ApplicationCLOptionsAnalyzer
 {
-    public:
+public:
     ApplicationCLOptionsGridder()
     {
         m_name = "Gridder";

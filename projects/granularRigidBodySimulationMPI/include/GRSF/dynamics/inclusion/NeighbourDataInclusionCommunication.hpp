@@ -73,15 +73,15 @@ struct RemoteDataTemp
 class NeighbourDataInclusionCommunication : public NeighbourData<NeighbourDataInclusionCommunication_impl::LocalData,
                                                                  NeighbourDataInclusionCommunication_impl::RemoteData>
 {
-    public:
+public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    private:
+private:
     typedef NeighbourData<NeighbourDataInclusionCommunication_impl::LocalData,
                           NeighbourDataInclusionCommunication_impl::RemoteData>
         NeighbourDataDerived;
 
-    public:
+public:
     NeighbourDataInclusionCommunication(const RankIdType& neighbourRank) : NeighbourDataDerived(neighbourRank){};
 
     using RemoteIterator = NeighbourDataDerived::RemoteIterator;

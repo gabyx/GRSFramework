@@ -70,7 +70,7 @@ template <typename TElement,
           typename TGrowthPolicy = GrowthPolicy::OptimalGrowth>
 class LinearReusableStorage
 {
-    public:
+public:
     using ValueType          = TElement;
     using PointerType        = TElement*;
     using ConstPointerType   = const TElement*;
@@ -157,7 +157,7 @@ class LinearReusableStorage
     template <typename T>
     class iterator
     {
-        public:
+    public:
         using iterator_category = std::random_access_iterator_tag;  //!< The iterator category.
         using value_type        = T*;                               //!< Type of the underlying pointers.
         using pointer           = T*;                               //!< Pointer return type.
@@ -294,7 +294,7 @@ class LinearReusableStorage
             return *m_it;
         }
 
-        private:
+    private:
         IteratorType m_it;
     };
 
@@ -492,7 +492,7 @@ class LinearReusableStorage
         }
     }
 
-    private:
+private:
     struct DestructElement
     {
         inline void operator()(ValueType& t)

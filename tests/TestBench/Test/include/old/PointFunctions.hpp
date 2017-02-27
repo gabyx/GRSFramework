@@ -170,7 +170,7 @@ std::pair<TVector, TVector> estimateDiameter(const MatrixBase<Derived>& points, 
 
 class CompareByAngle
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
 
@@ -220,7 +220,7 @@ class CompareByAngle
         return (m_p.col(idx1) - m_base).norm() < (m_p.col(idx2) - m_base).norm();
     }
 
-    private:
+private:
     const Vector2                     m_base;
     const MatrixRef<const Matrix2Dyn> m_p;
 };

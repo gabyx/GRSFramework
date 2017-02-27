@@ -17,7 +17,7 @@
 
 class PlaneGeometry
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -33,7 +33,7 @@ class PlaneGeometry
     Vector3 m_normal;   // in K frame
     /*Vector3 m_pos;*/  // in K frame (not needed)
 
-    protected:
+protected:
     friend class boost::serialization::access;
 };
 

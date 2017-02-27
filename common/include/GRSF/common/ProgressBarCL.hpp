@@ -17,7 +17,7 @@
 template <typename T>
 class ProgressBarCL
 {
-    public:
+public:
     ProgressBarCL(std::ostream& s, std::string title, T start, T end, unsigned int length = 20) : m_oStream(s)
     {
         m_start = start;
@@ -70,7 +70,7 @@ class ProgressBarCL
         }
     }
 
-    private:
+private:
     std::string m_title;
 
     T            m_start, m_end;

@@ -37,7 +37,7 @@
 */
 class MenuMouse : public OIS::KeyListener, OIS::MouseListener
 {
-    public:
+public:
     /** @brief Constructs an orbiting Camera in the given Scene Manager pSceneMgr.
     * @param trayManager Pointer to en existing SdkTrayManager of Ogre.
     * @param name The name of the mouse.
@@ -51,7 +51,7 @@ class MenuMouse : public OIS::KeyListener, OIS::MouseListener
     void setInactive();  ///< Disables the input, which basically only removes this class in the InputManager and makes
                          /// the GUI mouse invisible.
     /* @} */
-    protected:
+protected:
     Ogre::String m_Name;  ///< The mouse name.
 
     std::shared_ptr<OgreBites::SdkTrayManager> m_pTrayMgr;  ///< The existing SdkTrayManager from Ogre.

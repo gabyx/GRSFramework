@@ -21,7 +21,7 @@
 template <typename IntType = unsigned int, typename Allocator = std::allocator<IntType>>
 class Range
 {
-    public:
+public:
     using RangeType = std::vector<IntType, Allocator>;
 
     GRSF_STATIC_ASSERTM(std::is_integral<IntType>::value, "IntType needs to be Integeral");
@@ -122,7 +122,7 @@ class Range
 
     class iterator : public std::iterator_traits<typename RangeType::iterator>
     {
-        public:
+    public:
         using iterator_traits = std::iterator_traits<typename RangeType::iterator>;
 
         iterator(){};
@@ -190,7 +190,7 @@ class Range
             return *m_it;
         }
 
-        private:
+    private:
         typename RangeType::iterator m_it;
     };
 
@@ -223,7 +223,7 @@ class Range
         return m_linear;
     }
 
-    private:
+private:
     bool      m_linear;
     RangeType m_v;
 

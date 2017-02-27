@@ -46,7 +46,7 @@ _________________________________________________________*/
 
 class SimulationState : public AppState, OgreBites::SdkTrayListener
 {
-    public:
+public:
     SimulationState();
     ~SimulationState();
 
@@ -87,7 +87,7 @@ class SimulationState : public AppState, OgreBites::SdkTrayListener
 
     std::shared_ptr<SimulationManagerGUI> m_pSimMgr;
 
-    private:
+private:
     Ogre::Log* m_pAppLog;
 
     void setupParamsPanel();

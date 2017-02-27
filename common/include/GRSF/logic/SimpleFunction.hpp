@@ -28,7 +28,7 @@ namespace LogicNodes
 template <typename EvalType, typename OutType = EvalType>
 class SimpleFunction : public LogicNode
 {
-    private:
+private:
     using TEval        = EvalType;
     using expression_t = exprtk::expression<TEval>;
     exprtk::symbol_table<TEval> m_symbol_table;
@@ -68,7 +68,7 @@ class SimpleFunction : public LogicNode
         TEval* m_t;
     };
 
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     struct Outputs

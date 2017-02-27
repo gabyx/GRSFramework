@@ -25,7 +25,7 @@ class TupleHash;
 template <typename... TTypes>
 class TupleHash<std::tuple<TTypes...>>
 {
-    private:
+private:
     using Tuple = std::tuple<TTypes...>;
 
     template <int N>
@@ -43,7 +43,7 @@ class TupleHash<std::tuple<TTypes...>>
         return seed;
     }
 
-    public:
+public:
     size_t operator()(const Tuple& value) const
     {
         return combine_hash<sizeof...(TTypes), TTypes...>(value);

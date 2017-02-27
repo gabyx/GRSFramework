@@ -182,7 +182,7 @@ struct GraphTraitsSymmetric
 template <typename TTraits>
 class NodeBase
 {
-    public:
+public:
     using Traits = TTraits;
     NodeBase(const std::size_t& t) : m_type(t)
     {
@@ -195,14 +195,14 @@ class NodeBase
         Traits::castAndVisitNodes(m_type, this, std::forward<Visitor>(v));
     }
 
-    private:
+private:
     const std::size_t m_type;
 };
 
 template <typename TTraits>
 class EdgeBase
 {
-    public:
+public:
     using Traits = TTraits;
 
     EdgeBase(const std::size_t& t) : m_type(t)
@@ -216,14 +216,14 @@ class EdgeBase
         Traits::castAndVisitNodes(m_type, this, std::forward<Visitor>(v));
     }
 
-    private:
+private:
     const std::size_t m_type;
 };
 
 template <typename TEdgeData, typename TTraits>
 class Edge : public EdgeBase<TTraits>
 {
-    public:
+public:
     using Traits = TTraits;
 
     using StartNodeType = NodeBase<Traits>;
@@ -289,7 +289,7 @@ class Edge : public EdgeBase<TTraits>
         return m_twinEdge;
     }
 
-    private:
+private:
     StartNodeType* m_startNode = nullptr;
     EndNodeType*   m_endNode   = nullptr;
     TwinEdgeType*  m_twinEdge  = nullptr;
@@ -301,7 +301,7 @@ class Edge : public EdgeBase<TTraits>
 template <typename TNodeData, typename TTraits>
 class NodeEdgeSupport
 {
-    public:
+public:
     using NodeDataType = TNodeData;
     using Traits       = TTraits;
 
@@ -315,7 +315,7 @@ class NodeEdgeSupport
         InEdgeDataTypes,
         meta::compose<meta::quote<metaAdd::addPointer>, meta::quote<Traits::template toEdge>>>;
 
-    public:
+public:
     inline void clearConnections()
     {
         ClearConnections c;
@@ -350,7 +350,7 @@ class NodeEdgeSupport
         TupleVisit::visit(e, m_edgesOut);
     }
 
-    private:
+private:
     OutEdgeStoragesTypes m_edgesOut;
     InEdgeStoragesTypes  m_edgesIn;
 
@@ -386,7 +386,7 @@ class NodeEdgeSupport
 template <typename TNodeData, typename TTraits>
 class Node : public NodeBase<TTraits>, public NodeEdgeSupport<TNodeData, TTraits>
 {
-    public:
+public:
     using NodeDataType = TNodeData;
     using Traits       = TTraits;
 
@@ -413,7 +413,7 @@ class Node : public NodeBase<TTraits>, public NodeEdgeSupport<TNodeData, TTraits
         NodeEdgeSupport<TNodeData, TTraits>::clearConnections();
     }
 
-    private:
+private:
     NodeDataType      m_data;
     const std::size_t m_id;
 };
@@ -421,7 +421,7 @@ class Node : public NodeBase<TTraits>, public NodeEdgeSupport<TNodeData, TTraits
 template <typename GraphTraits>
 class GeneralGraph
 {
-    public:
+public:
     using Traits        = GraphTraits;
     using NodeDataTypes = typename Traits::NodeDataTypes;
     using EdgeDataTypes = typename Traits::EdgeDataTypes;
@@ -443,7 +443,7 @@ class GeneralGraph
     template <typename TEdgeData>
     using toEdgeStorageType = std::tuple_element_t<meta::find_index<EdgeDataTypes, TEdgeData>::value, EdgeStorageTuple>;
 
-    protected:
+protected:
     NodeStorageTuple m_nodeStorage;
     EdgeStorageTuple m_edgeStorage;
 
@@ -496,7 +496,7 @@ class GeneralGraph
         return std::get<meta::find_index<EdgeDataTypes, TEdgeData>::value>(m_edgeStorage);  // get container
     }
 
-    public:
+public:
     ~GeneralGraph()
     {
     }

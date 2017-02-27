@@ -16,7 +16,7 @@
 
 class RenderMaterial
 {
-    public:
+public:
     RenderMaterial() : m_id(0)
     {
     }
@@ -52,7 +52,7 @@ class RenderMaterial
         m_s.seekg(0);
     }
 
-    private:
+private:
     std::stringstream m_s;
     unsigned int      m_id;
 };

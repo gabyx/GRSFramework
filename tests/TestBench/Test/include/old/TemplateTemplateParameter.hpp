@@ -17,7 +17,7 @@
 template <typename T>
 class A
 {
-    public:
+public:
     template <template <typename, typename> class U, typename Allocator>
     void foo(U<T, Allocator>& list)
     {

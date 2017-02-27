@@ -36,7 +36,7 @@ class SharedBufferPlayback;
 
 class PlaybackManager : public PlaybackManagerBase, public OIS::KeyListener
 {
-    public:
+public:
     DEFINE_CONFIG_TYPES
 
     PlaybackManager(std::shared_ptr<Ogre::SceneManager> pSceneMgr);
@@ -81,7 +81,7 @@ class PlaybackManager : public PlaybackManagerBase, public OIS::KeyListener
     bool keyReleased(const OIS::KeyEvent& keyEventRef);
     void enableInput(bool value);
 
-    private:
+private:
     Logging::Log* m_pSimulationLog;
     Logging::Log* m_pThreadLog;
 

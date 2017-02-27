@@ -37,11 +37,11 @@ template <typename TDataStorage,
           typename TDerived = void>
 class LogicParser
 {
-    public:
+public:
     using ParserTraits = TParserTraits<LogicParser, TDataStorage>;
     DEFINE_LOGICPARSER_TYPE_TRAITS(ParserTraits);
 
-    private:
+private:
     boost::filesystem::path m_currentParseFilePath;
     boost::filesystem::path m_currentParseFileDir;
 
@@ -90,7 +90,7 @@ class LogicParser
         }
     };
 
-    public:
+public:
     /**
     * Constructor takes a module function which constructs all modules.
     */
@@ -166,7 +166,7 @@ class LogicParser
         m_currentParseFileDir  = m_currentParseFilePath.parent_path();
     }
 
-    private:
+private:
     void checkFileExists(boost::filesystem::path file)
     {
         if (!boost::filesystem::exists(file))

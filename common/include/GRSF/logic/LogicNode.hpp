@@ -59,13 +59,13 @@ class LogicSocket;
 
 class LogicNode
 {
-    public:
+public:
     using SocketListType = LogicSocketCommon::SocketListType;
     using SocketIterator = LogicSocketCommon::SocketIterator;
 
     const unsigned int m_id;
 
-    public:
+public:
     LogicNode(unsigned int id);
 
     virtual ~LogicNode();
@@ -156,7 +156,7 @@ class LogicNode
     */
     static void makeWriteLink(LogicNode* outN, unsigned int outS, LogicNode* inN, unsigned int inS);
 
-    protected:
+protected:
     bool           m_hasLinks;
     SocketListType m_inputs;
     SocketListType m_outputs;

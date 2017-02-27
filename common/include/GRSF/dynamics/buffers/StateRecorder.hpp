@@ -32,7 +32,7 @@
 */
 class StateRecorder
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -57,7 +57,7 @@ class StateRecorder
 
     StateRecorder& operator<<(const DynamicsState* value);
 
-    protected:
+protected:
     Logging::Log* m_pSimulationLog;
 
     // void scanAllSimDataFiles(boost::filesystem::path path_name, bool with_SubDirs = false);

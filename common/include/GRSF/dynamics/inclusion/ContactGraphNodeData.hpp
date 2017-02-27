@@ -28,7 +28,7 @@
 //                                      m_eContactModel = ContactModels::UCFC_ContactModel,
 class ContactGraphNodeDataUCFBase
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // not required
 
@@ -46,7 +46,7 @@ class ContactGraphNodeDataUCFBase
 
 class ContactGraphNodeDataUCF : public ContactGraphNodeDataUCFBase
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -92,7 +92,7 @@ class ContactGraphNodeDataUCF : public ContactGraphNodeDataUCFBase
         m_LambdaBack.swap(m_LambdaFront);
     };
 
-    private:
+private:
     //    Vector3 m_LambdaBack_internal;
     //    Vector3 m_LambdaFront_internal;
 };
@@ -102,7 +102,7 @@ class ContactGraphNodeDataUCF : public ContactGraphNodeDataUCFBase
 */
 class ContactGraphEdgeData
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     ContactGraphEdgeData() : m_pBody(nullptr){};
@@ -112,7 +112,7 @@ class ContactGraphEdgeData
 
 class ContactGraphNodeDataDriftCorrector
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // not required
 

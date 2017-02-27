@@ -48,7 +48,7 @@
 
 class gps_position
 {
-    private:
+private:
     friend class boost::serialization::access;
     // When the class Archive corresponds to an output archive, the
     // & operator is defined similar to <<.  Likewise, when the class Archive
@@ -64,7 +64,7 @@ class gps_position
     int   minutes;
     float seconds;
 
-    public:
+public:
     gps_position(){};
     gps_position(int d, int m, float s) : degrees(d), minutes(m), seconds(s)
     {
@@ -73,7 +73,7 @@ class gps_position
 
 class Obj
 {
-    public:
+public:
     Obj(int b)
     {
         m_a = b;
@@ -99,7 +99,7 @@ class Obj
 
 class serialTestClass
 {
-    public:
+public:
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
     serialTestClass(int a)

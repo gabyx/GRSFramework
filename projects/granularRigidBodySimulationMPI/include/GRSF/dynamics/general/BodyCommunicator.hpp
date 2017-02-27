@@ -27,7 +27,7 @@
 
 class RigidBodyAddRemoveNotificator
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     RigidBodyAddRemoveNotificator()
@@ -65,7 +65,7 @@ class RigidBodyAddRemoveNotificator
         m_LocalNotifyRemoveList.push_back(cD);
     }
 
-    protected:
+protected:
     /** Invokes all delegates for a add notifaction of a local body*/
     void invokeAllAddBodyLocal(RigidBodyType* body) const
     {
@@ -85,7 +85,7 @@ class RigidBodyAddRemoveNotificator
         }
     }
 
-    private:
+private:
     std::vector<AddDelegate> m_LocalNotifyAddList;
     //    std::vector<ContactDelegate> m_AddRemoteDelegateList;
     std::vector<RemoveDelegate> m_LocalNotifyRemoveList;
@@ -96,7 +96,7 @@ class BodyCommunicator : public RigidBodyAddRemoveNotificator
 {
     ;
 
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -126,7 +126,7 @@ class BodyCommunicator : public RigidBodyAddRemoveNotificator
         return &m_nbDataMap;
     }
 
-    private:
+private:
     /**
     * The NeighbourMessageWrapperBodies class needs access, to be able to serialize all together!
     */

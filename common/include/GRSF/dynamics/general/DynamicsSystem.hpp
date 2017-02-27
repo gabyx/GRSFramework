@@ -19,7 +19,7 @@
 
 class DynamicsSystem : public DynamicsSystemBase
 {
-    public:
+public:
     struct ParserModulesCreator
     {
         ParserModulesCreator(DynamicsSystem* p) : m_p(p)

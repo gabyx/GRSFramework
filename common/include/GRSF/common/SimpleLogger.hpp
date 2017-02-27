@@ -33,11 +33,11 @@ namespace Logging
 
 class LogSink
 {
-    protected:
+protected:
     std::string   m_sinkName;
     std::ostream* m_pOutStream;
 
-    public:
+public:
     std::string getName();
 
     void operator<<(std::stringstream& s);
@@ -53,12 +53,12 @@ class LogSink
 /** File Sink which does not roll itself, LogManager needs to do this!, defaultRollSize default to 5 MiB */
 class LogSinkFile : public LogSink
 {
-    private:
+private:
     static const std::streamsize defaultRollSize = 5 << 20;
 
     std::ofstream   m_fileStream;
     std::streamsize m_rollSize = 0;  ///< maximum size of file when the file should be rolled
-    public:
+public:
     LogSinkFile(const std::string&      sink_name,
                 boost::filesystem::path filePath = "",
                 std::streamsize         rollSize = defaultRollSize);
@@ -71,7 +71,7 @@ class LogSinkFile : public LogSink
 
 class LogSinkCout : public LogSink
 {
-    public:
+public:
     LogSinkCout(const std::string& sink_name);
     ~LogSinkCout();
 };
@@ -81,7 +81,7 @@ class LogSinkCout : public LogSink
 */
 class Log
 {
-    protected:
+protected:
     CPUTimer* m_time = nullptr;  ///< A timer which can be set from outside!
 
     std::string m_logName;
@@ -108,7 +108,7 @@ class Log
 
     bool m_newLine = true;  ///< Markes the state where we are at a new beginning of a line -> push time
 
-    public:
+public:
     virtual ~Log();
     Log(std::string log_name);
 
@@ -178,7 +178,7 @@ class Log
     // Expression to write all " myLogSink << a << b << c " first into a stringstream and the flush!
     class expression
     {
-        public:
+    public:
         expression(Log& _log, std::stringstream& _s, bool lastWasEndl = false);
         // Destructor pushes message!
         ~expression();
@@ -199,7 +199,7 @@ class Log
         // For std::endl;
         expression& operator<<(std::ostream& (*f)(std::ostream&));
 
-        private:
+    private:
         std::stringstream& m_s;
         bool               m_lastWasEndl;
         Log&               m_log;
@@ -211,7 +211,7 @@ class Log
 */
 class LogManager : public Utilities::Singleton<LogManager>
 {
-    private:
+private:
     typedef std::unordered_map<std::string, Log*>           LogListType;
     typedef std::unordered_map<std::string, Log*>::iterator LogListIteratorType;
     LogListType m_logList;
@@ -219,7 +219,7 @@ class LogManager : public Utilities::Singleton<LogManager>
     std::mutex m_busy_mutex;
     CPUTimer   m_globalClock;
 
-    public:
+public:
     LogManager();
     ~LogManager();
 

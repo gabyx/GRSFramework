@@ -18,7 +18,7 @@ namespace LogicNodes
 template <typename T>
 class InnerProduct : public LogicNode
 {
-    public:
+public:
     using PREC = typename T::Scalar;
 
     struct Inputs

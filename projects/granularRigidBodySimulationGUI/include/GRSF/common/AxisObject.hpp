@@ -34,11 +34,11 @@ class AxisObject
         BOX_ALL   = 0xFF
     };
 
-    private:
+private:
     void addMaterial(const Ogre::String& mat, const Ogre::ColourValue& clr, Ogre::SceneBlendType sbt);
     void addBox(Ogre::ManualObject* obj, Ogre::Vector3 dim, Ogre::Vector3 pos, Ogre::ColourValue color, short boxMask);
 
-    public:
+public:
     Ogre::ManualObject* createAxis(Ogre::SceneManager* scene, const Ogre::String& name, Ogre::Real scale);
 };
 

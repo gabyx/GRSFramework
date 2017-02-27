@@ -27,7 +27,7 @@
 
 class CPUTimer
 {
-    public:
+public:
     using ClockType = std::chrono::high_resolution_clock;
 
     inline void start()
@@ -57,7 +57,7 @@ class CPUTimer
         return std::chrono::duration<double, std::milli>(ClockType::now() - m_start).count();
     }
 
-    private:
+private:
     std::chrono::time_point<ClockType> m_start;
 };
 

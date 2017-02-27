@@ -18,7 +18,7 @@
 template <typename TRigidBody>
 class AddGyroTermVisitor : public boost::static_visitor<>
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
     using RigidBodyType = TRigidBody;
     DEFINE_GEOMETRY_PTR_TYPES(RigidBodyType)
@@ -53,7 +53,7 @@ class AddGyroTermVisitor : public boost::static_visitor<>
         addGyroTerm();
     }
 
-    private:
+private:
     inline void addGyroTerm()
     {
         Vector3 K_omega_IK = m_rigidBody->m_pSolverData->m_uBuffer.m_back.template tail<3>();

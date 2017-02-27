@@ -23,7 +23,7 @@
 
 class ProjectedPointSet
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     DEFINE_MATRIX_TYPES
     DEFINE_POINTS_CONFIG_TYPES
@@ -151,7 +151,7 @@ class ProjectedPointSet
         return OOBB(M_min, M_max, A_IM);
     }
 
-    private:
+private:
     template <typename Derived>
     void project(const MatrixBase<Derived>& points)
     {

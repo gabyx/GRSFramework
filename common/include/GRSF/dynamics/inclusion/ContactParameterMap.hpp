@@ -37,7 +37,7 @@ class ContactParameterTagHash;
 
 class ContactParameterTag
 {
-    public:
+public:
     using Tuple = std::tuple<unsigned int, unsigned int>;
     ContactParameterTag(unsigned int materialid1, unsigned int materialid2);
 
@@ -45,7 +45,7 @@ class ContactParameterTag
 
     friend class ContactParameterTagHash;
 
-    private:
+private:
     /**
     * This tuple builds up the hash. It consists of: 2 material ids
     **/
@@ -54,7 +54,7 @@ class ContactParameterTag
 
 class ContactParameterTagHash : std::unary_function<ContactParameterTag, std::size_t>
 {
-    public:
+public:
     std::size_t operator()(ContactParameterTag const& c) const
     {
         TupleHash<typename ContactParameterTag::Tuple> hasher;
@@ -64,7 +64,7 @@ class ContactParameterTagHash : std::unary_function<ContactParameterTag, std::si
 
 class ContactParameterMap
 {
-    public:
+public:
     DEFINE_RIGIDBODY_CONFIG_TYPES
 
     using MaterialIdType = typename RigidBodyType::BodyMaterialType;
@@ -111,7 +111,7 @@ class ContactParameterMap
         return m_ContactParams;
     }
 
-    private:
+private:
     ContactParameter m_std_values;  ///< Some standart values: m_std_values.m_epsilon_N = 0.5, m_std_values.m_epsilon_T
                                     ///= 0.5, m_std_values.m_mu = 0.3 .
     ContactParameterMapType m_ContactParams;  /// All contact parameters (except the standart value);

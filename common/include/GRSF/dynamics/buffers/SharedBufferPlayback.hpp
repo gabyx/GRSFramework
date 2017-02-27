@@ -27,7 +27,7 @@
 
 class SharedBufferPlayback : public StateRingPoolVisBackFront
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
     template <typename RigidBodyIterator>
@@ -36,7 +36,7 @@ class SharedBufferPlayback : public StateRingPoolVisBackFront
 
     ~SharedBufferPlayback(){DESTRUCTOR_MESSAGE};
 
-    private:
+private:
 };
 
 #endif

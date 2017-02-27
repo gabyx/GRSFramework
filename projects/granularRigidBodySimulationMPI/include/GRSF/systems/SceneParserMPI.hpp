@@ -35,13 +35,13 @@ struct SceneParserMPITraits : public SceneParserBaseTraits<TSceneParser, TDynami
 template <typename TDynamicsSystem, template <typename P, typename D> class TParserTraits = SceneParserMPITraits>
 class SceneParserMPI : public SceneParser<TDynamicsSystem, TParserTraits, SceneParserMPI<TDynamicsSystem>>
 {
-    private:
+private:
     using BaseType = SceneParser<TDynamicsSystem, TParserTraits, SceneParserMPI<TDynamicsSystem>>;
 
-    public:
+public:
     using DynamicsSystemType = TDynamicsSystem;
 
-    public:
+public:
     template <typename ModuleGeneratorType>
     SceneParserMPI(ModuleGeneratorType& moduleGen, Logging::Log* log, const boost::filesystem::path& mediaDir)
         : BaseType(moduleGen, log, mediaDir)

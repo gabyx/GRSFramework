@@ -41,7 +41,7 @@
 
 class StateRecorderBody
 {
-    public:
+public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -63,7 +63,7 @@ class StateRecorderBody
 
     void closeAll();
 
-    protected:
+protected:
     boost::filesystem::path m_directoryPath;  ///< The path where the sim body files are opened!
 
     void getSimBodyFileName(typename DynamicsSystemType::RigidBodyType* body, std::stringstream& s);

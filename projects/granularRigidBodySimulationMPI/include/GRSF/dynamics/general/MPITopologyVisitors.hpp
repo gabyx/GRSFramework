@@ -28,7 +28,7 @@ namespace TopologyVisitors
 template <typename ProcessTopologyBase>
 class BelongsPointToProcess : public boost::static_visitor<bool>
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -65,7 +65,7 @@ class BelongsPointToProcess : public boost::static_visitor<bool>
         return false;
     }
 
-    private:
+private:
     const Vector3& m_point;
     // Results
     RankIdType& m_neighbourProcessRank;
@@ -74,7 +74,7 @@ class BelongsPointToProcess : public boost::static_visitor<bool>
 template <typename ProcessTopologyBase>
 class CheckOverlap : public boost::static_visitor<bool>
 {
-    public:
+public:
     CheckOverlap(const typename ProcessTopologyBase::RigidBodyType*    body,
                  typename ProcessTopologyBase::NeighbourRanksListType& neighbourProcessRanks,
                  bool&                                                 overlapsOwnProcess)
@@ -100,7 +100,7 @@ class CheckOverlap : public boost::static_visitor<bool>
         return false;
     }
 
-    private:
+private:
     const typename ProcessTopologyBase::RigidBodyType* m_body;
     // Results
     typename ProcessTopologyBase::NeighbourRanksListType& m_neighbourProcessRanks;

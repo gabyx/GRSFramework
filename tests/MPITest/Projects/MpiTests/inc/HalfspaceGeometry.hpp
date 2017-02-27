@@ -19,12 +19,12 @@
 template <class PREC>
 class HalfspaceGeometry : public PlaneGeometry<PREC>
 {
-    public:
+public:
     DEFINE_MATRIX_TYPES
     HalfspaceGeometry() : PlaneGeometry<PREC>(){};
     HalfspaceGeometry(const Vector3& n, const Vector3& p) : PlaneGeometry<PREC>(n, p){};
 
-    private:
+private:
     friend class boost::serialization::access;
 };
 

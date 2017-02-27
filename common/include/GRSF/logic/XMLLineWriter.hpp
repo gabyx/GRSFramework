@@ -25,7 +25,7 @@ namespace LogicNodes
 template <typename TValue>
 class XMLLineWriter : public LogicNode
 {
-    public:
+public:
     using XMLNodeType            = pugi::xml_node;
     using XMLDocumentType        = pugi::xml_document;
     static const auto nodePCData = pugi::node_pcdata;
@@ -103,7 +103,7 @@ class XMLLineWriter : public LogicNode
         m_openedFile = "";
     }
 
-    private:
+private:
     std::stringstream m_stream;
 
     boost::filesystem::path m_openedFile;

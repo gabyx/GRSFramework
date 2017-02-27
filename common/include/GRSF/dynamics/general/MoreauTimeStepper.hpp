@@ -41,7 +41,7 @@ struct MoreauTimeStepperTraits
 
 class MoreauTimeStepper : public TimeStepperBase<MoreauTimeStepper, MoreauTimeStepperTraits>
 {
-    public:
+public:
     DEFINE_TIMESTEPPER_CONFIG_TYPES
 
     MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys, std::shared_ptr<StatePoolType> pSysState);
@@ -65,7 +65,7 @@ class MoreauTimeStepper : public TimeStepperBase<MoreauTimeStepper, MoreauTimeSt
     inline void writeIterationToSystemDataFile(double globalTime);
     inline void writeIterationToCollisionDataFile();
 
-    protected:
+protected:
     inline void afterFirstTimeStep(){};
     inline void afterSecondTimeStep(){};
     inline void doInputTimeStep(PREC T){};

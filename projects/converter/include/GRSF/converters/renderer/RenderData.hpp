@@ -27,7 +27,7 @@ namespace ParserModules
 template <typename TParserTraits>
 class VisModuleConverter
 {
-    private:
+private:
     DEFINE_PARSER_TYPE_TRAITS(TParserTraits)
     DEFINE_MATRIX_TYPES
 
@@ -45,7 +45,7 @@ class VisModuleConverter
 
     BodyListType* m_bodyListGroup;
 
-    public:
+public:
     VisModuleConverter(ParserType* p, ScalesMap* scales, VisMeshMap* meshMap)
         : m_pSimulationLog(p->getSimLog())
         , m_scalesMap(scales)
@@ -79,7 +79,7 @@ class VisModuleConverter
 
     void cleanUp(){};
 
-    private:
+private:
     // Virtual function in SceneParser!, this function adds all objects to Ogre related objects!
     void parseMesh(XMLNodeType meshNode)
     {
@@ -105,7 +105,7 @@ class VisModuleConverter
 
 class RenderData
 {
-    public:
+public:
     DEFINE_RENDERCONVERTERDATA_TYPES
 
     ~RenderData()

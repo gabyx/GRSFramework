@@ -41,7 +41,7 @@
 
 class CollisionSolver : public ContactDelegateSupport
 {
-    public:
+public:
     DEFINE_COLLISION_SOLVER_CONFIG_TYPES
 
     using CollisionSetType = LinearReusableStorage<CollisionData>;
@@ -66,7 +66,7 @@ class CollisionSolver : public ContactDelegateSupport
     std::string getIterationStats();
     std::string getStatsHeader();
 
-    protected:
+protected:
     CollisionSetType m_collisionSet;  ///< This list is only used if no  ContactDelegate is in m_ContactDelegateList,
                                       /// then the contacts are simply added here.
 

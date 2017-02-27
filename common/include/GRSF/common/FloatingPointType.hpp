@@ -53,7 +53,7 @@ struct TypeWithSize<8>
 template <typename RawType>
 class FloatingPoint
 {
-    public:
+public:
     typedef typename TypeWithSize<sizeof(RawType)>::UInt Bits;
 
     static const size_t kBitCount     = 8 * sizeof(RawType);
@@ -91,7 +91,7 @@ class FloatingPoint
         return computedUlpDiff <= maxUlps;
     }
 
-    private:
+private:
     bool is_nan() const
     {
         return ((kExpBitMask & bits_) == kExpBitMask) && ((kFracBitMask & bits_) != 0);

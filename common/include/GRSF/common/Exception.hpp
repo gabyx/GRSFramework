@@ -18,18 +18,18 @@
 
 class Exception : public std::runtime_error
 {
-    public:
+public:
     Exception(const std::stringstream& ss) : std::runtime_error(ss.str()){};
 
-    private:
+private:
 };
 
 class SignalException : public std::runtime_error
 {
-    public:
+public:
     SignalException(const std::stringstream& ss) : std::runtime_error(ss.str()){};
 
-    private:
+private:
 };
 
 #define GRSF_THROWEXCEPTION(message)                                                                  \

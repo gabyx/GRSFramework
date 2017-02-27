@@ -16,7 +16,7 @@
 
 class OOBB
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     DEFINE_MATRIX_TYPES

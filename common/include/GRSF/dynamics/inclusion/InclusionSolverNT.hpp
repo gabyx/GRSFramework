@@ -39,7 +39,7 @@
 template <typename TInclusionSolverConfig>
 class InclusionSolverNT
 {
-    public:
+public:
     DEFINE_INCLUSIONS_SOLVER_CONFIG_TYPES_OF(TInclusionSolverConfig)
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -80,7 +80,7 @@ class InclusionSolverNT
 
     unsigned int getNObjects();
 
-    protected:
+protected:
     unsigned int m_nDofq, m_nDofu, m_nDofqBody, m_nDofuBody, m_nDofFriction, m_nSimBodies;
 
     unsigned int m_nExpectedContacts;

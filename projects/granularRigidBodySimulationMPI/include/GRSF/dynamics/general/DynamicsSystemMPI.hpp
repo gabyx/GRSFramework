@@ -23,7 +23,7 @@
 
 class DynamicsSystemMPI : public DynamicsSystemBase
 {
-    public:
+public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     DEFINE_DYNAMICSYSTEM_BASE_TYPES
@@ -48,10 +48,10 @@ class DynamicsSystemMPI : public DynamicsSystemBase
 
     const TopologyBuilderSettingsType& getSettingsTopoBuilder() const;
 
-    protected:
+protected:
     TopologyBuilderSettingsType m_settingsTopologyBuilder;
 
-    public:
+public:
     struct ParserModulesCreator1
     {
         ParserModulesCreator1(DynamicsSystemMPI* p) : m_p(p)

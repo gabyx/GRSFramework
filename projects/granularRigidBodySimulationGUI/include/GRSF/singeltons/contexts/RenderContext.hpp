@@ -36,7 +36,7 @@
 
 class RenderContext : public Ogre::Singleton<RenderContext>
 {
-    public:
+public:
     RenderContext();
     ~RenderContext();
 
@@ -73,7 +73,7 @@ class RenderContext : public Ogre::Singleton<RenderContext>
         //				}
     }
 
-    private:
+private:
     RenderContext(const RenderContext&);
     RenderContext& operator=(const RenderContext&);
 

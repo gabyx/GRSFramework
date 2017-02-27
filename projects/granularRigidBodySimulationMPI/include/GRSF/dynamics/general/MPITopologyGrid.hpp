@@ -31,7 +31,7 @@ namespace MPILayer
 template <typename ProcessTopologyBase>
 class ProcessTopologyGrid : protected CartesianGrid<NoCellData, typename ProcessTopologyBase::RankIdType>
 {
-    public:
+public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -43,7 +43,7 @@ class ProcessTopologyGrid : protected CartesianGrid<NoCellData, typename Process
     using NeighbourRanksListType        = typename ProcessTopologyBase::NeighbourRanksListType;
     using AdjacentNeighbourRanksMapType = typename ProcessTopologyBase::AdjacentNeighbourRanksMapType;
 
-    private:
+private:
     //
     using Base::m_dim;
     using Base::m_dxyz;
@@ -51,7 +51,7 @@ class ProcessTopologyGrid : protected CartesianGrid<NoCellData, typename Process
     using Base::m_nbIndicesOff;
     using Base::m_A_KI;
 
-    public:
+public:
     ProcessTopologyGrid(NeighbourRanksListType&        nbRanks,
                         AdjacentNeighbourRanksMapType& adjNbRanks,
                         RankIdType                     processRank,
@@ -204,7 +204,7 @@ class ProcessTopologyGrid : protected CartesianGrid<NoCellData, typename Process
         }
     }
 
-    private:
+private:
     template <typename Collider, typename... AddArgs>
     inline bool checkOverlapImpl(Collider&               collider,
                                  NeighbourRanksListType& neighbourProcessRanks,

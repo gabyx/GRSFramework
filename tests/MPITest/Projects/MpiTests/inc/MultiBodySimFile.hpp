@@ -48,7 +48,7 @@
 template <typename TLayoutConfig>
 class MultiBodySimFile
 {
-    public:
+public:
     DEFINE_LAYOUT_CONFIG_TYPES_OF(TLayoutConfig)
 
     MultiBodySimFile();
@@ -118,7 +118,7 @@ class MultiBodySimFile
         return m_errorString.str();
     }
 
-    private:
+private:
     /**
    * @brief Operator to write a generic value to the file as binary data.
    */
