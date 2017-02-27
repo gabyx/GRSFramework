@@ -9,7 +9,6 @@
 // ========================================================================================
 
 #include "GRSF/common/AxisObject.hpp"
-#include <Ogre.h>
 
 using namespace Ogre;
 
