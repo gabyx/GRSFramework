@@ -11,7 +11,7 @@ sudo apt-get -y install openmpi-bin libopenmpi-dev
 
 # Install eigen3 =======================================================
 hg clone https://bitbucket.org/eigen/eigen/ ${ROOT_PATH}/eigen3 > /dev/null
-cd ${ROOT_PATH}/eigen3 && hg update default
+cd ${ROOT_PATH}/eigen3 && hg update 3.3
 mkdir ${ROOT_PATH}/eigen3Build
 cd ${ROOT_PATH}/eigen3Build
 cmake ../eigen3 -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
