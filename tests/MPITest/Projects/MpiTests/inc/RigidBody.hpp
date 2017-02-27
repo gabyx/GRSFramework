@@ -173,7 +173,7 @@ class RigidBodyBase
     typedef boost::variant<boost::shared_ptr<SphereGeometry<PREC>>,
                            boost::shared_ptr<HalfspaceGeometry<PREC>>,
                            boost::shared_ptr<BoxGeometry<PREC>> /*,
-                            boost::shared_ptr<MeshGeometry<PREC> >*/
+                             boost::shared_ptr<MeshGeometry<PREC> >*/
                            >
         GeometryType;
 

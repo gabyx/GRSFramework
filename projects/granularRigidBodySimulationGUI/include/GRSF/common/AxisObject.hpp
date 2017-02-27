@@ -15,9 +15,9 @@
 #include <OgreMaterial.h>
 namespace Ogre
 {
-    class String;
-    class ManualObject;
-    class SceneManager;
+class String;
+class ManualObject;
+class SceneManager;
 }
 
 class AxisObject
