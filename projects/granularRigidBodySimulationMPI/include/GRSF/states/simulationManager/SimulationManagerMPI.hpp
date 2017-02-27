@@ -13,16 +13,16 @@
 
 #include <mpi.h>
 
-#include <memory>
 #include <boost/filesystem.hpp>
+#include <memory>
 
 #include "GRSF/common/LogDefines.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 
-#include "GRSF/dynamics/general/MPIInformation.hpp"
-#include "GRSF/dynamics/general/MPICommunication.hpp"
-#include "GRSF/dynamics/general/MPITopologyBuilder.hpp"
 #include "GRSF/dynamics/general/BodyCommunicator.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
+#include "GRSF/dynamics/general/MPIInformation.hpp"
+#include "GRSF/dynamics/general/MPITopologyBuilder.hpp"
 
 #include "GRSF/common/CPUTimer.hpp"
 
@@ -31,10 +31,9 @@ class StateRecorderBody;
 class StateRecorderProcess;
 class StateRecorderMPI;
 
-
-class SimulationManagerMPI {
-public:
-
+class SimulationManagerMPI
+{
+    public:
     DEFINE_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
@@ -44,11 +43,9 @@ public:
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
 
-
     void startSim();
 
-private:
-
+    private:
     CPUTimer m_globalTimer;
 
     void initSim();
@@ -61,32 +58,30 @@ private:
     // File Paths for one Simulation, always reset ==============================
     boost::filesystem::path m_SimFolderPath;
 
-    struct SettingsSimThread {
+    struct SettingsSimThread
+    {
         double m_EndTime;
     } m_settingsSimThread;
 
+    Logging::Log* m_pSimulationLog;
 
-    Logging::Log *  m_pSimulationLog;
-
-    //using StateRecorderType = StateRecorderBody<DynamicsSystemType>;
+    // using StateRecorderType = StateRecorderBody<DynamicsSystemType>;
     using StateRecorderType = StateRecorderMPI;
     // ===============================================
 
-    std::shared_ptr< StateRecorderType >  m_pStateRecorder;
+    std::shared_ptr<StateRecorderType> m_pStateRecorder;
     void gracefullyExit(int signal);
 
-    std::shared_ptr< TimeStepperType >	m_pTimestepper;
-    std::shared_ptr< DynamicsSystemType > m_pDynSys;
-    std::shared_ptr< BodyCommunicator >   m_pBodyCommunicator;
-
+    std::shared_ptr<TimeStepperType>    m_pTimestepper;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
+    std::shared_ptr<BodyCommunicator>   m_pBodyCommunicator;
 
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
-    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType;
-    std::shared_ptr< ProcessCommunicatorType > m_pProcCommunicator;
+    using ProcessInfoType         = typename ProcessCommunicatorType::ProcessInfoType;
+    std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 
-
-    using TopologyBuilderType = MPILayer::TopologyBuilder<ProcessCommunicatorType> ;
-    std::shared_ptr< TopologyBuilderType >    m_pTopologyBuilder;
+    using TopologyBuilderType = MPILayer::TopologyBuilder<ProcessCommunicatorType>;
+    std::shared_ptr<TopologyBuilderType> m_pTopologyBuilder;
 
     void writeAllOutput();
 
@@ -97,5 +92,4 @@ private:
     boost::filesystem::path m_sceneFileParsed;
 };
 
-
-#endif // SimulationManagerMPI_HPP
+#endif  // SimulationManagerMPI_HPP

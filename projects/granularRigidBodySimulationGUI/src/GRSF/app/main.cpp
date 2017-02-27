@@ -11,13 +11,13 @@
 #include <iostream>
 #include <sstream>
 
-#include "GRSF/common/ApplicationSignalHandler.hpp"
 #include "GRSF/common/ApplicationCLOptions.hpp"
+#include "GRSF/common/ApplicationSignalHandler.hpp"
 
 #include "GRSF/app/App.hpp"
 
-
-void callBackExit(int signum){
+void callBackExit(int signum)
+{
     std::cerr << "GRSFramework Sim: received signal: " << signum << " -> exit ..." << std::endl;
     GRSF_THROW_SIGNALEXCEPTION("GRSFramework Sim: received signal: " << signum << " -> exit ...");
 }
@@ -26,43 +26,48 @@ void callBackExit(int signum){
 //#define WIN32_LEAN_AND_MEAN
 //#include "windows.h"
 
-//INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
+// INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
 //#else
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 //#endif
 {
-
-    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler,sigHandler, ( {SIGINT,SIGUSR2,SIGPIPE} ) )
-    sigHandler->registerCallback({SIGINT,SIGUSR2,SIGPIPE},callBackExit,"callBackExit");
+    INSTANCIATE_UNIQUE_SINGELTON_CTOR(ApplicationSignalHandler, sigHandler, ({SIGINT, SIGUSR2, SIGPIPE}))
+    sigHandler->registerCallback({SIGINT, SIGUSR2, SIGPIPE}, callBackExit, "callBackExit");
 
     // Parsing Input Parameters===================================
-    INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions,opts)
-    ApplicationCLOptions::getSingleton().parseOptions(argc,argv);
+    INSTANCIATE_UNIQUE_SINGELTON(ApplicationCLOptions, opts)
+    ApplicationCLOptions::getSingleton().parseOptions(argc, argv);
     // End Parsing =================================
 
-
-	try
+    try
     {
-		App demo;
-		demo.startApp();
-
-    }catch(SignalException& ex) {
-        std::cerr << "SignalException occured: "  << ex.what() <<std::endl;
+        App demo;
+        demo.startApp();
+    }
+    catch (SignalException& ex)
+    {
+        std::cerr << "SignalException occured: " << ex.what() << std::endl;
         std::cerr << "Exiting ..." << std::endl;
         exit(EXIT_SUCCESS);
-	}catch(Exception& ex) {
-        std::cerr << "Exception occured: "  << ex.what() <<std::endl;
+    }
+    catch (Exception& ex)
+    {
+        std::cerr << "Exception occured: " << ex.what() << std::endl;
         std::cerr << "Exiting ..." << std::endl;
         exit(EXIT_FAILURE);
-    }catch(std::exception & ex){
-        std::cerr << "std::exception occured: "  << ex.what() <<std::endl;
+    }
+    catch (std::exception& ex)
+    {
+        std::cerr << "std::exception occured: " << ex.what() << std::endl;
         std::cerr << "Exiting ..." << std::endl;
         exit(EXIT_FAILURE);
-    }catch(...){
-        std::cerr << "Unknown exception occured!" <<std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown exception occured!" << std::endl;
         std::cerr << "Exiting ..." << std::endl;
         exit(EXIT_FAILURE);
     }
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

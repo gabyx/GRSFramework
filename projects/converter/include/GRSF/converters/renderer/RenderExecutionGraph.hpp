@@ -11,13 +11,13 @@
 #ifndef GRSF_converters_renderer_RenderExecutionGraph_hpp
 #define GRSF_converters_renderer_RenderExecutionGraph_hpp
 
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/general/SimFileExecutionGraph.hpp"
 
-
-namespace LogicNodes{
-    class RenderScriptWriter;
+namespace LogicNodes
+{
+class RenderScriptWriter;
 };
 
 class RenderMaterial;
@@ -25,19 +25,18 @@ class RenderMaterial;
 class RenderExecutionGraph : public SimFileExecutionGraph
 {
     public:
-        using Base = SimFileExecutionGraph;
-        using NodeGroups = Base::NodeGroups;
+    using Base       = SimFileExecutionGraph;
+    using NodeGroups = Base::NodeGroups;
 
-        RenderExecutionGraph(){};
+    RenderExecutionGraph(){};
 
-        void setup();
-        void initState(boost::filesystem::path outputFilePath, double time, unsigned int stateNr);
-        void finalizeState();
-        void addBodyState(RigidBodyStateAdd * s);
+    void setup();
+    void initState(boost::filesystem::path outputFilePath, double time, unsigned int stateNr);
+    void finalizeState();
+    void addBodyState(RigidBodyStateAdd* s);
 
     private:
-        std::unordered_set<LogicNodes::RenderScriptWriter *> m_scriptWritterNodes;
+    std::unordered_set<LogicNodes::RenderScriptWriter*> m_scriptWritterNodes;
 };
 
-
-#endif // RenderExecutionGraph_hpp
+#endif  // RenderExecutionGraph_hpp

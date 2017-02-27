@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,11 +11,10 @@
 #ifndef GRSF_dynamics_buffers_StatePoolVisBackFront_hpp
 #define GRSF_dynamics_buffers_StatePoolVisBackFront_hpp
 
-
 #include "GRSF/common/LogDefines.hpp"
 
-#include "GRSF/dynamics/buffers/StatePool.hpp"
 #include "GRSF/dynamics/buffers/FrontBackBuffer.hpp"
+#include "GRSF/dynamics/buffers/StatePool.hpp"
 
 #include "GRSF/singeltons/FileManager.hpp"
 
@@ -24,19 +23,20 @@
 /**
 * @ingroup StatesAndBuffers
 * @brief This is the StatePoolVisBackFront class which is a spcialisation of the StatePool class.
-* It provides exactly 3 states and three indices. The third index gives the state for the visualization thread, the second index
+* It provides exactly 3 states and three indices. The third index gives the state for the visualization thread, the
+* second index
 * gives the state for the back buffer and the first index is the state corresponding to the front buffer.
 * @{
 */
-class StatePoolVisBackFront : public StatePool<DynamicsState> {
-public:
-
+class StatePoolVisBackFront : public StatePool<DynamicsState>
+{
+    public:
     DECLERATIONS_STATEPOOL
     DEFINE_LAYOUT_CONFIG_TYPES
 
     using StateType = DynamicsState;
 
-    template<typename TRigidBodyIterator>
+    template <typename TRigidBodyIterator>
     StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyIterator end);
 
     ~StatePoolVisBackFront();
@@ -44,7 +44,8 @@ public:
     /** @name Only accessed by Simulation Thread.
     * @{
     */
-    using FrontBackBufferType = FrontBackBuffer<StateType, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst>;
+    using FrontBackBufferType =
+        FrontBackBuffer<StateType, FrontBackBufferPtrType::NormalPtr, FrontBackBufferMode::BackConst>;
 
     FrontBackBufferType getFrontBackBuffer();
     FrontBackBufferType swapFrontBackBuffer();
@@ -53,47 +54,45 @@ public:
     /** @name Only accessed by Visualization Thread.
     * @{
     */
-    const StateType * updateVisBuffer(bool & out_changed);
-    const StateType * updateVisBuffer();
+    const StateType* updateVisBuffer(bool& out_changed);
+    const StateType* updateVisBuffer();
     /** @} */
 
     /** @name Only accessed by if only Visualization Thread runs.
     * @{
     */
-    template<typename RigidBodyStateContainerType>
-    void resetStatePool(const RigidBodyStateContainerType & state_init);
+    template <typename RigidBodyStateContainerType>
+    void resetStatePool(const RigidBodyStateContainerType& state_init);
     /** @} */
 
-
-protected:
+    protected:
     std::ofstream m_logfile;
 };
 /** @} */
 
-
-template<typename TRigidBodyIterator>
-StatePoolVisBackFront::StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyIterator end):
-    StatePool(3)
+template <typename TRigidBodyIterator>
+StatePoolVisBackFront::StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyIterator end) : StatePool(3)
 {
     // Add the 3 state pools, managed by this class!
-    m_pool.assign(3,StateType());
+    m_pool.assign(3, StateType());
 
-    m_pool[0].initSimStates<true>(beg,end);
+    m_pool[0].initSimStates<true>(beg, end);
     m_pool[1] = m_pool[0];
     m_pool[2] = m_pool[0];
 
-//    for(auto & s : m_pool[0].m_SimBodyStates){
-//        std::cout << RigidBodyId::getBodyIdString(s.m_id) << std::endl;
-//    }
+    //    for(auto & s : m_pool[0].m_SimBodyStates){
+    //        std::cout << RigidBodyId::getBodyIdString(s.m_id) << std::endl;
+    //    }
 
-    m_idx[0] = 1; //front
-    m_idx[1] = 0; //back
-    m_idx[2] = 0; //vis
+    m_idx[0] = 1;  // front
+    m_idx[1] = 0;  // back
+    m_idx[2] = 0;  // vis
 
     // Init Log
     boost::filesystem::path filePath = FileManager::getSingleton().getLocalDirectoryPath();
     filePath /= GLOBAL_LOG_FOLDER_DIRECTORY;
-    if(!boost::filesystem::exists(filePath)) {
+    if (!boost::filesystem::exists(filePath))
+    {
         boost::filesystem::create_directories(filePath);
     }
 
@@ -103,17 +102,15 @@ StatePoolVisBackFront::StatePoolVisBackFront(TRigidBodyIterator beg, TRigidBodyI
     m_logfile << "This is the State pool log file: each line describes the actual mode in which the state pool is\n";
 }
 
-
-
-template<typename RigidBodyStateContainerType>
-void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & state_init) {
-
+template <typename RigidBodyStateContainerType>
+void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType& state_init)
+{
     boost::mutex::scoped_lock l2(m_change_pointer_mutex);
 
-    //initialize state buffer pointers
-    m_idx[0] = 1; //front
-    m_idx[1] = 0; //back
-    m_idx[2] = 0; //vis
+    // initialize state buffer pointers
+    m_idx[0] = 1;  // front
+    m_idx[1] = 0;  // back
+    m_idx[2] = 0;  // vis
 
     m_pool[0].reset();
     m_pool[0].applyBodyStates<false>(state_init);
@@ -122,9 +119,9 @@ void StatePoolVisBackFront::resetStatePool(const RigidBodyStateContainerType & s
     m_pool[1] = m_pool[0];
 
 #if STATEPOOLLOG_TOFILE == 1
-    m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
+    m_logfile << "front: \t" << (unsigned int)m_idx[0] << "\t back: \t" << (unsigned int)m_idx[1] << "\t vis: \t"
+              << (unsigned int)m_idx[2] << endl;
 #endif
 }
-
 
 #endif

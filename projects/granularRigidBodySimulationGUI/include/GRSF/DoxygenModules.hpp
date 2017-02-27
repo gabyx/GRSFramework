@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,34 +11,33 @@
 #ifndef GRSF_DoxygenModules_hpp
 #define GRSF_DoxygenModules_hpp
 
-
-/** @defgroup Common 
+/** @defgroup Common
 * These explaines the common classes which are located under the subfolder Common.
 * Common classes can not really be classified, and are used as helper classes in the framework.
 */
 
-
-/** @defgroup Dynamics 
+/** @defgroup Dynamics
 * These explaines the classes which are related to the dynamics part of the framework. This includes all files
 * under the subfolder Dynamics.
-* The dynamics includes the whole mechanics part, solvers, collision, timestepper and many more helper classes to make up a efficient versatile 
+* The dynamics includes the whole mechanics part, solvers, collision, timestepper and many more helper classes to make
+* up a efficient versatile
 * simulation framework.
 */
 
 /**
 * @ingroup Dynamics
-* @defgroup Collision 
+* @defgroup Collision
 * These explaines the classes which are related to the collision part of the dynamics.
 */
 /**
 * @ingroup Dynamics
-* @defgroup Contact 
+* @defgroup Contact
 * These explaines the classes which are related to a contact of the dynamics.
 */
 
 /**
 * @ingroup Dynamics
-* @defgroup StatesAndBuffers States & Buffers 
+* @defgroup StatesAndBuffers States & Buffers
 * These explaines the classes which are related to the shared buffers and the states of the dynamics.
 */
 /**
@@ -48,39 +47,38 @@
 */
 /**
 * @ingroup Dynamics
-* @defgroup Inclusion 
+* @defgroup Inclusion
 * These are the classes and function corresponding to the inclusion problem.
 */
 
-
-
-/** @defgroup App 
+/** @defgroup App
 * These explaines the classes which are related to the application part of the framework. This includes all files
 * under the subfolder App.
 */
 
-/** @defgroup Singeltons 
+/** @defgroup Singeltons
 * These explaines the classes which are related to a singelton in the framework. This includes all files
 * under the subfolder System.
 */
-/** 
+/**
 * @ingroup Singeltons
-* @defgroup Contexts 
+* @defgroup Contexts
 * All the contexts in this framework.
 */
 
-/** @defgroup States 
+/** @defgroup States
 * These explaines the classes which are related to an app states in the framework. This includes all files
 * under the subfolder States.
-* An application can have several states, which are put in an application state queue. The way the user programs the states, they can be pushed
-* and popped from the stack which then makes it possible to have for example several simulations of different systems in one application and the user
+* An application can have several states, which are put in an application state queue. The way the user programs the
+* states, they can be pushed
+* and popped from the stack which then makes it possible to have for example several simulations of different systems in
+* one application and the user
 * can switch between them.
 */
 
-/** @defgroup Systems 
+/** @defgroup Systems
 * These explaines the classes which are related to a dynamics system in the framework. This includes all files
 * under the subfolder System.
 */
 
-
-#endif	
+#endif

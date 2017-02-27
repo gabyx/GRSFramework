@@ -11,12 +11,12 @@
 #ifndef GRSF_states_simulationManager_SimulationManager_hpp
 #define GRSF_states_simulationManager_SimulationManager_hpp
 
-#include <memory>
 #include <boost/filesystem.hpp>
+#include <memory>
 
-#include "GRSF/common/TypeDefs.hpp"
-#include "GRSF/common/LogDefines.hpp"
 #include "GRSF/common/ApplicationSignalHandler.hpp"
+#include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include TimeStepper_INCLUDE_FILE
 #include DynamicsSystem_INCLUDE_FILE
@@ -28,77 +28,77 @@ class DynamicsState;
 class StateRecorder;
 class SharedBufferDynSys;
 
-
-class SimulationManager {
-public:
-
+class SimulationManager
+{
+    public:
     DEFINE_CONFIG_TYPES
 
     SimulationManager();
     ~SimulationManager();
 
-    std::shared_ptr<SharedBufferDynSys >	    m_pSharedBuffer;
-    std::shared_ptr<StateRecorder >		    m_pStateRecorder;
+    std::shared_ptr<SharedBufferDynSys> m_pSharedBuffer;
+    std::shared_ptr<StateRecorder>      m_pStateRecorder;
 
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
 
-    using SceneParserType = SceneParser<DynamicsSystemType,
-                                        DynamicsSystemType::ParserModulesCreator::SceneParserTraits >;
-    std::shared_ptr< SceneParserType > m_pSceneParser;
+    using SceneParserType =
+        SceneParser<DynamicsSystemType, DynamicsSystemType::ParserModulesCreator::SceneParserTraits>;
+    std::shared_ptr<SceneParserType> m_pSceneParser;
 
     void startSim();
 
-private:
-
+    private:
     CPUTimer m_global_time;
 
-    void writeAllOutput();
+    void             writeAllOutput();
     RecorderSettings m_RecorderSettings;
 
     // Accessed only by thread ===================
 
-    template<bool handleSignals=false>
-    void threadRunRecord(){
+    template <bool handleSignals = false>
+    void           threadRunRecord()
+    {
         m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
-        if(initRecordThread()) {
-
+        if (initRecordThread())
+        {
             // wait for vis thread! (which does some loops before)
             m_global_time.start();
 
-            while(1) {
-                if(handleSignals){
+            while (1)
+            {
+                if (handleSignals)
+                {
                     ApplicationSignalHandler::getSingleton().handlePendingSignals();
                 }
                 // Do one iteration
                 m_pTimestepper->doTimeStep();
                 writeAllOutput();
                 // Check if simulation can be aborted!
-                if(m_pTimestepper->finished()) {
+                if (m_pTimestepper->finished())
+                {
                     m_pSimulationLog->logMessage("---> SimulationManager: Timestepper finished, exit...");
                     break;
                 }
-
             }
             cleanUpRecordThread();
         }
         m_pSimulationLog->logMessage("---> SimulationManager: Simulation leaving...");
     }
 
-
     bool initRecordThread();
     void cleanUpRecordThread();
 
-    struct SettingsSimThread {
+    struct SettingsSimThread
+    {
         double m_EndTime;
     } m_settingsSimThread;
 
+    Logging::Log* m_pSimulationLog;
 
-    Logging::Log *  m_pSimulationLog;
+    std::shared_ptr<TimeStepperType> m_pTimestepper;
 
-    std::shared_ptr< TimeStepperType >	m_pTimestepper;
-
-    std::shared_ptr< DynamicsSystemType > m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
     // ===========================================
 
     unsigned int m_nSimBodies;
@@ -108,5 +108,4 @@ private:
     boost::filesystem::path m_SimFilePath;
 };
 
-
-#endif // SIMULATIONMANAGERMAZE_HPP
+#endif  // SIMULATIONMANAGERMAZE_HPP

@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -18,13 +18,13 @@
 /// Abstract base class providing mechanisms for dynamically growing hardware buffers.
 class DynamicRenderable : public Ogre::SimpleRenderable
 {
-public:
-  /// Constructor
-  DynamicRenderable();
-  /// Virtual destructor
-  virtual ~DynamicRenderable();
+    public:
+    /// Constructor
+    DynamicRenderable();
+    /// Virtual destructor
+    virtual ~DynamicRenderable();
 
-  /** Initializes the dynamic renderable.
+    /** Initializes the dynamic renderable.
    @remarks
       This function should only be called once. It initializes the
       render operation, and calls the abstract function
@@ -32,28 +32,27 @@ public:
    @param operationType The type of render operation to perform.
    @param useIndices Specifies whether to use indices to determine the
           vertices to use as input. */
-  void initialize(Ogre::RenderOperation::OperationType operationType,
-                  bool useIndices);
+    void initialize(Ogre::RenderOperation::OperationType operationType, bool useIndices);
 
-  /// Implementation of Ogre::SimpleRenderable
-  virtual Ogre::Real getBoundingRadius(void) const;
-  /// Implementation of Ogre::SimpleRenderable
-  virtual Ogre::Real getSquaredViewDepth(const Ogre::Camera* cam) const;
+    /// Implementation of Ogre::SimpleRenderable
+    virtual Ogre::Real getBoundingRadius(void) const;
+    /// Implementation of Ogre::SimpleRenderable
+    virtual Ogre::Real getSquaredViewDepth(const Ogre::Camera* cam) const;
 
-protected:
-  /// Maximum capacity of the currently allocated vertex buffer.
-  size_t mVertexBufferCapacity;
-  /// Maximum capacity of the currently allocated index buffer.
-  size_t mIndexBufferCapacity;
+    protected:
+    /// Maximum capacity of the currently allocated vertex buffer.
+    size_t mVertexBufferCapacity;
+    /// Maximum capacity of the currently allocated index buffer.
+    size_t mIndexBufferCapacity;
 
-  /** Creates the vertex declaration.
+    /** Creates the vertex declaration.
    @remarks
       Override and set mRenderOp.vertexData->vertexDeclaration here.
       mRenderOp.vertexData will be created for you before this method
       is called. */
-  virtual void createVertexDeclaration() = 0;
+    virtual void createVertexDeclaration() = 0;
 
-  /** Prepares the hardware buffers for the requested vertex and index counts.
+    /** Prepares the hardware buffers for the requested vertex and index counts.
    @remarks
       This function must be called before locking the buffers in
       fillHardwareBuffers(). It guarantees that the hardware buffers
@@ -67,19 +66,18 @@ protected:
 
    @param indexCount The number of indices the buffer must hold. This
           parameter is ignored if not using indices. */
-  void prepareHardwareBuffers(size_t vertexCount, size_t indexCount);
+    void prepareHardwareBuffers(size_t vertexCount, size_t indexCount);
 
-  /** Fills the hardware vertex and index buffers with data.
+    /** Fills the hardware vertex and index buffers with data.
    @remarks
       This function must call prepareHardwareBuffers() before locking
       the buffers to ensure the they are large enough for the data to
       be written. Afterwards the vertex and index buffers (if using
       indices) can be locked, and data can be written to them. */
-  virtual void fillHardwareBuffers() = 0;
+    virtual void fillHardwareBuffers() = 0;
 
-//  virtual bool preRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys);
-//  virtual void postRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys);
+    //  virtual bool preRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys);
+    //  virtual void postRender(Ogre::SceneManager *sm, Ogre::RenderSystem *rsys);
 };
 
-#endif // DYNAMIC_RENDERABLE_H
-
+#endif  // DYNAMIC_RENDERABLE_H

@@ -20,27 +20,28 @@
 /** Rendering coordinate systems
 *   TODO derive from MovableObject, MovableObjectFactory -> register Ogre::Root->addMovableObjectFactory
 */
-class DynamicCoordinateFrames {
-public:
+class DynamicCoordinateFrames
+{
+    public:
+    DynamicCoordinateFrames()
+        : m_xAxis(DynamicLines::OperationType::OT_LINE_LIST)
+        , m_yAxis(DynamicLines::OperationType::OT_LINE_LIST)
+        , m_zAxis(DynamicLines::OperationType::OT_LINE_LIST){};
 
-    DynamicCoordinateFrames():
-        m_xAxis(DynamicLines::OperationType::OT_LINE_LIST),
-        m_yAxis(DynamicLines::OperationType::OT_LINE_LIST),
-        m_zAxis(DynamicLines::OperationType::OT_LINE_LIST)
-    {};
-
-    void reserveCoordinateSystems(unsigned int nCoordSys){
-        m_xAxis.reserve(nCoordSys*2);
-        m_yAxis.reserve(nCoordSys*2);
-        m_zAxis.reserve(nCoordSys*2);
+    void reserveCoordinateSystems(unsigned int nCoordSys)
+    {
+        m_xAxis.reserve(nCoordSys * 2);
+        m_yAxis.reserve(nCoordSys * 2);
+        m_zAxis.reserve(nCoordSys * 2);
     }
 
-    void setVisible(bool value, bool cascade = true){
-        m_dynCoordFrameNode->setVisible(value,cascade);
+    void setVisible(bool value, bool cascade = true)
+    {
+        m_dynCoordFrameNode->setVisible(value, cascade);
     }
 
-
-    ~DynamicCoordinateFrames(){
+    ~DynamicCoordinateFrames()
+    {
         m_dynCoordFrameNode->detachObject(&m_xAxis);
         m_dynCoordFrameNode->detachObject(&m_yAxis);
         m_dynCoordFrameNode->detachObject(&m_zAxis);
@@ -52,10 +53,11 @@ public:
     The node can be scaled, which only scales the axes, but leaves the origin  of the coordinate system
     at the same place.
     */
-    void addToScene(Ogre::SceneNode * baseFrame,
-                    std::string xAxisMat = "BaseWhiteNoLighting",
-                    std::string yAxisMat = "BaseWhiteNoLighting",
-                    std::string zAxisMat = "BaseWhiteNoLighting"){
+    void addToScene(Ogre::SceneNode* baseFrame,
+                    std::string      xAxisMat = "BaseWhiteNoLighting",
+                    std::string      yAxisMat = "BaseWhiteNoLighting",
+                    std::string      zAxisMat = "BaseWhiteNoLighting")
+    {
         boost::mutex::scoped_lock l(m_mutexLock);
 
         m_dynCoordFrameNode = baseFrame;
@@ -72,8 +74,9 @@ public:
         m_yAxis.setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY - 1);
     }
 
-    template<typename TIterator>
-    void updateFramesSim(TIterator itBegin, TIterator itEnd){
+    template <typename TIterator>
+    void updateFramesSim(TIterator itBegin, TIterator itEnd)
+    {
         boost::mutex::scoped_lock l(m_mutexLock);
         m_xAxis.clear();
         m_yAxis.clear();
@@ -81,47 +84,42 @@ public:
 
         Ogre::Vector3 sc = m_dynCoordFrameNode->getScale();
 
-        for(TIterator it = itBegin; it != itEnd; ++it){
-
+        for (TIterator it = itBegin; it != itEnd; ++it)
+        {
             // do not scale the positions
             // of the coordinate systems by the scale of m_dynCoordFrameNode
-            Ogre::Vector3 p((*it)->m_cFrame.m_p(0)/sc.x,
-                        (*it)->m_cFrame.m_p(1)/sc.y,
-                        (*it)->m_cFrame.m_p(2)/sc.z);
+            Ogre::Vector3 p(
+                (*it)->m_cFrame.m_p(0) / sc.x, (*it)->m_cFrame.m_p(1) / sc.y, (*it)->m_cFrame.m_p(2) / sc.z);
 
             m_xAxis.addPoint(p);
-            m_xAxis.addPoint(p.x + (*it)->m_cFrame.m_e_x(0),
-                             p.y + (*it)->m_cFrame.m_e_x(1),
-                             p.z + (*it)->m_cFrame.m_e_x(2));
+            m_xAxis.addPoint(
+                p.x + (*it)->m_cFrame.m_e_x(0), p.y + (*it)->m_cFrame.m_e_x(1), p.z + (*it)->m_cFrame.m_e_x(2));
 
             m_yAxis.addPoint(p);
-            m_yAxis.addPoint(p.x + (*it)->m_cFrame.m_e_y(0),
-                             p.y + (*it)->m_cFrame.m_e_y(1),
-                             p.z + (*it)->m_cFrame.m_e_y(2));
+            m_yAxis.addPoint(
+                p.x + (*it)->m_cFrame.m_e_y(0), p.y + (*it)->m_cFrame.m_e_y(1), p.z + (*it)->m_cFrame.m_e_y(2));
 
             m_zAxis.addPoint(p);
-            m_zAxis.addPoint(p.x + (*it)->m_cFrame.m_e_z(0),
-                             p.y + (*it)->m_cFrame.m_e_z(1),
-                             p.z + (*it)->m_cFrame.m_e_z(2));
+            m_zAxis.addPoint(
+                p.x + (*it)->m_cFrame.m_e_z(0), p.y + (*it)->m_cFrame.m_e_z(1), p.z + (*it)->m_cFrame.m_e_z(2));
         }
     }
 
-    void updateFramesVis(){
+    void updateFramesVis()
+    {
         boost::mutex::scoped_lock l(m_mutexLock);
         m_xAxis.update();
         m_yAxis.update();
         m_zAxis.update();
         m_dynCoordFrameNode->needUpdate();
-
     };
 
-private:
-    boost::mutex m_mutexLock; // SimThread locks and updates points, vis thread locks and
-    Ogre::SceneNode*  m_dynCoordFrameNode;
-    DynamicLines m_xAxis;
-    DynamicLines m_yAxis;
-    DynamicLines m_zAxis;
-
+    private:
+    boost::mutex     m_mutexLock;  // SimThread locks and updates points, vis thread locks and
+    Ogre::SceneNode* m_dynCoordFrameNode;
+    DynamicLines     m_xAxis;
+    DynamicLines     m_yAxis;
+    DynamicLines     m_zAxis;
 };
 
 #endif

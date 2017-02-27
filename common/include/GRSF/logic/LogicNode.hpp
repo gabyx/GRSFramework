@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -14,8 +14,6 @@
 #include <vector>
 #include "GRSF/common/Asserts.hpp"
 #include "GRSF/logic/LogicCommon.hpp"
-
-
 
 /** General Concept
 
@@ -56,149 +54,172 @@
 */
 
 class LogicSocketBase;
-template<typename T> class LogicSocket;
-
+template <typename T>
+class LogicSocket;
 
 class LogicNode
 {
-public:
+    public:
     using SocketListType = LogicSocketCommon::SocketListType;
     using SocketIterator = LogicSocketCommon::SocketIterator;
 
     const unsigned int m_id;
 
-public:
+    public:
     LogicNode(unsigned int id);
 
-	virtual ~LogicNode();
+    virtual ~LogicNode();
 
     /** some reset*/
-    virtual void reset(){}
+    virtual void reset()
+    {
+    }
 
     /** the main compute function
         may be called many times
     */
-    virtual void compute() {}
+    virtual void compute()
+    {
+    }
 
+    LogicSocketBase* getISocket(unsigned int index);
+    LogicSocketBase* getOSocket(unsigned int index);
 
-    LogicSocketBase*   getISocket(unsigned int index);
-    LogicSocketBase*   getOSocket(unsigned int index);
+    inline bool hasLinks() const
+    {
+        return m_hasLinks;
+    }
+    inline void setLinked(void)
+    {
+        m_hasLinks = true;
+    }
+    inline void setPriority(unsigned int v)
+    {
+        m_priority = v;
+    }
+    inline unsigned int getPriority(void) const
+    {
+        return m_priority;
+    }
 
-    inline bool          hasLinks() const {return m_hasLinks;}
-    inline void          setLinked(void){m_hasLinks = true;}
-    inline void          setPriority(unsigned int v){m_priority = v;}
-    inline unsigned int  getPriority(void) const {return m_priority;}
+    SocketListType& getInputs()
+    {
+        return m_inputs;
+    }
+    SocketListType& getOutputs()
+    {
+        return m_outputs;
+    }
 
+    template <typename T>
+    void addISock(const T& defaultValue)
+    {
+        unsigned int idx = m_inputs.size() + m_outputs.size();
+        auto*        t   = new LogicSocket<T>(this, true, defaultValue, idx);
+        m_inputs.push_back(t);
+    }
 
-    SocketListType& getInputs()  {return m_inputs;}
-    SocketListType& getOutputs() {return m_outputs;}
+    template <typename T>
+    void addOSock(const T& defaultValue)
+    {
+        unsigned int idx = m_inputs.size() + m_outputs.size();
+        auto*        t   = new LogicSocket<T>(this, false, defaultValue, idx);
+        m_outputs.push_back(t);
+    }
 
+    template <typename T>
+    LogicSocket<T>* getISocket(unsigned int idx);
+    template <typename T>
+    LogicSocket<T>* getOSocket(unsigned int idx);
 
-	template<typename T>
-	void addISock(const T & defaultValue)
-	{
-	    unsigned int idx = m_inputs.size() + m_outputs.size();
-	    auto * t = new LogicSocket<T>(this, true, defaultValue, idx);
-		m_inputs.push_back(t);
-	}
+    template <typename T>
+    T getISocketValue(unsigned int idx);
+    template <typename T>
+    T& getISocketRefValue(unsigned int idx);
+    template <typename T>
+    T getOSocketValue(unsigned int idx);
+    template <typename T>
+    T& getOSocketRefValue(unsigned int idx);
 
-	template<typename T>
-	void addOSock(const T & defaultValue)
-	{
-	    unsigned int idx = m_inputs.size() + m_outputs.size();
-		auto * t = new LogicSocket<T>(this, false, defaultValue, idx);
-		m_outputs.push_back(t);
-	}
-
-	template<typename T> LogicSocket<T>* getISocket(unsigned int idx);
-    template<typename T> LogicSocket<T>* getOSocket(unsigned int idx);
-
-	template<typename T> T getISocketValue(unsigned int idx);
-	template<typename T> T& getISocketRefValue(unsigned int idx);
-    template<typename T> T getOSocketValue(unsigned int idx);
-	template<typename T> T& getOSocketRefValue(unsigned int idx);
-
-	template<typename T, typename TIn> void setISocketValue(unsigned int idx, const TIn & data);
-    template<typename T, typename TIn> void setOSocketValue(unsigned int idx, const TIn & data);
-    template<typename T> void distributeOSocketValue(unsigned int idx); /** special only sets all values for all write links */
+    template <typename T, typename TIn>
+    void setISocketValue(unsigned int idx, const TIn& data);
+    template <typename T, typename TIn>
+    void setOSocketValue(unsigned int idx, const TIn& data);
+    template <typename T>
+    void distributeOSocketValue(unsigned int idx); /** special only sets all values for all write links */
     /**
     * Links together an output with an input. Get the data from output from the input
     */
-    static void makeGetLink(LogicNode * outN, unsigned int outS,
-                            LogicNode * inN,  unsigned int inS);
+    static void makeGetLink(LogicNode* outN, unsigned int outS, LogicNode* inN, unsigned int inS);
     /**
     * Links together an output with an input. Write the data from output to the input
     */
-    static void makeWriteLink(LogicNode * outN, unsigned int outS,
-                              LogicNode * inN,  unsigned int inS);
+    static void makeWriteLink(LogicNode* outN, unsigned int outS, LogicNode* inN, unsigned int inS);
 
-protected:
-    bool            m_hasLinks;
-    SocketListType  m_inputs;
-    SocketListType  m_outputs;
-    unsigned int    m_priority;
+    protected:
+    bool           m_hasLinks;
+    SocketListType m_inputs;
+    SocketListType m_outputs;
+    unsigned int   m_priority;
 
-    //SocketListType m_sockets;
+    // SocketListType m_sockets;
 };
-
 
 #include "GRSF/logic/LogicSocket.hpp"
 
-
-template<typename T>
+template <typename T>
 LogicSocket<T>* LogicNode::getISocket(unsigned int idx)
 {
-    if (idx < m_inputs.size()){
+    if (idx < m_inputs.size())
+    {
         return m_inputs[idx]->castToType<T>();
     }
     return nullptr;
 }
-template<typename T>
+template <typename T>
 LogicSocket<T>* LogicNode::getOSocket(unsigned int idx)
 {
-    if (idx < m_outputs.size()){
+    if (idx < m_outputs.size())
+    {
         return m_outputs[idx]->castToType<T>();
     }
     return nullptr;
 }
 
-
-template<typename T>
+template <typename T>
 T LogicNode::getISocketValue(unsigned int idx)
 {
     return m_inputs[idx]->castToType<T>()->getValue();
 }
-template<typename T>
+template <typename T>
 T LogicNode::getOSocketValue(unsigned int idx)
 {
     return m_outputs[idx]->castToType<T>()->getValue();
 }
 
-template<typename T>
-T & LogicNode::getISocketRefValue(unsigned int idx)
+template <typename T>
+T& LogicNode::getISocketRefValue(unsigned int idx)
 {
     return m_inputs[idx]->castToType<T>()->getValueRef();
 }
-template<typename T>
-T & LogicNode::getOSocketRefValue(unsigned int idx)
+template <typename T>
+T& LogicNode::getOSocketRefValue(unsigned int idx)
 {
     return m_outputs[idx]->castToType<T>()->getValueRef();
 }
 
-
-
-template<typename T, typename TIn>
-void LogicNode::setISocketValue(unsigned int idx, const TIn & data)
+template <typename T, typename TIn>
+void LogicNode::setISocketValue(unsigned int idx, const TIn& data)
 {
     m_inputs[idx]->castToType<T>()->setValue(data);
 }
-template<typename T, typename TIn>
-void LogicNode::setOSocketValue(unsigned int idx, const TIn & data)
+template <typename T, typename TIn>
+void LogicNode::setOSocketValue(unsigned int idx, const TIn& data)
 {
     m_outputs[idx]->castToType<T>()->setValue(data);
 }
 
-template<typename T>
+template <typename T>
 void LogicNode::distributeOSocketValue(unsigned int idx)
 {
     m_outputs[idx]->castToType<T>()->distributeValue();
@@ -206,13 +227,12 @@ void LogicNode::distributeOSocketValue(unsigned int idx)
 
 /** Some handy macro to use when inheriting from LogicNode */
 
-#define GRSF_LN_DECLARE_SIZES \
-enum {\
-    N_INPUTS  = Inputs::INPUTS_LAST,\
-    N_OUTPUTS = Outputs::OUTPUTS_LAST,\
-    N_SOCKETS = N_INPUTS + N_OUTPUTS,\
-};
+#define GRSF_LN_DECLARE_SIZES              \
+    enum                                   \
+    {                                      \
+        N_INPUTS  = Inputs::INPUTS_LAST,   \
+        N_OUTPUTS = Outputs::OUTPUTS_LAST, \
+        N_SOCKETS = N_INPUTS + N_OUTPUTS,  \
+    };
 
-
-
-#endif //LogicNode_hpp
+#endif  // LogicNode_hpp

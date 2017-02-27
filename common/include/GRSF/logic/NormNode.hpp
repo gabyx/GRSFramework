@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -13,54 +13,58 @@
 
 #include "GRSF/logic/LogicNode.hpp"
 
-namespace LogicNodes{
-
-    template<typename T>
-    class NormNode: public LogicNode {
+namespace LogicNodes
+{
+template <typename T>
+class NormNode : public LogicNode
+{
     public:
+    using PREC = typename T::Scalar;
 
-        using PREC = typename T::Scalar;
-
-        struct Inputs {
-            enum {
-                Value,
-                INPUTS_LAST
-            };
+    struct Inputs
+    {
+        enum
+        {
+            Value,
+            INPUTS_LAST
         };
-
-        struct Outputs {
-            enum {
-                Result,
-                OUTPUTS_LAST
-            };
-        };
-
-        enum {
-            N_INPUTS  = Inputs::INPUTS_LAST,
-            N_OUTPUTS = Outputs::OUTPUTS_LAST - Inputs::INPUTS_LAST,
-            N_SOCKETS = N_INPUTS + N_OUTPUTS
-        };
-
-        DECLARE_ISOCKET_TYPE(Value, T );
-        DECLARE_OSOCKET_TYPE(Result, PREC );
-
-
-        NormNode(unsigned int id) : LogicNode(id) {
-            ADD_ISOCK(Value,T());
-            ADD_OSOCK(Result,PREC());
-        }
-
-        virtual ~NormNode() {
-        }
-
-        virtual void compute(){
-            //std::cout << GET_ISOCKET_REF_VALUE(Value) << std::endl;
-            SET_OSOCKET_VALUE(Result,GET_ISOCKET_REF_VALUE(Value).norm());
-        }
     };
+
+    struct Outputs
+    {
+        enum
+        {
+            Result,
+            OUTPUTS_LAST
+        };
+    };
+
+    enum
+    {
+        N_INPUTS  = Inputs::INPUTS_LAST,
+        N_OUTPUTS = Outputs::OUTPUTS_LAST - Inputs::INPUTS_LAST,
+        N_SOCKETS = N_INPUTS + N_OUTPUTS
+    };
+
+    DECLARE_ISOCKET_TYPE(Value, T);
+    DECLARE_OSOCKET_TYPE(Result, PREC);
+
+    NormNode(unsigned int id) : LogicNode(id)
+    {
+        ADD_ISOCK(Value, T());
+        ADD_OSOCK(Result, PREC());
+    }
+
+    virtual ~NormNode()
+    {
+    }
+
+    virtual void compute()
+    {
+        // std::cout << GET_ISOCKET_REF_VALUE(Value) << std::endl;
+        SET_OSOCKET_VALUE(Result, GET_ISOCKET_REF_VALUE(Value).norm());
+    }
+};
 };
 
-#endif // NormNode_hpp
-
-
-
+#endif  // NormNode_hpp

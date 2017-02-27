@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -12,17 +12,16 @@
 #define GRSF_states_AppState_hpp
 
 /*=========================================================
-	implementation specific includes & predefinitions
+    implementation specific includes & predefinitions
 _________________________________________________________*/
 #include <memory>
 #include "GRSF/singeltons/contexts/RenderContext.hpp"
-
 
 class RenderAppState;
 //=========================================================
 
 /*=========================================================
-	class AppStateListener
+    class AppStateListener
 _________________________________________________________*/
 /**
 * @ingroup	statestuff
@@ -34,22 +33,22 @@ _________________________________________________________*/
 **/
 class AppStateListener
 {
-public:
-	AppStateListener(void){};
-	virtual ~AppStateListener(void){};
+    public:
+    AppStateListener(void){};
+    virtual ~AppStateListener(void){};
 
-	virtual void manageAppState(Ogre::String stateName, std::shared_ptr<RenderAppState> state) = 0;
+    virtual void manageAppState(Ogre::String stateName, std::shared_ptr<RenderAppState> state) = 0;
 
-	virtual std::shared_ptr<RenderAppState>	findAppStateByName(Ogre::String stateName) = 0;
-	/*virtual void			changeAppState(std::shared_ptr<RenderAppState> state) = 0;*/
-	virtual bool			pushAppState(std::shared_ptr<RenderAppState> state) = 0;
-	virtual void			popAppState() = 0;
-	virtual void			shutdown() = 0;
+    virtual std::shared_ptr<RenderAppState> findAppStateByName(Ogre::String stateName) = 0;
+    /*virtual void			changeAppState(std::shared_ptr<RenderAppState> state) = 0;*/
+    virtual bool pushAppState(std::shared_ptr<RenderAppState> state) = 0;
+    virtual void popAppState()                                       = 0;
+    virtual void shutdown()                                          = 0;
 };
 //=========================================================
 
 /*=========================================================
-	class RenderAppState:
+    class RenderAppState:
 _________________________________________________________*/
 /**
 * @ingroup	myFramework
@@ -60,48 +59,62 @@ _________________________________________________________*/
 **/
 class RenderAppState
 {
-public:
-	//! @todo	<debug> should be protected, but RenderContext needs Access over m_pCurrentState
+    public:
+    //! @todo	<debug> should be protected, but RenderContext needs Access over m_pCurrentState
 
-	static void create(std::shared_ptr<AppStateListener> parent, const Ogre::String name){};
+    static void create(std::shared_ptr<AppStateListener> parent, const Ogre::String name){};
 
-	virtual void enter(void) = 0;
-	virtual void exit(void) = 0;
-	virtual bool pause(void){return false;}
-	virtual void resume(void){};
-	virtual void update(double timeSinceLastFrame) = 0;
+    virtual void enter(void) = 0;
+    virtual void exit(void)  = 0;
+    virtual bool pause(void)
+    {
+        return false;
+    }
+    virtual void resume(void){};
+    virtual void update(double timeSinceLastFrame) = 0;
 
-	std::shared_ptr<Ogre::SceneManager>		m_pSceneMgr;
+    std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
 
-	virtual ~RenderAppState(){};
-protected:
+    virtual ~RenderAppState(){};
 
-   bool m_bEntered;
+    protected:
+    bool m_bEntered;
 
-	RenderAppState(void){};
+    RenderAppState(void){};
 
-	std::shared_ptr<RenderAppState>	findAppStateByName(Ogre::String stateName){return m_pParent->findAppStateByName(stateName);}
-	/*void			changeAppState(std::shared_ptr<RenderAppState> state){m_pParent->changeAppState(state);}*/
-	bool			pushAppState(std::shared_ptr<RenderAppState> state){return m_pParent->pushAppState(state);}
-	void			popAppState(void){m_pParent->popAppState();}
-	void			shutdown(void){m_pParent->shutdown();}
+    std::shared_ptr<RenderAppState> findAppStateByName(Ogre::String stateName)
+    {
+        return m_pParent->findAppStateByName(stateName);
+    }
+    /*void			changeAppState(std::shared_ptr<RenderAppState> state){m_pParent->changeAppState(state);}*/
+    bool pushAppState(std::shared_ptr<RenderAppState> state)
+    {
+        return m_pParent->pushAppState(state);
+    }
+    void popAppState(void)
+    {
+        m_pParent->popAppState();
+    }
+    void shutdown(void)
+    {
+        m_pParent->shutdown();
+    }
 
-	AppStateListener*  m_pParent;
+    AppStateListener* m_pParent;
 };
 //=========================================================
 
-
 /*=========================================================
-	AppState implementation specific includes
+    AppState implementation specific includes
 _________________________________________________________*/
-#include <OISEvents.h>										// <debug> all needed?
+#include <OISEvents.h>  // <debug> all needed?
 #include <OISInputManager.h>
 #include <OISKeyboard.h>
 #include <OISMouse.h>
 //=========================================================
 
 /*=========================================================
-	Class AppState
+    Class AppState
 _________________________________________________________*/
 /**
 * @ingroup myFramework
@@ -120,16 +133,16 @@ class AppState : public RenderAppState, public OIS::KeyListener, public OIS::Mou
 //=========================================================
 
 /*=========================================================
-	Macro definition to automatically create a
-	(Render)AppState's create(...) function.
+    Macro definition to automatically create a
+    (Render)AppState's create(...) function.
 _________________________________________________________*/
-#define DECLARE_APPSTATE_CLASS(T)										\
-	static void create(std::shared_ptr<AppStateListener> parent, const Ogre::String name)	\
-{																		\
-	std::shared_ptr<T> myAppState = std::shared_ptr<T>(new T());											\
-	myAppState->m_pParent = parent.get();										\
-	parent->manageAppState(name, myAppState);							\
-}
+#define DECLARE_APPSTATE_CLASS(T)                                                         \
+    static void create(std::shared_ptr<AppStateListener> parent, const Ogre::String name) \
+    {                                                                                     \
+        std::shared_ptr<T> myAppState = std::shared_ptr<T>(new T());                      \
+        myAppState->m_pParent         = parent.get();                                     \
+        parent->manageAppState(name, myAppState);                                         \
+    }
 //=========================================================
 
-#endif	// APPSTATE_HPP
+#endif  // APPSTATE_HPP

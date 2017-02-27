@@ -59,8 +59,6 @@
 
 //#include "CompileTimeTable.hpp"
 
-
-
 // #include "ProxProfile.hpp"
 
 //#include "FrontBackBufferComplicated.hpp"
@@ -86,7 +84,6 @@
 
 //#include "ComputeMVBBTests.hpp"
 
-
 //#include "TemplateStateTree.hpp"
 //#include "LoggerTest.hpp"
 //#include "ContactGraphTest2.hpp"
@@ -109,56 +106,51 @@
 
 //#include "GRSF/common/MetaHelper.hpp"
 
-int  main( int  argc, char  ** argv ){
+int main(int argc, char** argv)
+{
+    // eigenSpeedTest();
 
+    // linearReusableStorageTest();
 
-
-    //eigenSpeedTest();
-
-
-    //linearReusableStorageTest();
-
-    //pointCloudTest();
+    // pointCloudTest();
 
     /* initialize random seed: */
 
-
     // stringFormatterTest();
 
-    //Test::serializeKdTree();
-    //Test::kdTreeTest();
+    // Test::serializeKdTree();
+    // Test::kdTreeTest();
 
-    //AABBnDTest();
-//        calcualteExpectedMassBin();
-//        calculateExpectedMass();
-//        calculateExpectedMassSimple();
-        //profileVectorBuffers();
+    // AABBnDTest();
+    //        calcualteExpectedMassBin();
+    //        calculateExpectedMass();
+    //        calculateExpectedMassSimple();
+    // profileVectorBuffers();
 
-        //convertSomeNumbers();
-//    doBenchmark();
+    // convertSomeNumbers();
+    //    doBenchmark();
     stringTest();
-//    doBenchmark();
+    //    doBenchmark();
 
+    //    SceneParser1::test();
+    //    SceneParser2::test();
+    // runTest();
+    // runRangeTest();
+    // frontBackBufferTest();
 
-//    SceneParser1::test();
-//    SceneParser2::test();
-    //runTest();
-    //runRangeTest();
-    //frontBackBufferTest();
+    // proxProfile();
 
-    //proxProfile();
+    // printCompileTimeTable();
 
-    //printCompileTimeTable();
+    // fstreamBufferTest();
+    // fstreamOpenCloseTest();
 
-    //fstreamBufferTest();
-    //fstreamOpenCloseTest();
-
-    //copyConstructorTest();
-    //iteratorTestRun();
-    //templateTemplateParamsTest();
-    //constVariantTest();
-    //multiIndexContainerTest();
-    //mortonKeyTest();
+    // copyConstructorTest();
+    // iteratorTestRun();
+    // templateTemplateParamsTest();
+    // constVariantTest();
+    // multiIndexContainerTest();
+    // mortonKeyTest();
 
     return 0;
 };

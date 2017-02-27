@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,33 +11,26 @@
 #ifndef GRSF_common_ProgressBarCL_hpp
 #define GRSF_common_ProgressBarCL_hpp
 
-
 /*
 *  A stupid commando interface progress bar!
 */
 template <typename T>
-class ProgressBarCL{
-public:
-
-    ProgressBarCL(std::ostream & s,
-                  std::string title,
-                  T start,
-                  T end, unsigned int length = 20
-                  ):m_oStream(s)
+class ProgressBarCL
+{
+    public:
+    ProgressBarCL(std::ostream& s, std::string title, T start, T end, unsigned int length = 20) : m_oStream(s)
     {
         m_start = start;
         m_end   = end;
 
         m_length = length;
-        m_title = title;
+        m_title  = title;
     }
 
-    void start(){
+    void start()
+    {
         m_current = 0;
-        m_oStream << m_title <<" [";
-
-
-
+        m_oStream << m_title << " [";
     }
     //   start                end
     //    340        341      342  ] // can be continous!
@@ -49,41 +42,41 @@ public:
     // i = (end -start) / l
     // idx = floor(c / i)  = 2 there should be the progress bar
 
-    void update(unsigned int counter){
-
-        double c = counter - m_start;
-        double i = (double)(m_end-m_start) / (double)(m_length);
+    void update(unsigned int counter)
+    {
+        double       c = counter - m_start;
+        double       i = (double)(m_end - m_start) / (double)(m_length);
         unsigned int idx;
-        if(i <= 0.0){
+        if (i <= 0.0)
+        {
             idx = m_length;
-        }else{
+        }
+        else
+        {
             idx = std::floor(c / i) + 1;
             idx = std::min(idx, m_length);
         }
 
         // pop out character till idx
-        while(m_current < idx){
+        while (m_current < idx)
+        {
             m_oStream << "=";
             m_current++;
         }
 
-        if(m_current == m_length){
+        if (m_current == m_length)
+        {
             m_oStream << "]" << std::endl;
         }
     }
 
-
-private:
+    private:
     std::string m_title;
 
-    T m_start, m_end;
+    T            m_start, m_end;
     unsigned int m_length, m_current;
 
-    std::ostream & m_oStream;
+    std::ostream& m_oStream;
 };
 
-
-
-#endif // ProgressBarCL_hpp
-
-
+#endif  // ProgressBarCL_hpp

@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,28 +11,21 @@
 #include <iostream>
 #include <type_traits>
 
-
 #include <Eigen/Dense>
 //#include "EigenTensorTest.hpp"
 
-
-
-
 int main(int, char**)
 {
+    const double b[2] = {1, 2};
 
-    const double b[2] = {1,2};
-
-    //eigenTensorTest();
-    using Vec2 = Eigen::Matrix<double,2,1>;
+    // eigenTensorTest();
+    using Vec2 = Eigen::Matrix<double, 2, 1>;
 
     Eigen::Map<const Vec2> m(b);
 
-    using T = Eigen::Matrix<double,2,1>;
+    using T = Eigen::Matrix<double, 2, 1>;
 
-    static_assert( (std::is_base_of< Eigen::DenseBase<T> , T >::value), "" );
+    static_assert((std::is_base_of<Eigen::DenseBase<T>, T>::value), "");
 
-
-return 0;
+    return 0;
 }
-

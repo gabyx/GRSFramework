@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,15 +11,13 @@
 #ifndef GRSF_dynamics_collision_geometry_MeshGeometry_hpp
 #define GRSF_dynamics_collision_geometry_MeshGeometry_hpp
 
-#include <memory>
-#include <boost/serialization/access.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/serialization/access.hpp>
+#include <memory>
 
 #include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/dynamics/general/MeshData.hpp"
-
-
 
 #if USE_OPCODE == 1
 #include <Opcode.h>
@@ -30,27 +28,28 @@
 #endif
 #endif
 
-class MeshGeometry {
-public:
-
+class MeshGeometry
+{
+    public:
     DEFINE_MATRIX_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    MeshGeometry(): m_pMeshData(nullptr){}
-    MeshGeometry( boost::filesystem::path path, MeshData * pMeshData):
-        m_filePath(path), m_pMeshData(pMeshData) {
-
+    MeshGeometry() : m_pMeshData(nullptr)
+    {
+    }
+    MeshGeometry(boost::filesystem::path path, MeshData* pMeshData) : m_filePath(path), m_pMeshData(pMeshData)
+    {
 #if USE_OPCODE == 1
 
-        //ASSERTMSG(sizeof(MeshPREC) == sizeof(OPCODE_PRECISION), " ATTENTION: OPCODE seems to use another precision than the MeshData!");
-        // Dependent on the use of our collision library, build here related stuff...
-
-
+// ASSERTMSG(sizeof(MeshPREC) == sizeof(OPCODE_PRECISION), " ATTENTION: OPCODE seems to use another precision than the
+// MeshData!");
+// Dependent on the use of our collision library, build here related stuff...
 
 //      Opcode::MeshInterface* meshInterface = new Opcode::MeshInterface();
 //	   meshInterface->SetNbTriangles((unsigned int)m_pMeshData->m_Faces.size());
 //	   meshInterface->SetNbVertices((unsigned int)m_pMeshData->m_Vertices.size());
-//	   meshInterface->SetPointers((const IceMaths::IndexedTriangle*)(m_pMeshData->m_Faces[0].data()), (const IceMaths::Point*)(m_pMeshData->m_Vertices[0].data()));
+//	   meshInterface->SetPointers((const IceMaths::IndexedTriangle*)(m_pMeshData->m_Faces[0].data()), (const
+// IceMaths::Point*)(m_pMeshData->m_Vertices[0].data()));
 //
 //      Opcode::OPCODECREATE create;
 //	   create.mIMesh = meshInterface;
@@ -69,71 +68,65 @@ public:
         using namespace ozcollide;
         AABBTreePolyBuilder builder;
 
-
-
-
-        if(pMeshData->m_Vertices.size()> std::numeric_limits<int>::max()) {
+        if (pMeshData->m_Vertices.size() > std::numeric_limits<int>::max())
+        {
             GRSF_ERRORMSG("The mesh has vertice indices which are to big to put into an INT in ozcollide");
         }
-        if(pMeshData->m_Faces.size()> std::numeric_limits<int>::max()) {
+        if (pMeshData->m_Faces.size() > std::numeric_limits<int>::max())
+        {
             GRSF_ERRORMSG("The mesh has to many faces to put into an INT in ozcollide");
         }
 
         m_ozPolys.reserve(pMeshData->m_Faces.size());
         std::vector<int> a;
-        for(int i=0; i<pMeshData->m_Faces.size(); i++) {
-            //poly.setIndicesMemory(3,reinterpret_cast<int *>(pMeshData->m_Faces[i].data() ));
+        for (int i = 0; i < pMeshData->m_Faces.size(); i++)
+        {
+            // poly.setIndicesMemory(3,reinterpret_cast<int *>(pMeshData->m_Faces[i].data() ));
             ozcollide::Polygon poly;
-            //poly.setNbIndices(3);
-            //std::cout << pMeshData->m_Faces[i] <<","<<std::endl;
-            //std::cout << sizeof(int)<<std::endl;
-            poly.setIndex(0,(int) pMeshData->m_Faces[i](0));
-            poly.setIndex(1,(int) pMeshData->m_Faces[i](1));
-            poly.setIndex(2,(int) pMeshData->m_Faces[i](2));
+            // poly.setNbIndices(3);
+            // std::cout << pMeshData->m_Faces[i] <<","<<std::endl;
+            // std::cout << sizeof(int)<<std::endl;
+            poly.setIndex(0, (int)pMeshData->m_Faces[i](0));
+            poly.setIndex(1, (int)pMeshData->m_Faces[i](1));
+            poly.setIndex(2, (int)pMeshData->m_Faces[i](2));
 
-            std::cout <<  poly.getIndex(0) <<","<< poly.getIndex(1)  <<","<< poly.getIndex(2) <<std::endl;
+            std::cout << poly.getIndex(0) << "," << poly.getIndex(1) << "," << poly.getIndex(2) << std::endl;
             m_ozPolys.push_back(poly);  ///< ATTTENTION THIS DOES NOT WORK!!!
             a.push_back(i);
-            //std::cout <<  m_ozPolys.back().getIndex(0) <<","<< m_ozPolys.back().getIndex(1)   <<","<< m_ozPolys.back().getIndex(2)  <<std::endl;
+            // std::cout <<  m_ozPolys.back().getIndex(0) <<","<< m_ozPolys.back().getIndex(1)   <<","<<
+            // m_ozPolys.back().getIndex(2)  <<std::endl;
 
+            std::cout << "=================" << std::endl;
 
-            std::cout << "================="<<std::endl;
-
-            ozcollide::Polygon* pols =(&m_ozPolys[0]);
-            for(unsigned int l=0; l<m_ozPolys.size(); l++) {
-                ozcollide::Polygon& pol= m_ozPolys[l];
-                std::cout <<a[l]<<": " << pol.getIndex(0) <<","<<pol.getIndex(1)  <<","<< pol.getIndex(2) <<std::endl;
-
+            ozcollide::Polygon* pols = (&m_ozPolys[0]);
+            for (unsigned int l = 0; l < m_ozPolys.size(); l++)
+            {
+                ozcollide::Polygon& pol = m_ozPolys[l];
+                std::cout << a[l] << ": " << pol.getIndex(0) << "," << pol.getIndex(1) << "," << pol.getIndex(2)
+                          << std::endl;
             }
-            std::cout << "================="<<std::endl;
-
+            std::cout << "=================" << std::endl;
         }
 
-
-        std::cout << "================="<<std::endl;
-        for(unsigned int l=0; l<m_ozPolys.size(); l++) {
+        std::cout << "=================" << std::endl;
+        for (unsigned int l = 0; l < m_ozPolys.size(); l++)
+        {
             ozcollide::Polygon& pol = m_ozPolys[l];
-            std::cout << pol.getIndex(0) <<","<<pol.getIndex(1)  <<","<< pol.getIndex(2) <<std::endl;
+            std::cout << pol.getIndex(0) << "," << pol.getIndex(1) << "," << pol.getIndex(2) << std::endl;
         }
-        std::cout << "================="<<std::endl;
+        std::cout << "=================" << std::endl;
 
-
-        m_pTreePoly = builder.buildFromPolys( &m_ozPolys[0],
-                                              m_ozPolys.size(),
-                                              (const Vec3f*)m_pMeshData->m_Vertices[0].data(),
-                                              m_pMeshData->m_Vertices.size(),
-                                              1,
-                                              nullptr);
+        m_pTreePoly = builder.buildFromPolys(&m_ozPolys[0],
+                                             m_ozPolys.size(),
+                                             (const Vec3f*)m_pMeshData->m_Vertices[0].data(),
+                                             m_pMeshData->m_Vertices.size(),
+                                             1,
+                                             nullptr);
 #endif
-
-
-
-
-
-
     };
 
-    ~MeshGeometry() {
+    ~MeshGeometry()
+    {
 #if USE_OPCODE == 1
         delete m_pOpcodeModel->GetMeshInterface();
         delete m_pOpcodeModel;
@@ -145,21 +138,19 @@ public:
     }
 
     boost::filesystem::path m_filePath;
-    MeshData * m_pMeshData =  nullptr;
+    MeshData*               m_pMeshData = nullptr;
 
 #if USE_OPCODE == 1
-    Opcode::Model * m_pOpcodeModel =  nullptr;
+    Opcode::Model* m_pOpcodeModel = nullptr;
 #endif
 
 #if USE_OZCOLLIDE == 1
-    ozcollide::AABBTreePoly * m_pTreePoly =  nullptr;
-    std::vector<ozcollide::Polygon> m_ozPolys; ///< A set of polygons used in ozcollide, only referenced!
+    ozcollide::AABBTreePoly*        m_pTreePoly = nullptr;
+    std::vector<ozcollide::Polygon> m_ozPolys;  ///< A set of polygons used in ozcollide, only referenced!
 #endif
 
-private:
+    private:
     friend class boost::serialization::access;
-
 };
-
 
 #endif

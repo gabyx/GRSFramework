@@ -1,21 +1,21 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
-#include <iostream>
-#include <string>
-#include <limits>
+#include <Eigen/Dense>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
-#include <Eigen/Dense>
+#include <iostream>
+#include <limits>
+#include <string>
 
 #include <boost/any.hpp>
 
@@ -30,164 +30,191 @@ using namespace std;
 */
 
 #include <Eigen/Dense>
-// CONFIG Template parameter which is used all over the framework!=========================================================
+// CONFIG Template parameter which is used all over the
+// framework!=========================================================
 
 using namespace Eigen;
 using namespace boost::math;
 
+template <typename Ref, int N1>
+struct RunImpl;
+// Those are the different imlpementation for  ConvexSet 2
+template <typename Ref>
+struct RunImpl<Ref, 2>
+{
+    RunImpl(Ref* ptr)
+    {
+        m_pRef = ptr;
+    }
 
-template<typename Ref, int N1> struct RunImpl;
-   // Those are the different imlpementation for  ConvexSet 2   
-template<typename Ref> struct RunImpl<Ref,2>{
+    template <typename T>
+    void run(int& a, int& b, T& c)
+    {
+        a = b + c + m_pRef->m;
+    }
 
-   RunImpl(Ref * ptr){
-      m_pRef = ptr;
-   }
-
-   template<typename T>
-   void run(int &a, int &b , T &c){
-      a = b + c + m_pRef->m;
-   }
-
-   Ref * m_pRef;
-
+    Ref* m_pRef;
 };
 
 // Those are the different imlpementation for  ConvexSet 1
-template<typename Ref> struct RunImpl<Ref,1>{
+template <typename Ref>
+struct RunImpl<Ref, 1>
+{
+    RunImpl(Ref* ptr)
+    {
+        m_pRef = ptr;
+    }
 
-   RunImpl(Ref * ptr){
-      m_pRef = ptr;
-   }
+    template <typename T>
+    void run(int& a, T& b)
+    {
+        a = a + b + m;
+    }
 
-   template<typename T>
-   void run(int &a,  T &b){
-      a= a + b+ m;
-   }
-
-   Ref * m_pRef;
-
+    Ref* m_pRef;
 };
 
 /// BETTER SPECIALIZE THE WHOLE CLASS ON THE CONVEX TYPE!
-template<int _nConvexSet>
-class Variant{
-public:
-      static const int nConvexSet = _nConvexSet;
+template <int _nConvexSet>
+class Variant
+{
+    public:
+    static const int nConvexSet = _nConvexSet;
 
+    Variant() : m_RunImpl(this)
+    {
+        m = 3;
+    };
 
-      Variant(): m_RunImpl(this){
-         m = 3;
-      };
+    typename RunImpl<Variant<nConvexSet>, nConvexSet> m_RunImpl;
 
-      typename RunImpl<Variant<nConvexSet>,nConvexSet> m_RunImpl;
-
-      int m;
-
+    int m;
 };
 
+template <typename Ref, typename Ref2>
+class RunDispatchBase
+{
+    public:
+    RunDispatchBase(Ref* ptr, Ref2* ptr2)
+    {
+        m_pRef  = ptr;
+        m_pRef2 = ptr2;
+    }
 
-template<typename Ref, typename Ref2> class RunDispatchBase{
-public:
-    RunDispatchBase(Ref * ptr, Ref2 *ptr2){
-      m_pRef = ptr;
-      m_pRef2 = ptr2;
-   }
-
-    
-   Ref * m_pRef;
-   Ref2 * m_pRef2;
-
+    Ref*  m_pRef;
+    Ref2* m_pRef2;
 };
 
-template<typename Ref,typename Ref2, int N2> struct RunDispatch;
-template<typename Ref,typename Ref2> class RunDispatch<Ref, Ref2, 2> : public RunDispatchBase<Ref,Ref2>{
+template <typename Ref, typename Ref2, int N2>
+struct RunDispatch;
+template <typename Ref, typename Ref2>
+class RunDispatch<Ref, Ref2, 2> : public RunDispatchBase<Ref, Ref2>
+{
+    public:
+    RunDispatch(Ref* ptr, Ref2* ptr2) : RunDispatchBase(ptr, ptr2)
+    {
+    }
 
-public:
-   RunDispatch(Ref* ptr, Ref2 *ptr2): RunDispatchBase(ptr,ptr2){}
-
-   void runDispatch(){
-      m_pRef2->m_RunImpl.run(m_pRef->m_a,m_pRef->m_b,m_pRef->m_c);
-   }
-
+    void runDispatch()
+    {
+        m_pRef2->m_RunImpl.run(m_pRef->m_a, m_pRef->m_b, m_pRef->m_c);
+    }
 };
 
+template <typename TVariant>
+struct ProxTestVariant
+{
+    static const int nConvexSet = TVariant::nConvexSet;  // say this parameter comes from outside
+    // say we want to call a run function depending on this argument, if for example nArgs = 3, (ConvexSet =
+    // RplusAndDisk) then we give some different arguments
+    // then if nArgs = 4 (ConvexSet = RplusAndContensouEllipsoid). The Test Class provides all parameters, which are set
+    // up and initialized, the underlying Variant has only the correct RunImpl which needs
+    // some number of args...
 
-template< typename TVariant>
-struct ProxTestVariant{
+    ProxTestVariant() : m_runDispatch(this, &m_variant)
+    {
+    }
 
-   static const int nConvexSet = TVariant::nConvexSet; // say this parameter comes from outside
-   // say we want to call a run function depending on this argument, if for example nArgs = 3, (ConvexSet = RplusAndDisk) then we give some different arguments
-   //then if nArgs = 4 (ConvexSet = RplusAndContensouEllipsoid). The Test Class provides all parameters, which are set up and initialized, the underlying Variant has only the correct RunImpl which needs
-   // some number of args...
+    void run()
+    {
+        m_runDispatch.runDispatch();
+    }
 
-  ProxTestVariant():  m_runDispatch(this,&m_variant){}
+    RunDispatch<ProxTestVariant<TVariant>, TVariant, nConvexSet> m_runDispatch;
 
-   void run(){
-     m_runDispatch.runDispatch();
-   }
-   
-   RunDispatch<ProxTestVariant<TVariant>,TVariant,nConvexSet> m_runDispatch;
+    TVariant m_variant;
 
-   TVariant m_variant;
-   
-   int m_a, m_b, m_c;
-
+    int m_a, m_b, m_c;
 };
 
-
-struct FalseType { static const bool  value = false ; };
-struct TrueType {  static const bool  value = true ; };
-
+struct FalseType
+{
+    static const bool value = false;
+};
+struct TrueType
+{
+    static const bool value = true;
+};
 
 template <typename T1, typename T2>
 struct IsSame
 {
-  typedef ::FalseType Result;
-  static const bool result = false;
+    typedef ::FalseType Result;
+    static const bool   result = false;
 };
-
 
 template <typename T>
-struct IsSame<T,T>
+struct IsSame<T, T>
 {
-TrueType Result;
-static const bool result = true;
+    TrueType          Result;
+    static const bool result = true;
 };
 
-namespace OtherType{
-   struct Type1{};
+namespace OtherType
+{
+struct Type1
+{
+};
 }
 
-template< typename _T> // Settings from below
-struct Settings{
-   typedef _T myT;
-   //typedef char static_assert_failed[ ((IsSame< myT,OtherType::Type1>::Result::value)) ? 1 : -1 ];
+template <typename _T>  // Settings from below
+struct Settings
+{
+    typedef _T myT;
+    // typedef char static_assert_failed[ ((IsSame< myT,OtherType::Type1>::Result::value)) ? 1 : -1 ];
 };
 
-struct FOFO{
-   static const int a = 3;
+struct FOFO
+{
+    static const int a = 3;
 };
-int main(){
-  
-  Eigen::Matrix<double,6,6> a;
-  a.setRandom();
-  a.diagonal().setConstant(2);
-  cout << a <<endl;
-  cout << (a.array().abs().matrix().rowwise().sum() - a.diagonal().array().abs().matrix()) <<endl;
-  cout << (a.diagonal().array().abs() < (a.array().abs().matrix().rowwise().sum() - a.diagonal().array().abs().matrix()).array() ) <<endl;
+int main()
+{
+    Eigen::Matrix<double, 6, 6> a;
+    a.setRandom();
+    a.diagonal().setConstant(2);
+    cout << a << endl;
+    cout << (a.array().abs().matrix().rowwise().sum() - a.diagonal().array().abs().matrix()) << endl;
+    cout << (a.diagonal().array().abs() <
+             (a.array().abs().matrix().rowwise().sum() - a.diagonal().array().abs().matrix()).array())
+         << endl;
 
-  cout << "SUM: " << (a.diagonal().array().abs() < (a.array().abs().matrix().rowwise().sum() - a.diagonal().array().abs().matrix()).array()).count() <<endl;
-   //Settings<OtherType::Type1> a;
+    cout << "SUM: "
+         << (a.diagonal().array().abs() <
+             (a.array().abs().matrix().rowwise().sum() - a.diagonal().array().abs().matrix()).array())
+                .count()
+         << endl;
+    // Settings<OtherType::Type1> a;
 
-   //cout << (IsSame<OtherType::Type1,OtherType::Type1>::Result::value)<< endl;
+    // cout << (IsSame<OtherType::Type1,OtherType::Type1>::Result::value)<< endl;
 
-   //Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> * pG =  new Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>(3,4);
-   //(*pG).setRandom(); delete pG;
-   //cout << (*pG).block(0,0,2,2) <<endl;
-   
-   //ProxTestVariant<Variant<2>> TV;
-   //TV.run();
+    // Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> * pG =  new
+    // Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>(3,4);
+    //(*pG).setRandom(); delete pG;
+    // cout << (*pG).block(0,0,2,2) <<endl;
 
-  system("pause");
+    // ProxTestVariant<Variant<2>> TV;
+    // TV.run();
+
+    system("pause");
 };

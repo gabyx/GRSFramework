@@ -10,68 +10,68 @@
 
 #include "GRSF/converters/renderer/RenderExecutionGraph.hpp"
 
-
 #include "GRSF/converters/renderer/RenderExecutionGraphNodes.hpp"
 
-
-void RenderExecutionGraph::setup() {
-
+void RenderExecutionGraph::setup()
+{
     Base::setup();
 
     m_scriptWritterNodes.clear();
-    auto & outNodes = this->getOutputNodes();
-    for(auto & n : outNodes){
-        LogicNodes::RenderScriptWriter * r = dynamic_cast<LogicNodes::RenderScriptWriter * >(n);
-        if(!r) {
+    auto& outNodes = this->getOutputNodes();
+    for (auto& n : outNodes)
+    {
+        LogicNodes::RenderScriptWriter* r = dynamic_cast<LogicNodes::RenderScriptWriter*>(n);
+        if (!r)
+        {
             continue;
         }
         m_scriptWritterNodes.emplace(r);
     }
 
-    if( m_scriptWritterNodes.size() == 0  ) {
-            GRSF_ERRORMSG("Execution tree has no output node 'RenderScriptWriter = [RendermanWriter]' ")
+    if (m_scriptWritterNodes.size() == 0)
+    {
+        GRSF_ERRORMSG("Execution tree has no output node 'RenderScriptWriter = [RendermanWriter]' ")
     }
-
-
 }
 
-void RenderExecutionGraph::initState(boost::filesystem::path outputFilePath,
-                                      double time,
-                                      unsigned int stateNr)
+void RenderExecutionGraph::initState(boost::filesystem::path outputFilePath, double time, unsigned int stateNr)
 {
-     Base::initState(outputFilePath,time,stateNr);
+    Base::initState(outputFilePath, time, stateNr);
 
-     // TODO RendermanWriter node should be LogicNodeGroup (which consist of several LogicNodes by composition)
-     // one for InitNode, AddBodyStateNode, FinalizeFrameNode,  which then can be connected to
-     // and the group assigned to
-     // InitNode -> FRAME_INIT,
-     // AddBodyStateNode -> BODY_FINAL
-     // ExecutionTreeInOut needs then support to add LogicNodeGroup, adds all members nodes of a LogicGroupNode
-     // LogicGroupNode is something special, no compute() function, but provides a ways to expose multiple functionality
-     //
+    // TODO RendermanWriter node should be LogicNodeGroup (which consist of several LogicNodes by composition)
+    // one for InitNode, AddBodyStateNode, FinalizeFrameNode,  which then can be connected to
+    // and the group assigned to
+    // InitNode -> FRAME_INIT,
+    // AddBodyStateNode -> BODY_FINAL
+    // ExecutionTreeInOut needs then support to add LogicNodeGroup, adds all members nodes of a LogicGroupNode
+    // LogicGroupNode is something special, no compute() function, but provides a ways to expose multiple functionality
+    //
 
-     // Call all render script writters
-     for(auto & n : m_scriptWritterNodes){
+    // Call all render script writters
+    for (auto& n : m_scriptWritterNodes)
+    {
         n->initFrame();
-     }
+    }
 }
 
-void RenderExecutionGraph::finalizeState(){
+void RenderExecutionGraph::finalizeState()
+{
+    Base::finalizeState();
 
-     Base::finalizeState();
-
-     // Call all render script writters
-     for(auto & n : m_scriptWritterNodes){
+    // Call all render script writters
+    for (auto& n : m_scriptWritterNodes)
+    {
         n->finalizeFrame();
-     }
+    }
 }
 
-void RenderExecutionGraph::addBodyState(RigidBodyStateAdd * s) {
-
+void RenderExecutionGraph::addBodyState(RigidBodyStateAdd* s)
+{
     Base::addBodyState(s);
 
     // Call all render script writters
-     for(auto & n : m_scriptWritterNodes){
+    for (auto& n : m_scriptWritterNodes)
+    {
         n->writeBody();
-     }
+    }
 }

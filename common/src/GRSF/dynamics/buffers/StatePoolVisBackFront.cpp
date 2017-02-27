@@ -10,19 +10,15 @@
 
 #include "GRSF/dynamics/buffers/StatePoolVisBackFront.hpp"
 
-
-
-
-
-
-StatePoolVisBackFront::~StatePoolVisBackFront() {
+StatePoolVisBackFront::~StatePoolVisBackFront()
+{
     DESTRUCTOR_MESSAGE
     m_logfile.close();
 }
 
 // ==========================
 
-//typename StatePoolVisBackFront::VectorQBody StatePoolVisBackFront::getqInit(const unsigned idxObject)
+// typename StatePoolVisBackFront::VectorQBody StatePoolVisBackFront::getqInit(const unsigned idxObject)
 //{
 //  static typename LayoutConfigType::VectorQBody  q;
 //  m_mutexStateInit.lock();
@@ -32,7 +28,7 @@ StatePoolVisBackFront::~StatePoolVisBackFront() {
 //}
 //
 //
-//void StatePoolVisBackFront::setqInit(const VectorQBody & q ,const unsigned idxObject)
+// void StatePoolVisBackFront::setqInit(const VectorQBody & q ,const unsigned idxObject)
 //{
 //  m_mutexStateInit.lock();
 //  m_state_init.m_SimBodyStates[idxObject].m_q = q;
@@ -40,9 +36,7 @@ StatePoolVisBackFront::~StatePoolVisBackFront() {
 //  return;
 //}
 
-
-
-//typename StatePoolVisBackFront::VectorUBody StatePoolVisBackFront::getuInit(const unsigned idxObject)
+// typename StatePoolVisBackFront::VectorUBody StatePoolVisBackFront::getuInit(const unsigned idxObject)
 //{
 //  typename LayoutConfigType::VectorUBody u;
 //  m_mutexStateInit.lock();
@@ -52,7 +46,7 @@ StatePoolVisBackFront::~StatePoolVisBackFront() {
 //}
 //
 //
-//void StatePoolVisBackFront::setuInit(const VectorUBody & u, const unsigned idxObject)
+// void StatePoolVisBackFront::setuInit(const VectorUBody & u, const unsigned idxObject)
 //{
 //  m_mutexStateInit.lock();
 //  m_state_init.m_SimBodyStates[idxObject].m_u = u;
@@ -60,9 +54,7 @@ StatePoolVisBackFront::~StatePoolVisBackFront() {
 //  return;
 //}
 
-
-
-//void StatePoolVisBackFront::resetStatePool()
+// void StatePoolVisBackFront::resetStatePool()
 //{
 //  boost::mutex::scoped_lock l(m_change_pointer_mutex);
 //
@@ -78,35 +70,36 @@ StatePoolVisBackFront::~StatePoolVisBackFront() {
 //  return;
 //}
 
-
-
 // ONLY USED IN SIM THREAD
 
-typename StatePoolVisBackFront::FrontBackBufferType
-StatePoolVisBackFront::getFrontBackBuffer() {
+typename StatePoolVisBackFront::FrontBackBufferType StatePoolVisBackFront::getFrontBackBuffer()
+{
     return FrontBackBufferType(&m_pool[m_idx[0]], &m_pool[m_idx[1]]);
 }
 
 // ONLY USED IN SIM THREAD
 
-typename StatePoolVisBackFront::FrontBackBufferType
-StatePoolVisBackFront::swapFrontBackBuffer() {
+typename StatePoolVisBackFront::FrontBackBufferType StatePoolVisBackFront::swapFrontBackBuffer()
+{
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
-    if(m_idx[1] != m_idx[2]) {
+    if (m_idx[1] != m_idx[2])
+    {
         std::swap(m_idx[0], m_idx[1]);
 #if STATEPOOLLOG_TOFILE == 1
-        m_logfile << "swapFrontBackBuffer()"<<endl;
-        m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
+        m_logfile << "swapFrontBackBuffer()" << endl;
+        m_logfile << "front: \t" << (unsigned int)m_idx[0] << "\t back: \t" << (unsigned int)m_idx[1] << "\t vis: \t"
+                  << (unsigned int)m_idx[2] << endl;
 #endif
         return FrontBackBufferType(&m_pool[m_idx[0]], &m_pool[m_idx[1]]);
     }
-    int new_front = 3 - m_idx[0] - m_idx[1]; //select the buffer which is currently unused
-    m_idx[1] = m_idx[0];
-    m_idx[0] = new_front;
+    int new_front = 3 - m_idx[0] - m_idx[1];  // select the buffer which is currently unused
+    m_idx[1]      = m_idx[0];
+    m_idx[0]      = new_front;
 
 #if STATEPOOLLOG_TOFILE == 1
-    m_logfile << "swapFrontBackBuffer()"<<endl;
-    m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
+    m_logfile << "swapFrontBackBuffer()" << endl;
+    m_logfile << "front: \t" << (unsigned int)m_idx[0] << "\t back: \t" << (unsigned int)m_idx[1] << "\t vis: \t"
+              << (unsigned int)m_idx[2] << endl;
 #endif
 
     return FrontBackBufferType(&m_pool[m_idx[0]], &m_pool[m_idx[1]]);
@@ -114,31 +107,31 @@ StatePoolVisBackFront::swapFrontBackBuffer() {
 
 // ONLY USED IN VISUALIZATION THREAD
 
-const DynamicsState *
-StatePoolVisBackFront::updateVisBuffer(bool & out_changed) {
+const DynamicsState* StatePoolVisBackFront::updateVisBuffer(bool& out_changed)
+{
     boost::mutex::scoped_lock l(m_change_pointer_mutex);
-    if(m_idx[2] == m_idx[1]) {
+    if (m_idx[2] == m_idx[1])
+    {
         out_changed = false;
         return &m_pool[m_idx[2]];
     }
 
-    m_idx[2] = m_idx[1];
+    m_idx[2]    = m_idx[1];
     out_changed = true;
 
 #if STATEPOOLLOG_TOFILE == 1
-    m_logfile << "updateVisBuffer()"<<endl;
-    m_logfile << "front: \t"<<(unsigned int)m_idx[0]<< "\t back: \t"<<(unsigned int)m_idx[1]<< "\t vis: \t"<<(unsigned int)m_idx[2]<< endl;
+    m_logfile << "updateVisBuffer()" << endl;
+    m_logfile << "front: \t" << (unsigned int)m_idx[0] << "\t back: \t" << (unsigned int)m_idx[1] << "\t vis: \t"
+              << (unsigned int)m_idx[2] << endl;
 #endif
 
     return &m_pool[m_idx[2]];
 }
 
-
-const DynamicsState *
-StatePoolVisBackFront::updateVisBuffer() {
+const DynamicsState* StatePoolVisBackFront::updateVisBuffer()
+{
     bool changed;
     return updateVisBuffer(changed);
 }
 
 //=========================================================
-

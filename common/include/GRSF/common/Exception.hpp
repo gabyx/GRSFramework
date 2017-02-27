@@ -11,32 +11,39 @@
 #ifndef GRSF_common_Exception_hpp
 #define GRSF_common_Exception_hpp
 
-#include <stdexcept>
 #include <exception>
-#include <string>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 
+class Exception : public std::runtime_error
+{
+    public:
+    Exception(const std::stringstream& ss) : std::runtime_error(ss.str()){};
 
-class Exception : public std::runtime_error {
-public:
-    Exception(const std::stringstream & ss): std::runtime_error(ss.str()){};
-private:
-
+    private:
 };
 
+class SignalException : public std::runtime_error
+{
+    public:
+    SignalException(const std::stringstream& ss) : std::runtime_error(ss.str()){};
 
-class SignalException : public std::runtime_error {
-public:
-    SignalException(const std::stringstream & ss): std::runtime_error(ss.str()){};
-private:
-
+    private:
 };
 
+#define GRSF_THROWEXCEPTION(message)                                                                  \
+    {                                                                                                 \
+        std::stringstream ___s___;                                                                    \
+        ___s___ << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; \
+        throw Exception(___s___);                                                                     \
+    }
 
-#define GRSF_THROWEXCEPTION( message ) {std::stringstream ___s___ ; ___s___ << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; throw Exception(___s___);}
+#define GRSF_THROW_SIGNALEXCEPTION(message)                                                           \
+    {                                                                                                 \
+        std::stringstream ___s___;                                                                    \
+        ___s___ << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; \
+        throw SignalException(___s___);                                                               \
+    }
 
-#define GRSF_THROW_SIGNALEXCEPTION( message ) {std::stringstream ___s___ ; ___s___ << message << std::endl << " @ " << __FILE__ << " (" << __LINE__ << ")" << std::endl; throw SignalException(___s___);}
-
-
-
-#endif // Exception_hpp
+#endif  // Exception_hpp

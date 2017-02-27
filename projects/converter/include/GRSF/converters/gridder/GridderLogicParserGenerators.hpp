@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,9 +11,8 @@
 #ifndef GRSF_converters_gridder_GridderLogicParserGenerators_hpp
 #define GRSF_converters_gridder_GridderLogicParserGenerators_hpp
 
-
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include <memory>
 
@@ -21,27 +20,27 @@
 
 class GridderData;
 
-namespace GridderLogicParserGenerators {
+namespace GridderLogicParserGenerators
+{
+struct LogicParserGen
+{
+    LogicParserGen(GridderData* g) : m_g(g)
+    {
+    }
 
-    struct LogicParserGen {
+    GridderData* m_g;
 
-        LogicParserGen( GridderData * g): m_g(g){}
+    template <typename TParser>
+    typename TParser::ParserTraits::TupleModules createParserModules(TParser* p)
+    {
+        using ParserTraits    = typename TParser::ParserTraits;
+        using LogicModuleType = typename ParserTraits::template getModuleType<0>;
 
-        GridderData * m_g;
+        auto logic = std::unique_ptr<LogicModuleType>(new LogicModuleType(p, &m_g->m_gridSettingsList));
 
-        template<typename TParser>
-        typename TParser::ParserTraits::TupleModules
-        createParserModules(TParser * p) {
-
-            using ParserTraits = typename TParser::ParserTraits;
-            using LogicModuleType     = typename ParserTraits::template getModuleType<0>;
-
-            auto logic = std::unique_ptr<LogicModuleType >  (new LogicModuleType(p, &m_g->m_gridSettingsList));
-
-            return std::make_tuple(std::move(logic));
-        };
-
+        return std::make_tuple(std::move(logic));
     };
+};
 };
 
 #endif

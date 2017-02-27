@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -16,194 +16,251 @@
 * This naive implementation is the fastest method to convert! Below is a uncommented .hpp file with the benchmark!
 */
 
-
 #define white_space(c) ((c) == ' ' || (c) == '\t')
 #define valid_digit(c) ((c) >= '0' && (c) <= '9')
 
-
-namespace StringConversion{
-
-namespace detail{
+namespace StringConversion
+{
+namespace detail
+{
 // integral implementation
-template<typename T>
-typename std::enable_if< std::is_integral<T>::value ,bool>::type
-toType(T & r , const char *p) {
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type toType(T& r, const char* p)
+{
     r = 0;
 
     // Skip leading white space, if any.
-    while (white_space(*p) ) {
+    while (white_space(*p))
+    {
         p += 1;
     }
 
     // Get the sign!
     bool neg = false;
-    if (*p == '-') {
+    if (*p == '-')
+    {
         neg = true;
         ++p;
-    }else if(*p == '+'){
+    }
+    else if (*p == '+')
+    {
         neg = false;
         ++p;
     }
 
-    int c = 0; // counter to check how many numbers we got!
-    while (valid_digit(*p)) {
-        r = (r*10) + (*p - '0');
-        ++p; ++c;
+    int c = 0;  // counter to check how many numbers we got!
+    while (valid_digit(*p))
+    {
+        r = (r * 10) + (*p - '0');
+        ++p;
+        ++c;
     }
 
     // FIRST CHECK:
-    if(c==0){return false;} // we got no dezimal places: invalid number!
-     // POST CHECK:
+    if (c == 0)
+    {
+        return false;
+    }  // we got no dezimal places: invalid number!
+       // POST CHECK:
     // skip post whitespaces
-    while( white_space(*p) ){
+    while (white_space(*p))
+    {
         ++p;
     }
-    if(*p != '\0'){return false;} // if next character is not the terminating character: invalid number!
+    if (*p != '\0')
+    {
+        return false;
+    }  // if next character is not the terminating character: invalid number!
 
-    if (neg) {r = -r;}
+    if (neg)
+    {
+        r = -r;
+    }
     return true;
 }
 
 // double,float implementation
-template<typename T>
-typename std::enable_if< std::is_floating_point<T>::value ,bool>::type
-toType(T & r, const char *p) {
-
+template <typename T>
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type toType(T& r, const char* p)
+{
     // Skip leading white space, if any.
-    while (white_space(*p) ) {
+    while (white_space(*p))
+    {
         p += 1;
     }
 
-    r = 0.0;
-    int c = 0; // counter to check how many numbers we got!
+    r     = 0.0;
+    int c = 0;  // counter to check how many numbers we got!
 
     // Get the sign!
     bool neg = false;
-    if (*p == '-') {
+    if (*p == '-')
+    {
         neg = true;
         ++p;
-    }else if(*p == '+'){
+    }
+    else if (*p == '+')
+    {
         neg = false;
         ++p;
     }
 
     // Get the digits before decimal point
-    while (valid_digit(*p)) {
-        r = (r*10.0) + (*p - '0');
-        ++p; ++c;
+    while (valid_digit(*p))
+    {
+        r = (r * 10.0) + (*p - '0');
+        ++p;
+        ++c;
     }
 
     // Get the digits after decimal point
-    if (*p == '.') {
-        T f = 0.0;
+    if (*p == '.')
+    {
+        T f     = 0.0;
         T scale = 1.0;
         ++p;
-        while (*p >= '0' && *p <= '9') {
-            f = (f*10.0) + (*p - '0');
+        while (*p >= '0' && *p <= '9')
+        {
+            f = (f * 10.0) + (*p - '0');
             ++p;
-            scale*=10.0;
+            scale *= 10.0;
             ++c;
         }
         r += f / scale;
     }
 
     // FIRST CHECK:
-    if(c==0){return false;} // we got no dezimal places: invalid number!
-
+    if (c == 0)
+    {
+        return false;
+    }  // we got no dezimal places: invalid number!
 
     // Get the digits after the "e"/"E" (exponenet)
-    if (*p == 'e' || *p == 'E'){
+    if (*p == 'e' || *p == 'E')
+    {
         unsigned int e = 0;
 
         bool negE = false;
         ++p;
-        if (*p == '-') {
+        if (*p == '-')
+        {
             negE = true;
             ++p;
-        }else if(*p == '+'){
+        }
+        else if (*p == '+')
+        {
             negE = false;
             ++p;
         }
         // Get exponent
         c = 0;
-        while (valid_digit(*p)) {
-            e = (e*10) + (*p - '0');
-            ++p; ++c;
+        while (valid_digit(*p))
+        {
+            e = (e * 10) + (*p - '0');
+            ++p;
+            ++c;
         }
 
         // Check exponent limits!
-//        if( !neg && e>std::numeric_limits<T>::max_exponent10 ){
-//            e = std::numeric_limits<T>::max_exponent10;
-//        }else if(e < std::numeric_limits<T>::min_exponent10 ){
-//            e = std::numeric_limits<T>::max_exponent10;
-//        }
+        //        if( !neg && e>std::numeric_limits<T>::max_exponent10 ){
+        //            e = std::numeric_limits<T>::max_exponent10;
+        //        }else if(e < std::numeric_limits<T>::min_exponent10 ){
+        //            e = std::numeric_limits<T>::max_exponent10;
+        //        }
 
         // SECOND CHECK:
-        if(c==0){return false;} // we got no  exponent: invalid number!
+        if (c == 0)
+        {
+            return false;
+        }  // we got no  exponent: invalid number!
 
         T scaleE = 1.0;
         // Calculate scaling factor.
 
-        while (e >= 50) { scaleE *= 1E50; e -= 50; }
-        //while (e >=  8) { scaleE *= 1E8;  e -=  8; }
-        while (e >   0) { scaleE *= 10.0; e -=  1; }
+        while (e >= 50)
+        {
+            scaleE *= 1E50;
+            e -= 50;
+        }
+        // while (e >=  8) { scaleE *= 1E8;  e -=  8; }
+        while (e > 0)
+        {
+            scaleE *= 10.0;
+            e -= 1;
+        }
 
-        if (negE){
-           r /= scaleE;
-        }else{
-           r *= scaleE;
+        if (negE)
+        {
+            r /= scaleE;
+        }
+        else
+        {
+            r *= scaleE;
         }
     }
 
     // POST CHECK:
     // skip post whitespaces
-    while( white_space(*p) ){
+    while (white_space(*p))
+    {
         ++p;
     }
-    if(*p != '\0'){return false;} // if next character is not the terminating character: invalid number!
+    if (*p != '\0')
+    {
+        return false;
+    }  // if next character is not the terminating character: invalid number!
 
     // Apply sign to number
-    if(neg){ r = -r;}
+    if (neg)
+    {
+        r = -r;
+    }
 
     return true;
 }
-}; //detail
+};  // detail
 
-
-
-
-template<typename T>
-inline bool toType(T & r, const std::string & s ){
-    return detail::toType( r, s.c_str());
+template <typename T>
+inline bool toType(T& r, const std::string& s)
+{
+    return detail::toType(r, s.c_str());
 }
 
-//Sepcial for boolean values
-inline bool toType(bool & t, const std::string& s) {
-        char a;
-        if( detail::toType(a, s.c_str()) ) {
-            if(a) {
-                t = true; return true;
-            } else {
-                t = false; return true;
-            }
-        }
-
-        if( s == "true") {
+// Sepcial for boolean values
+inline bool toType(bool& t, const std::string& s)
+{
+    char a;
+    if (detail::toType(a, s.c_str()))
+    {
+        if (a)
+        {
             t = true;
             return true;
-        } else if( s == "false") {
+        }
+        else
+        {
             t = false;
             return true;
         }
-        return false;
+    }
+
+    if (s == "true")
+    {
+        t = true;
+        return true;
+    }
+    else if (s == "false")
+    {
+        t = false;
+        return true;
+    }
+    return false;
 }
 
-}; // StringConversion
+};  // StringConversion
 
 #undef white_space
 #undef valid_digit
-
-
 
 // UNCOMMENTED BENCHMARK FILE!!
 
@@ -233,11 +290,11 @@ inline bool toType(bool & t, const std::string& s) {
 //
 //#include <bitset>
 //
-//static const size_t N = 100000;
-//static const size_t R = 7;
-//static const double scaleSize = 1000000.0;
+// static const size_t N = 100000;
+// static const size_t R = 7;
+// static const double scaleSize = 1000000.0;
 //
-//void PrintStats(std::vector<double> timings) {
+// void PrintStats(std::vector<double> timings) {
 //    double fastest = std::numeric_limits<double>::max();
 //
 //    std::cout << std::fixed << std::setprecision(2);
@@ -266,7 +323,7 @@ inline bool toType(bool & t, const std::string& s) {
 //    std::cout << " with fastest " << fastest << ", average " << avg << ", stddev " << sdv;
 //}
 //
-//double naive(const char *p) {
+// double naive(const char *p) {
 //    double r = 0.0;
 //    bool neg = false;
 //    if (*p == '-') {
@@ -297,8 +354,8 @@ inline bool toType(bool & t, const std::string& s) {
 //#define white_space(c) ((c) == ' ' || (c) == '\t')
 //#define valid_digit(c) ((c) >= '0' && (c) <= '9')
 //
-//template<typename T>
-//bool naive(T & r, const char *p) {
+// template<typename T>
+// bool naive(T & r, const char *p) {
 //
 //    // Skip leading white space, if any.
 //    while (white_space(*p) ) {
@@ -400,7 +457,7 @@ inline bool toType(bool & t, const std::string& s) {
 //
 //
 //
-//double atofNew (const char *p)
+// double atofNew (const char *p)
 //{
 //    int frac;
 //    double sign, value, scale;
@@ -470,64 +527,64 @@ inline bool toType(bool & t, const std::string& s) {
 //    return sign * (frac ? (value / scale) : (value * scale));
 //}
 //
-//int convertSomeNumbers(){
+// int convertSomeNumbers(){
 //
-//std::string y = ".3";
-//std::cout << naive(y.c_str()) <<std::endl;
-//double d;
-//bool r = naive(d,y.c_str());
+// std::string y = ".3";
+// std::cout << naive(y.c_str()) <<std::endl;
+// double d;
+// bool r = naive(d,y.c_str());
 //
-//y = " 3.123e-3";
-//r = naive(d,y.c_str());
-//std::cout << r << ", " << d <<std::endl;
+// y = " 3.123e-3";
+// r = naive(d,y.c_str());
+// std::cout << r << ", " << d <<std::endl;
 //
-//y = "  -12.112e-12";
-//r = naive(d,y.c_str());
-//assert(r);
-//std::cout << r << ", " << d <<std::endl;
+// y = "  -12.112e-12";
+// r = naive(d,y.c_str());
+// assert(r);
+// std::cout << r << ", " << d <<std::endl;
 //
-//y = "   -1.3e-2c3a23";
-//r = naive(d,y.c_str());
-//assert(!r);
-//std::cout << r << ", " << d <<std::endl;
-//y = "a-1e-2";
-//assert(!r);
-//r = naive(d,y.c_str());
-//std::cout << r << ", " << d <<std::endl;
+// y = "   -1.3e-2c3a23";
+// r = naive(d,y.c_str());
+// assert(!r);
+// std::cout << r << ", " << d <<std::endl;
+// y = "a-1e-2";
+// assert(!r);
+// r = naive(d,y.c_str());
+// std::cout << r << ", " << d <<std::endl;
 //
-//y = "123e";
-//r = naive(d,y.c_str());
-//assert(!r);
-//std::cout << r << ", " << d <<std::endl;
+// y = "123e";
+// r = naive(d,y.c_str());
+// assert(!r);
+// std::cout << r << ", " << d <<std::endl;
 //
-//y = "e-5"; //needs to fail
-//r = naive(d,y.c_str());
-//std::cout << r << ", " << d <<std::endl;
-//r = std::atof(y.c_str());
-//std::cout << r << ", " << d <<std::endl;
+// y = "e-5"; //needs to fail
+// r = naive(d,y.c_str());
+// std::cout << r << ", " << d <<std::endl;
+// r = std::atof(y.c_str());
+// std::cout << r << ", " << d <<std::endl;
 //
 //
-//y = "1e-200";
-//r = naive(d,y.c_str());
-//std::cout << r << ", " << std::bitset<64>(*reinterpret_cast<long int *>(&d)) <<std::endl;
+// y = "1e-200";
+// r = naive(d,y.c_str());
+// std::cout << r << ", " << std::bitset<64>(*reinterpret_cast<long int *>(&d)) <<std::endl;
 //
-//y = "1e-308";
-//r = naive(d,y.c_str());
-//std::cout << r << ", " << d  <<std::endl;
+// y = "1e-308";
+// r = naive(d,y.c_str());
+// std::cout << r << ", " << d  <<std::endl;
 //
 ////overflow
-//y = "1e-309";
-//r = naive(d,y.c_str());
-//std::cout << r << ", " << d <<std::endl;
-//float f;
-//r = naive(f,y.c_str());
-//std::cout << r << ", " << f <<std::endl;
+// y = "1e-309";
+// r = naive(d,y.c_str());
+// std::cout << r << ", " << d <<std::endl;
+// float f;
+// r = naive(f,y.c_str());
+// std::cout << r << ", " << f <<std::endl;
 //
-//d = 1.0e308;
-//std::cout << r << ", " << d  <<std::endl;
+// d = 1.0e308;
+// std::cout << r << ", " << d  <<std::endl;
 //}
 //
-//int doBenchmark() {
+// int doBenchmark() {
 //    std::vector<std::string> nums;
 //    nums.reserve(N);
 //    for (size_t i=0 ; i<N ; ++i) {
@@ -763,5 +820,4 @@ inline bool toType(bool & t, const std::string& s) {
 //    }
 //}
 
-
-#endif // FastStringConversion
+#endif  // FastStringConversion

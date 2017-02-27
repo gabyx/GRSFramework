@@ -1,41 +1,43 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <ctime>
-#include <cmath>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <iomanip>
-#include <sstream>
 #include <boost/lexical_cast.hpp>
-#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 #include "cycle.h"
 
 #include <bitset>
 
-static const size_t N = 100000;
-static const size_t R = 7;
+static const size_t N         = 100000;
+static const size_t R         = 7;
 static const double scaleSize = 1000000.0;
 
-void PrintStats(std::vector<double> timings) {
+void PrintStats(std::vector<double> timings)
+{
     double fastest = std::numeric_limits<double>::max();
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << "[";
-    for (size_t i = 1 ; i<timings.size()-1 ; ++i) {
+    for (size_t i = 1; i < timings.size() - 1; ++i)
+    {
         fastest = std::min(fastest, timings[i]);
         std::cout << timings[i] << ",";
     }
@@ -43,45 +45,53 @@ void PrintStats(std::vector<double> timings) {
     std::cout << "]";
 
     double sum = 0.0;
-    for (size_t i = 1 ; i<timings.size() ; ++i) {
+    for (size_t i = 1; i < timings.size(); ++i)
+    {
         sum += timings[i];
     }
-    double avg = sum / static_cast<double>(timings.size()-1);
+    double avg = sum / static_cast<double>(timings.size() - 1);
 
     sum = 0.0;
-    for (size_t i = 1 ; i<timings.size() ; ++i) {
-        timings[i] = pow(timings[i]-avg, 2);
+    for (size_t i = 1; i < timings.size(); ++i)
+    {
+        timings[i] = pow(timings[i] - avg, 2);
         sum += timings[i];
     }
-    double var = sum/(timings.size()-2);
+    double var = sum / (timings.size() - 2);
     double sdv = sqrt(var);
 
     std::cout << " with fastest " << fastest << ", average " << avg << ", stddev " << sdv;
 }
 
-double naive(const char *p) {
-    double r = 0.0;
-    bool neg = false;
-    if (*p == '-') {
+double naive(const char* p)
+{
+    double r   = 0.0;
+    bool   neg = false;
+    if (*p == '-')
+    {
         neg = true;
         ++p;
     }
-    while (*p >= '0' && *p <= '9') {
-        r = (r*10.0) + (*p - '0');
+    while (*p >= '0' && *p <= '9')
+    {
+        r = (r * 10.0) + (*p - '0');
         ++p;
     }
-    if (*p == '.') {
+    if (*p == '.')
+    {
         double f = 0.0;
-        int n = 0;
+        int    n = 0;
         ++p;
-        while (*p >= '0' && *p <= '9') {
-            f = (f*10.0) + (*p - '0');
+        while (*p >= '0' && *p <= '9')
+        {
+            f = (f * 10.0) + (*p - '0');
             ++p;
             ++n;
         }
         r += f / std::pow(10.0, n);
     }
-    if (neg) {
+    if (neg)
+    {
         r = -r;
     }
     return r;
@@ -90,139 +100,179 @@ double naive(const char *p) {
 #define white_space(c) ((c) == ' ' || (c) == '\t')
 #define valid_digit(c) ((c) >= '0' && (c) <= '9')
 
-template<typename T>
-bool naive(T & r, const char *p) {
-
+template <typename T>
+bool naive(T& r, const char* p)
+{
     // Skip leading white space, if any.
-    while (white_space(*p) ) {
+    while (white_space(*p))
+    {
         p += 1;
     }
 
-    r = 0.0;
-    int c = 0; // counter to check how many numbers we got!
+    r     = 0.0;
+    int c = 0;  // counter to check how many numbers we got!
 
     // Get the sign!
     bool neg = false;
-    if (*p == '-') {
+    if (*p == '-')
+    {
         neg = true;
         ++p;
-    }else if(*p == '+'){
+    }
+    else if (*p == '+')
+    {
         neg = false;
         ++p;
     }
 
     // Get the digits before decimal point
-    while (valid_digit(*p)) {
-        r = (r*10.0) + (*p - '0');
-        ++p; ++c;
+    while (valid_digit(*p))
+    {
+        r = (r * 10.0) + (*p - '0');
+        ++p;
+        ++c;
     }
 
     // Get the digits after decimal point
-    if (*p == '.') {
-        T f = 0.0;
+    if (*p == '.')
+    {
+        T f     = 0.0;
         T scale = 1.0;
         ++p;
-        while (*p >= '0' && *p <= '9') {
-            f = (f*10.0) + (*p - '0');
+        while (*p >= '0' && *p <= '9')
+        {
+            f = (f * 10.0) + (*p - '0');
             ++p;
-            scale*=10.0;
+            scale *= 10.0;
             ++c;
         }
         r += f / scale;
     }
 
     // FIRST CHECK:
-    if(c==0){return false;} // we got no dezimal places! this cannot be any number!
-
+    if (c == 0)
+    {
+        return false;
+    }  // we got no dezimal places! this cannot be any number!
 
     // Get the digits after the "e"/"E" (exponenet)
-    if (*p == 'e' || *p == 'E'){
+    if (*p == 'e' || *p == 'E')
+    {
         unsigned int e = 0;
 
         bool negE = false;
         ++p;
-        if (*p == '-') {
+        if (*p == '-')
+        {
             negE = true;
             ++p;
-        }else if(*p == '+'){
+        }
+        else if (*p == '+')
+        {
             negE = false;
             ++p;
         }
         // Get exponent
         c = 0;
-        while (valid_digit(*p)) {
-            e = (e*10) + (*p - '0');
-            ++p; ++c;
+        while (valid_digit(*p))
+        {
+            e = (e * 10) + (*p - '0');
+            ++p;
+            ++c;
         }
         // Check exponent limits!
-//        if( !neg && e>std::numeric_limits<T>::max_exponent10 ){
-//            e = std::numeric_limits<T>::max_exponent10;
-//        }else if(e < std::numeric_limits<T>::min_exponent10 ){
-//            e = std::numeric_limits<T>::max_exponent10;
-//        }
+        //        if( !neg && e>std::numeric_limits<T>::max_exponent10 ){
+        //            e = std::numeric_limits<T>::max_exponent10;
+        //        }else if(e < std::numeric_limits<T>::min_exponent10 ){
+        //            e = std::numeric_limits<T>::max_exponent10;
+        //        }
         // SECOND CHECK:
-        if(c==0){return false;} // we got no  exponent! this was not intended!!
+        if (c == 0)
+        {
+            return false;
+        }  // we got no  exponent! this was not intended!!
 
         T scaleE = 1.0;
         // Calculate scaling factor.
 
-        while (e >= 50) { scaleE *= 1E50; e -= 50; }
-        //while (e >=  8) { scaleE *= 1E8;  e -=  8; }
-        while (e >   0) { scaleE *= 10.0; e -=  1; }
+        while (e >= 50)
+        {
+            scaleE *= 1E50;
+            e -= 50;
+        }
+        // while (e >=  8) { scaleE *= 1E8;  e -=  8; }
+        while (e > 0)
+        {
+            scaleE *= 10.0;
+            e -= 1;
+        }
 
-        if (negE){
-           r /= scaleE;
-        }else{
-           r *= scaleE;
+        if (negE)
+        {
+            r /= scaleE;
+        }
+        else
+        {
+            r *= scaleE;
         }
     }
 
     // POST CHECK:
     // skip post whitespaces
-    while( white_space(*p) ){
+    while (white_space(*p))
+    {
         ++p;
     }
-    if(*p != '\0'){return false;} // if next character is not the terminating character
+    if (*p != '\0')
+    {
+        return false;
+    }  // if next character is not the terminating character
 
     // Apply sign to number
-    if(neg){ r = -r;}
+    if (neg)
+    {
+        r = -r;
+    }
 
     return true;
 }
 
-
-
-
-double atofNew (const char *p)
+double atofNew(const char* p)
 {
-    int frac;
+    int    frac;
     double sign, value, scale;
 
     // Skip leading white space, if any.
-    while (white_space(*p) ) {
+    while (white_space(*p))
+    {
         p += 1;
     }
 
     // Get sign, if any.
     sign = 1.0;
-    if (*p == '-') {
+    if (*p == '-')
+    {
         sign = -1.0;
         p += 1;
-
-    } else if (*p == '+') {
+    }
+    else if (*p == '+')
+    {
         p += 1;
     }
 
     // Get digits before decimal point or exponent, if any.
-    for (value = 0.0; valid_digit(*p); p += 1) {
+    for (value = 0.0; valid_digit(*p); p += 1)
+    {
         value = value * 10.0 + (*p - '0');
     }
 
     // Get digits after decimal point, if any.
-    if (*p == '.') {
+    if (*p == '.')
+    {
         double pow10 = 10.0;
         p += 1;
-        while (valid_digit(*p)) {
+        while (valid_digit(*p))
+        {
             value += (*p - '0') / pow10;
             pow10 *= 10.0;
             p += 1;
@@ -230,102 +280,121 @@ double atofNew (const char *p)
     }
 
     // Handle exponent, if any.
-    frac = 0;
+    frac  = 0;
     scale = 1.0;
-    if ((*p == 'e') || (*p == 'E')) {
+    if ((*p == 'e') || (*p == 'E'))
+    {
         unsigned int expon;
 
         // Get sign of exponent, if any.
 
         p += 1;
-        if (*p == '-') {
+        if (*p == '-')
+        {
             frac = 1;
             p += 1;
-
-        } else if (*p == '+') {
+        }
+        else if (*p == '+')
+        {
             p += 1;
         }
 
         // Get digits of exponent, if any.
 
-        for (expon = 0; valid_digit(*p); p += 1) {
+        for (expon = 0; valid_digit(*p); p += 1)
+        {
             expon = expon * 10 + (*p - '0');
         }
-        if (expon > 308) expon = 308;
+        if (expon > 308)
+            expon = 308;
 
         // Calculate scaling factor.
-        while (expon >= 50) { scale *= 1E50; expon -= 50; }
-        while (expon >=  8) { scale *= 1E8;  expon -=  8; }
-        while (expon >   0) { scale *= 10.0; expon -=  1; }
+        while (expon >= 50)
+        {
+            scale *= 1E50;
+            expon -= 50;
+        }
+        while (expon >= 8)
+        {
+            scale *= 1E8;
+            expon -= 8;
+        }
+        while (expon > 0)
+        {
+            scale *= 10.0;
+            expon -= 1;
+        }
     }
 
     // Return signed and scaled floating point result.
     return sign * (frac ? (value / scale) : (value * scale));
 }
 
-int convertSomeNumbers(){
+int convertSomeNumbers()
+{
+    std::string y = ".3";
+    std::cout << naive(y.c_str()) << std::endl;
+    double d;
+    bool   r = naive(d, y.c_str());
 
-std::string y = ".3";
-std::cout << naive(y.c_str()) <<std::endl;
-double d;
-bool r = naive(d,y.c_str());
+    y = " 3.123e-3";
+    r = naive(d, y.c_str());
+    std::cout << r << ", " << d << std::endl;
 
-y = " 3.123e-3";
-r = naive(d,y.c_str());
-std::cout << r << ", " << d <<std::endl;
+    y = "  -12.112e-12";
+    r = naive(d, y.c_str());
+    assert(r);
+    std::cout << r << ", " << d << std::endl;
 
-y = "  -12.112e-12";
-r = naive(d,y.c_str());
-assert(r);
-std::cout << r << ", " << d <<std::endl;
+    y = "   -1.3e-2c3a23";
+    r = naive(d, y.c_str());
+    assert(!r);
+    std::cout << r << ", " << d << std::endl;
+    y = "a-1e-2";
+    assert(!r);
+    r = naive(d, y.c_str());
+    std::cout << r << ", " << d << std::endl;
 
-y = "   -1.3e-2c3a23";
-r = naive(d,y.c_str());
-assert(!r);
-std::cout << r << ", " << d <<std::endl;
-y = "a-1e-2";
-assert(!r);
-r = naive(d,y.c_str());
-std::cout << r << ", " << d <<std::endl;
+    y = "123e";
+    r = naive(d, y.c_str());
+    assert(!r);
+    std::cout << r << ", " << d << std::endl;
 
-y = "123e";
-r = naive(d,y.c_str());
-assert(!r);
-std::cout << r << ", " << d <<std::endl;
+    y = "e-5";  // needs to fail
+    r = naive(d, y.c_str());
+    std::cout << r << ", " << d << std::endl;
+    r = std::atof(y.c_str());
+    std::cout << r << ", " << d << std::endl;
 
-y = "e-5"; //needs to fail
-r = naive(d,y.c_str());
-std::cout << r << ", " << d <<std::endl;
-r = std::atof(y.c_str());
-std::cout << r << ", " << d <<std::endl;
+    y = "1e-308";
+    r = naive(d, y.c_str());
+    std::cout << r << ", " << d << std::endl;
 
+    y = "1e+309";
+    r = naive(d, y.c_str());
+    std::cout << r << ", " << d << std::endl;
 
-y = "1e-308";
-r = naive(d,y.c_str());
-std::cout << r << ", " << d <<std::endl;
+    // overflow
+    y = "1e-309";
+    r = naive(d, y.c_str());
+    std::cout << r << ", " << d << std::endl;
+    float f;
+    r = naive(f, y.c_str());
+    std::cout << r << ", " << f << std::endl;
 
-y = "1e+309";
-r = naive(d,y.c_str());
-std::cout << r << ", " << d  <<std::endl;
-
-//overflow
-y = "1e-309";
-r = naive(d,y.c_str());
-std::cout << r << ", " << d <<std::endl;
-float f;
-r = naive(f,y.c_str());
-std::cout << r << ", " << f <<std::endl;
-
-d = 1.0e308;
-std::cout << r << ", " << d  <<std::endl;
+    d = 1.0e308;
+    std::cout << r << ", " << d << std::endl;
 }
 
-int doBenchmark() {
+int doBenchmark()
+{
     std::vector<std::string> nums;
     nums.reserve(N);
-    for (size_t i=0 ; i<N ; ++i) {
+    for (size_t i = 0; i < N; ++i)
+    {
         std::string y;
-        if (i & 1) {
+        if (i & 1)
+        {
             y += '-';
         }
         y += boost::lexical_cast<std::string>(i);
@@ -335,16 +404,18 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x = naive(nums[i].c_str());
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -356,17 +427,19 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x;
-                naive(x,nums[i].c_str());
+                naive(x, nums[i].c_str());
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -377,16 +450,18 @@ int doBenchmark() {
         std::cout << tsum << std::endl;
     }
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x = atofNew(nums[i].c_str());
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -398,16 +473,18 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x = atof(nums[i].c_str());
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -419,16 +496,18 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x = strtod(nums[i].c_str(), 0);
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -440,17 +519,19 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x = 0.0;
                 sscanf(nums[i].c_str(), "%lf", &x);
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -462,16 +543,18 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 double x = boost::lexical_cast<double>(nums[i]);
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -485,18 +568,20 @@ int doBenchmark() {
     {
         using boost::spirit::qi::double_;
         using boost::spirit::qi::parse;
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
-                double x = 0.0;
-                char const *str = nums[i].c_str();
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
+                double      x   = 0.0;
+                char const* str = nums[i].c_str();
                 parse(str, &str[nums[i].size()], double_, x);
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -508,18 +593,20 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
+        for (size_t r = 0; r < R; ++r)
+        {
             ticks start = getticks();
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 std::istringstream ss(nums[i]);
-                double x = 0.0;
+                double             x = 0.0;
                 ss >> x;
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -531,20 +618,22 @@ int doBenchmark() {
     }
 
     {
-        double tsum = 0.0;
+        double              tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
-        for (size_t r=0 ; r<R ; ++r) {
-            ticks start = getticks();
+        for (size_t r = 0; r < R; ++r)
+        {
+            ticks              start = getticks();
             std::istringstream ss;
-            for (size_t i=0 ; i<nums.size() ; ++i) {
+            for (size_t i = 0; i < nums.size(); ++i)
+            {
                 ss.str(nums[i]);
                 ss.clear();
                 double x = 0.0;
                 ss >> x;
                 tsum += x;
             }
-            ticks end = getticks();
+            ticks  end   = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }

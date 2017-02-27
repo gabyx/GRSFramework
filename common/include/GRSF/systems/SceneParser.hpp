@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -13,74 +13,68 @@
 
 #include <memory>
 
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include "GRSF/common/Asserts.hpp"
-
 
 #include "GRSF/common/XMLMacros.hpp"
 #include "GRSF/systems/SceneParserModules.hpp"
 
-
 /** The traits for a standart SceneParser class*/
-template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserTraits: SceneParserBaseTraits<TSceneParser,TDynamicsSystem> {
+template <typename TSceneParser, typename TDynamicsSystem>
+struct SceneParserTraits : SceneParserBaseTraits<TSceneParser, TDynamicsSystem>
+{
     // Module typedefs
-    using SettingsModuleType         = ParserModules::SettingsModule<SceneParserTraits>;
-    using ExternalForcesModuleType   = ParserModules::ExternalForcesModule<SceneParserTraits>;
-    using ContactParamModuleType     = ParserModules::ContactParamModule<SceneParserTraits>;
-    using InitStatesModuleType       = ParserModules::InitStatesModule<SceneParserTraits> ;
+    using SettingsModuleType       = ParserModules::SettingsModule<SceneParserTraits>;
+    using ExternalForcesModuleType = ParserModules::ExternalForcesModule<SceneParserTraits>;
+    using ContactParamModuleType   = ParserModules::ContactParamModule<SceneParserTraits>;
+    using InitStatesModuleType     = ParserModules::InitStatesModule<SceneParserTraits>;
 
-    using BodyMStaticOptions         = ParserModules::BodyModuleStaticOptions<>;
-    using BodyModuleType             = ParserModules::BodyModule< SceneParserTraits > ;
+    using BodyMStaticOptions = ParserModules::BodyModuleStaticOptions<>;
+    using BodyModuleType     = ParserModules::BodyModule<SceneParserTraits>;
 
-    using GeomMStaticOptions         = ParserModules::GeometryModuleStaticOptions<>;
-    using GeometryModuleType         = ParserModules::GeometryModule<SceneParserTraits, GeomMStaticOptions>;
+    using GeomMStaticOptions = ParserModules::GeometryModuleStaticOptions<>;
+    using GeometryModuleType = ParserModules::GeometryModule<SceneParserTraits, GeomMStaticOptions>;
 
-    using VisModuleType              = ParserModules::VisModuleDummy<SceneParserTraits>;
+    using VisModuleType = ParserModules::VisModuleDummy<SceneParserTraits>;
 
-    using MPIModuleType              = ParserModules::MPIModuleDummy<SceneParserTraits>;
+    using MPIModuleType = ParserModules::MPIModuleDummy<SceneParserTraits>;
 };
 
-
 /** SceneParser Options */
-struct SceneParserDynamicOptions {
+struct SceneParserDynamicOptions
+{
     bool m_parseSceneSettings = true;  ///< Parse SceneSettings (default= true)
     bool m_parseSceneObjects  = true;  ///< Parse SceneObjects, (default= true)
 };
 
-
-
-template<
- typename TDynamicsSystem,
- template<typename P, typename D> class TParserTraits = SceneParserTraits,
- typename TDerived = void >
-class SceneParser {
-public:
-
-    using DerivedType = typename std::conditional< std::is_same<TDerived,void>::value, SceneParser, TDerived>::type;
+template <typename TDynamicsSystem,
+          template <typename P, typename D> class TParserTraits = SceneParserTraits,
+          typename TDerived = void>
+class SceneParser
+{
+    public:
+    using DerivedType = typename std::conditional<std::is_same<TDerived, void>::value, SceneParser, TDerived>::type;
 
     /** Modules defintions
     * This type traits define the module types from TParserTraits
     * SceneParser is injected into the modules, we use this class instead of the derived one
     */
     using ParserForModulesType = SceneParser;
-    using ParserTraits = TParserTraits<ParserForModulesType, TDynamicsSystem >;
+    using ParserTraits         = TParserTraits<ParserForModulesType, TDynamicsSystem>;
     DEFINE_PARSER_TYPE_TRAITS(ParserTraits);
 
     using SceneParserDynamicOptionsType = SceneParserDynamicOptions;
     using BodyModuleDynamicOptionsType  = typename BodyModuleType::DynamicOptionsType;
-public:
 
+    public:
     /**
     * Constructor takes a module function which constructs all modules.
     */
-    template<typename ModuleGeneratorType>
-    SceneParser(ModuleGeneratorType & moduleGen,
-                Logging::Log * log,
-                const boost::filesystem::path & mediaDir)
-        :  m_mediaDir(mediaDir), m_pSimulationLog(log)
+    template <typename ModuleGeneratorType>
+    SceneParser(ModuleGeneratorType& moduleGen, Logging::Log* log, const boost::filesystem::path& mediaDir)
+        : m_mediaDir(mediaDir), m_pSimulationLog(log)
     {
         m_pSimulationLog = log;
         GRSF_ASSERTMSG(m_pSimulationLog, "Log pointer is zero!");
@@ -93,18 +87,19 @@ public:
                  m_pBodyModule,
                  m_pGeometryModule,
                  m_pVisModule,
-                 m_pMPIModule)
-            = moduleGen.template createParserModules<ParserForModulesType>( static_cast<ParserForModulesType*>(this));
-
+                 m_pMPIModule) =
+            moduleGen.template createParserModules<ParserForModulesType>(static_cast<ParserForModulesType*>(this));
     }
 
     /**
     * Set a XML Document by specifying a pointer and a filepath if a document is already been loaded!
     */
-    void setDocument(std::shared_ptr<pugi::xml_document> xmlDoc, boost::filesystem::path file = "" ){
+    void setDocument(std::shared_ptr<pugi::xml_document> xmlDoc, boost::filesystem::path file = "")
+    {
         m_currentParseFilePath = file;
         m_currentParseFileDir = m_currentParseFileDir = m_currentParseFilePath.parent_path();
-        if(xmlDoc){
+        if (xmlDoc)
+        {
             GRSF_ERRORMSG("XML Document pointer is null!")
         }
         m_xmlDoc = xmlDoc;
@@ -113,42 +108,51 @@ public:
     /**
     * Load a file, this does not parse the file, it only loads the DOM tree!
     */
-    void loadFile(const boost::filesystem::path & file){
-        if(!boost::filesystem::exists(file)) {
+    void loadFile(const boost::filesystem::path& file)
+    {
+        if (!boost::filesystem::exists(file))
+        {
             GRSF_ERRORMSG("Scene Input file does not exist!");
         }
         pugi::xml_parse_result result = m_xmlDoc->load_file(file.c_str());
-        if (result) {
+        if (result)
+        {
             LOGSCLEVEL1(m_pSimulationLog, "---> Loaded XML [" << file.string() << "] without errors!" << std::endl;);
-        } else {
-            GRSF_ERRORMSG( "Loaded XML [" << file.string() << "] with errors!" << std::endl
-                            << "Error description: " << result.description() << std::endl
-                            << "Error offset: " << result.offset )
+        }
+        else
+        {
+            GRSF_ERRORMSG("Loaded XML [" << file.string() << "] with errors!" << std::endl
+                                         << "Error description: "
+                                         << result.description()
+                                         << std::endl
+                                         << "Error offset: "
+                                         << result.offset)
         }
 
         m_currentParseFilePath = file;
-        m_currentParseFileDir = m_currentParseFilePath.parent_path();
+        m_currentParseFileDir  = m_currentParseFilePath.parent_path();
     }
 
     /**
     * range is only applied to the groups with the attribute enableSelectiveIds="true"
     */
-    template<typename TParserTraitsOptions = SceneParserDynamicOptions,
-             typename TBodyParserOptions = BodyModuleDynamicOptionsType>
-    bool parseScene( const boost::filesystem::path & file,
-                     TParserTraitsOptions&& opt = TParserTraitsOptions(),
-                     TBodyParserOptions&& optBody = TBodyParserOptions()
-                   ) {
-
+    template <typename TParserTraitsOptions = SceneParserDynamicOptions,
+              typename TBodyParserOptions   = BodyModuleDynamicOptionsType>
+    bool parseScene(const boost::filesystem::path& file,
+                    TParserTraitsOptions&&         opt     = TParserTraitsOptions(),
+                    TBodyParserOptions&&           optBody = TBodyParserOptions())
+    {
         // Forward all settings
         m_opts = std::forward<TParserTraitsOptions>(opt);
 
-        if(m_pBodyModule) {
+        if (m_pBodyModule)
+        {
             m_pBodyModule->setParsingOptions(std::forward<TBodyParserOptions>(optBody));
         }
 
-        if(m_pGeometryModule) {
-            //m_pGeometryModule->setParsingOptions(std::forward<TGeometryModuleOptions>(optGeom));
+        if (m_pGeometryModule)
+        {
+            // m_pGeometryModule->setParsingOptions(std::forward<TGeometryModuleOptions>(optGeom));
         }
 
         parseSceneIntern(file);
@@ -156,117 +160,149 @@ public:
         return true;
     }
 
-
-    virtual void cleanUp() {
+    virtual void cleanUp()
+    {
         // Delegate all cleanUp stuff to the modules!
-        if(m_pSettingsModule) {
+        if (m_pSettingsModule)
+        {
             m_pSettingsModule->cleanUp();
         }
-        if(m_pContactParamModule) {
+        if (m_pContactParamModule)
+        {
             m_pContactParamModule->cleanUp();
         }
-        if(m_pExternalForcesModule) {
+        if (m_pExternalForcesModule)
+        {
             m_pExternalForcesModule->cleanUp();
         }
-        if(m_pGeometryModule) {
+        if (m_pGeometryModule)
+        {
             m_pGeometryModule->cleanUp();
         }
-        if(m_pBodyModule) {
+        if (m_pBodyModule)
+        {
             m_pBodyModule->cleanUp();
         }
-        if(m_pInitStatesModule) {
+        if (m_pInitStatesModule)
+        {
             m_pInitStatesModule->cleanUp();
         }
-        if(m_pVisModule) {
+        if (m_pVisModule)
+        {
             m_pVisModule->cleanUp();
         }
     }
 
-
-    boost::filesystem::path getParsedSceneFile() {
+    boost::filesystem::path getParsedSceneFile()
+    {
         return m_currentParseFilePath;
     }
 
-    void checkFileExists(boost::filesystem::path file) {
-        if( !boost::filesystem::exists(file) ) {
+    void checkFileExists(boost::filesystem::path file)
+    {
+        if (!boost::filesystem::exists(file))
+        {
             GRSF_ERRORMSG("---> The file ' " + file.string() + "' does not exist!");
         }
     }
 
     /** If the file path is a relative path, prepend the media directory path*/
-    void makeFullMediaPath(boost::filesystem::path & file) {
-        if(file.is_relative()) {
+    void makeFullMediaPath(boost::filesystem::path& file)
+    {
+        if (file.is_relative())
+        {
             file = m_mediaDir / file;
         }
     }
 
-    LogType * getSimLog() {
+    LogType* getSimLog()
+    {
         return m_pSimulationLog;
     }
 
-    unsigned int getSpecifiedSimBodies() {
-        if(m_pBodyModule) {
+    unsigned int getSpecifiedSimBodies()
+    {
+        if (m_pBodyModule)
+        {
             return m_pBodyModule->getSpecifiedSimBodies();
         }
         return 0;
     }
 
-    GeometryModuleType * getGeometryModule() {
+    GeometryModuleType* getGeometryModule()
+    {
         return m_pGeometryModule.get();
     }
-    SettingsModuleType * getSettingsModule() {
+    SettingsModuleType* getSettingsModule()
+    {
         return m_pSettingsModule.get();
     }
-    ExternalForcesModuleType * getExternalForcesModule() {
+    ExternalForcesModuleType* getExternalForcesModule()
+    {
         return m_pExternalForcesModule.get();
     }
-    ContactParamModuleType * getContactParamModule() {
+    ContactParamModuleType* getContactParamModule()
+    {
         return m_pContactParamModule.get();
     }
-    BodyModuleType * getBodyModule() {
+    BodyModuleType* getBodyModule()
+    {
         return m_pBodyModule.get();
     }
-    InitStatesModuleType * getInitStatesModule() {
+    InitStatesModuleType* getInitStatesModule()
+    {
         return m_pInitStatesModule.get();
     }
-    VisModuleType * getVisModule() {
+    VisModuleType* getVisModule()
+    {
         return m_pVisModule.get();
     }
-    MPIModuleType * getMPIModule() {
+    MPIModuleType* getMPIModule()
+    {
         return m_pMPIModule.get();
     }
 
-protected:
+    protected:
+    bool parseSceneIntern(const boost::filesystem::path& file)
+    {
+        LOGSCLEVEL1(m_pSimulationLog,
+                    "---> SceneParser parsing: ========================================================" << std::endl
+                                                                                                         << "\t file: "
+                                                                                                         << file
+                                                                                                         << std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog,
+                    "---> SceneParser Options: " << std::endl
+                                                 << "\t parse scene settings:"
+                                                 << m_opts.m_parseSceneSettings
+                                                 << std::endl
+                                                 << "\t parse scene objects:"
+                                                 << m_opts.m_parseSceneObjects
+                                                 << std::endl;);
 
-    bool parseSceneIntern(const boost::filesystem::path & file) {
-
-        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser parsing: ========================================================" <<
-                     std::endl << "\t file: " << file <<std::endl;);
-        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser Options: " <<std::endl <<
-                     "\t parse scene settings:"<<m_opts.m_parseSceneSettings << std::endl<<
-                     "\t parse scene objects:"<<m_opts.m_parseSceneObjects << std::endl;);
-
-         // if document does not exist create one and force loading!
-        if(!m_xmlDoc){
-            m_xmlDoc = std::shared_ptr<pugi::xml_document>( new pugi::xml_document() );
+        // if document does not exist create one and force loading!
+        if (!m_xmlDoc)
+        {
+            m_xmlDoc = std::shared_ptr<pugi::xml_document>(new pugi::xml_document());
         }
-        if( file.empty() ){
+        if (file.empty())
+        {
             GRSF_ERRORMSG("File name is empty!");
         }
 
         // Load the file if necessary
-        if(file != m_currentParseFilePath) {
+        if (file != m_currentParseFilePath)
+        {
             loadFile(file);
         }
 
-        LOGSCLEVEL1( m_pSimulationLog, "---> Scene Input file: "  << file.string() <<std::endl; );
+        LOGSCLEVEL1(m_pSimulationLog, "---> Scene Input file: " << file.string() << std::endl;);
 
-        LOGSCLEVEL1(m_pSimulationLog, "---> Try to parse the scene ..."<<std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog, "---> Try to parse the scene ..." << std::endl;);
 
-        GET_XMLCHILDNODE_CHECK( m_xmlRootNode, "DynamicsSystem" , (*m_xmlDoc) );
+        GET_XMLCHILDNODE_CHECK(m_xmlRootNode, "DynamicsSystem", (*m_xmlDoc));
 
         XMLNodeType node;
-        GET_XMLCHILDNODE_CHECK( node , "SceneSettings",  m_xmlRootNode);
+        GET_XMLCHILDNODE_CHECK(node, "SceneSettings", m_xmlRootNode);
         parseSceneSettingsPre(node);
 
         node = m_xmlRootNode.child("SceneObjects");
@@ -275,68 +311,80 @@ protected:
         node = m_xmlRootNode.child("SceneSettings");
         parseSceneSettingsPost(node);
 
-        //parseOtherOptions(m_xmlRootNode);
+        // parseOtherOptions(m_xmlRootNode);
 
-        LOGSCLEVEL1( m_pSimulationLog, "---> SceneParser finshed =========================================================" << std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog,
+                    "---> SceneParser finshed =========================================================" << std::endl;);
 
         return true;
     }
 
-
-    virtual void parseSceneSettingsPre( XMLNodeType sceneSettings ) {
-
-        if(!m_opts.m_parseSceneSettings) {
-            LOGSCLEVEL1(m_pSimulationLog,"---> Skip SceneSettings"<<std::endl;);
+    virtual void parseSceneSettingsPre(XMLNodeType sceneSettings)
+    {
+        if (!m_opts.m_parseSceneSettings)
+        {
+            LOGSCLEVEL1(m_pSimulationLog, "---> Skip SceneSettings" << std::endl;);
             return;
         }
 
-        LOGSCLEVEL1(m_pSimulationLog,"---> Parse Pre SceneSettings..."<<std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog, "---> Parse Pre SceneSettings..." << std::endl;);
 
-        if(m_pSettingsModule) {
+        if (m_pSettingsModule)
+        {
             m_pSettingsModule->parse(sceneSettings);
         }
 
-        if(m_pContactParamModule) {
+        if (m_pContactParamModule)
+        {
             m_pContactParamModule->parse(sceneSettings);
         }
 
-        if(m_pExternalForcesModule) {
+        if (m_pExternalForcesModule)
+        {
             m_pExternalForcesModule->parse(sceneSettings);
         }
 
-        if(m_pGeometryModule) {
+        if (m_pGeometryModule)
+        {
             m_pGeometryModule->parseGlobalGeometries(sceneSettings);
         }
 
-        if(m_pBodyModule) {
+        if (m_pBodyModule)
+        {
             m_pBodyModule->parseModuleOptions(sceneSettings);
         }
     }
 
-    virtual void parseSceneSettingsPost( XMLNodeType sceneSettings ) {
-
-        if(!m_opts.m_parseSceneSettings) {
-            LOGSCLEVEL1(m_pSimulationLog,"---> Skip SceneSettings"<<std::endl;);
+    virtual void parseSceneSettingsPost(XMLNodeType sceneSettings)
+    {
+        if (!m_opts.m_parseSceneSettings)
+        {
+            LOGSCLEVEL1(m_pSimulationLog, "---> Skip SceneSettings" << std::endl;);
             return;
         }
 
-        LOGSCLEVEL1(m_pSimulationLog,"---> Parse Post SceneSettings..."<<std::endl;);
+        LOGSCLEVEL1(m_pSimulationLog, "---> Parse Post SceneSettings..." << std::endl;);
 
-        if(m_pInitStatesModule) {
+        if (m_pInitStatesModule)
+        {
             m_pInitStatesModule->parseGlobalInitialCondition(sceneSettings);
         }
 
-        if(m_pVisModule) {
+        if (m_pVisModule)
+        {
             m_pVisModule->parseSceneSettingsPost(sceneSettings);
         }
 
-        if(m_pMPIModule) {
+        if (m_pMPIModule)
+        {
             m_pMPIModule->parseSceneSettingsPost(sceneSettings);
         }
     }
 
-    virtual void parseSceneObjects( XMLNodeType sceneObjects) {
-        if(m_pBodyModule) {
+    virtual void parseSceneObjects(XMLNodeType sceneObjects)
+    {
+        if (m_pBodyModule)
+        {
             m_pBodyModule->parse(sceneObjects);
         }
     }
@@ -353,27 +401,24 @@ protected:
 
     /** XML Declarations */
     std::shared_ptr<pugi::xml_document> m_xmlDoc;
-    bool m_loadedFile = false;
-    pugi::xml_node m_xmlRootNode;
+    bool                                m_loadedFile = false;
+    pugi::xml_node                      m_xmlRootNode;
 
     /** Log */
-    LogType * m_pSimulationLog;
+    LogType* m_pSimulationLog;
 
     /** Modules */
-    std::unique_ptr< SettingsModuleType>       m_pSettingsModule;
-    std::unique_ptr< GeometryModuleType>       m_pGeometryModule;
-    std::unique_ptr< ExternalForcesModuleType> m_pExternalForcesModule;
-    std::unique_ptr< ContactParamModuleType>   m_pContactParamModule;
+    std::unique_ptr<SettingsModuleType>       m_pSettingsModule;
+    std::unique_ptr<GeometryModuleType>       m_pGeometryModule;
+    std::unique_ptr<ExternalForcesModuleType> m_pExternalForcesModule;
+    std::unique_ptr<ContactParamModuleType>   m_pContactParamModule;
 
-    std::unique_ptr< BodyModuleType>           m_pBodyModule;
-    std::unique_ptr< InitStatesModuleType>     m_pInitStatesModule;
+    std::unique_ptr<BodyModuleType>       m_pBodyModule;
+    std::unique_ptr<InitStatesModuleType> m_pInitStatesModule;
 
-    std::unique_ptr< VisModuleType>            m_pVisModule;
+    std::unique_ptr<VisModuleType> m_pVisModule;
 
-    std::unique_ptr< MPIModuleType>            m_pMPIModule;
+    std::unique_ptr<MPIModuleType> m_pMPIModule;
 };
 
-
-
 #endif
-

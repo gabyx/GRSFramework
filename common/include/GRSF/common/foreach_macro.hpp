@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,15 +11,15 @@
 #ifndef GRSF_common_foreach_macro_hpp
 #define GRSF_common_foreach_macro_hpp
 
-#if defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__<4
+#if defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ < 4
 #define FOREACH__HPP_TYPEOF 1
-#elif defined(__GNUC__) && __GNUC__==4 && __GNUC_MINOR__>=4
+#elif defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ >= 4
 #define FOREACH__HPP_AUTO 1
-#elif defined(_MSC_VER) && _MSC_VER<1600
+#elif defined(_MSC_VER) && _MSC_VER < 1600
 #include <boost/typeof/typeof.hpp>
 #define FOREACH__HPP_TYPEOF 1
 #define __typeof__(ex) BOOST_TYPEOF(ex)
-#elif defined(_MSC_VER) && _MSC_VER>=1600
+#elif defined(_MSC_VER) && _MSC_VER >= 1600
 #define FOREACH__HPP_AUTO 1
 #else
 #error unknown compiler!
@@ -32,7 +32,8 @@
     @param c (STL) container, has to support begin() and end() methods.
     @param i name of iterator which is available in loop body.
 */
-#define foreach(c,i) for(/*lint --e{953}*/__typeof__((c).begin()) i = (c).begin(), end##i = (c).end(); i != end##i; ++i)
+#define foreach(c, i) \
+    for (/*lint --e{953}*/ __typeof__((c).begin()) i = (c).begin(), end##i = (c).end(); i != end##i; ++i)
 #endif
 
 #ifndef foreach_r
@@ -40,7 +41,8 @@
     @param c (STL) container, has to support rbegin() and rend() methods.
     @param i name of reverse iterator which is available in loop body.
 */
-#define foreach_r(c,i) for(/*lint --e{953}*/__typeof__((c).rbegin()) i = (c).rbegin(), end##i = (c).rend(); i != end##i; ++i)
+#define foreach_r(c, i) \
+    for (/*lint --e{953}*/ __typeof__((c).rbegin()) i = (c).rbegin(), end##i = (c).rend(); i != end##i; ++i)
 #endif
 
 #ifndef foreach_e
@@ -54,24 +56,25 @@
     @param c (STL) container, has to support begin() and end() methods.
     @param i name of iterator which is available in loop body
 */
-#define foreach_e(c,i) for(/*lint --e{953}*/__typeof__((c).end()) end##i = (c).end(), \
-					      next##i = (c).begin(), \
-					      i = (next##i==end##i)?next##i:next##i++; \
-					    i != next##i; \
-					    i = (next##i==end##i)?next##i:next##i++)
+#define foreach_e(c, i)                                                                               \
+    for (/*lint --e{953}*/ __typeof__((c).end()) end##i  = (c).end(),                                 \
+                                                 next##i = (c).begin(),                               \
+                                                 i       = (next##i == end##i) ? next##i : next##i++; \
+         i != next##i;                                                                                \
+         i = (next##i == end##i) ? next##i : next##i++)
 #endif
 
 #elif defined(FOREACH__HPP_AUTO)
 
-#define foreach(c,i) for(auto i = (c).begin(), end##i = (c).end(); i != end##i; ++i)
-#define foreach_r(c,i) for(auto i = (c).rbegin(), end##i = (c).rend(); i != end##i; ++i)
+#define foreach(c, i) for (auto i = (c).begin(), end##i = (c).end(); i != end##i; ++i)
+#define foreach_r(c, i) for (auto i = (c).rbegin(), end##i = (c).rend(); i != end##i; ++i)
 
-#define foreach_e(c,i) for(auto end##i = (c).end(), next##i = (c).begin(), i = (next##i==end##i)?next##i:next##i++; \
-			   i != next##i; \
-			   i = (next##i==end##i)?next##i:next##i++)
+#define foreach_e(c, i)                                                                                               \
+    for (auto end##i = (c).end(), next##i = (c).begin(), i = (next##i == end##i) ? next##i : next##i++; i != next##i; \
+         i = (next##i == end##i) ? next##i : next##i++)
 
 #else
 #error no code style defined!
 #endif
 
-#endif // HPP
+#endif  // HPP

@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -10,8 +10,8 @@
 
 #include "GRSF/dynamics/collision/SerializationHelpersGeometries.hpp"
 
-
-template<>
-void GeomSerialization::createGeom_impl<-1>(){
+template <>
+void GeomSerialization::createGeom_impl<-1>()
+{
     GRSF_ERRORMSG("Geometry which type: " << m_w << "did not match with the variant!");
 }

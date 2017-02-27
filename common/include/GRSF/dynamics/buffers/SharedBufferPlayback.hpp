@@ -14,32 +14,29 @@
 #include <boost/thread.hpp>
 #include "GRSF/common/Asserts.hpp"
 
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include "GRSF/dynamics/buffers/StateRingPoolVisBackFront.hpp"
 
-
 /**
 * @ingroup StatesAndBuffers
-* @brief This is the SharedBufferPlayback class which is a specialisation which is used to add several more shared data to the StateRingPoolVisBackFront base class.
+* @brief This is the SharedBufferPlayback class which is a specialisation which is used to add several more shared data
+* to the StateRingPoolVisBackFront base class.
 */
 
-class SharedBufferPlayback : public StateRingPoolVisBackFront {
-public:
+class SharedBufferPlayback : public StateRingPoolVisBackFront
+{
+    public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    template<typename RigidBodyIterator>
-    SharedBufferPlayback(RigidBodyIterator itBegin, RigidBodyIterator itEnd):
-        StateRingPoolVisBackFront(itBegin,itEnd)
-    {};
+    template <typename RigidBodyIterator>
+    SharedBufferPlayback(RigidBodyIterator itBegin, RigidBodyIterator itEnd)
+        : StateRingPoolVisBackFront(itBegin, itEnd){};
 
-    ~SharedBufferPlayback() {
-        DESTRUCTOR_MESSAGE
-    };
+    ~SharedBufferPlayback(){DESTRUCTOR_MESSAGE};
 
-private:
-
+    private:
 };
 
 #endif

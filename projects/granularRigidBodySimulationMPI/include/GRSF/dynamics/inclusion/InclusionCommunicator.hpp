@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,12 +11,11 @@
 #ifndef GRSF_dynamics_inclusion_InclusionCommunicator_hpp
 #define GRSF_dynamics_inclusion_InclusionCommunicator_hpp
 
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-
-#include "GRSF/dynamics/general/MPICommunication.hpp"
 #include "GRSF/dynamics/general/BodyCommunicator.hpp"
+#include "GRSF/dynamics/general/MPICommunication.hpp"
 
 #include "GRSF/dynamics/general/NeighbourMap.hpp"
 #include "GRSF/dynamics/inclusion/NeighbourDataInclusionCommunication.hpp"
@@ -25,39 +24,40 @@
 
 #include InclusionSolverSettings_INCLUDE_FILE
 
-template<typename TCombo>
-class InclusionCommunicator {
-public:
-
+template <typename TCombo>
+class InclusionCommunicator
+{
+    public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
-    //Cannot template on this type, template cyclic dependency because ContactGraph also template on InlcusionComm
+    // Cannot template on this type, template cyclic dependency because ContactGraph also template on InlcusionComm
     // Dont template on InclusionCommunicator and ContactGraph
     // Cannnot typedef more dependent types in ContactGraph, because doing so,
     using ContactGraphType = typename TCombo::ContactGraphType;
 
-    using ProcessCommunicatorType = MPILayer::ProcessCommunicator                                     ;
-    using ProcessInfoType = typename ProcessCommunicatorType::ProcessInfoType                          ;
-    using ProcessTopologyType = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType     ;
+    using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
+    using ProcessInfoType         = typename ProcessCommunicatorType::ProcessInfoType;
+    using ProcessTopologyType     = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType;
 
-    using RigidBodyContainerType = typename DynamicsSystemType::RigidBodySimContainerType                     ;
-    using GlobalGeometryMapType = typename DynamicsSystemType::GlobalGeometryMapType                         ;
+    using RigidBodyContainerType = typename DynamicsSystemType::RigidBodySimContainerType;
+    using GlobalGeometryMapType  = typename DynamicsSystemType::GlobalGeometryMapType;
 
-    //using NodeDataType = typename ContactGraphType::NodeDataType;
-    using NeighbourMapType = NeighbourMap<NeighbourDataInclusionCommunication/*<NodeDataType> */>;
+    // using NodeDataType = typename ContactGraphType::NodeDataType;
+    using NeighbourMapType = NeighbourMap<NeighbourDataInclusionCommunication /*<NodeDataType> */>;
 
-    InclusionCommunicator(std::shared_ptr< BodyCommunicator> pBodyComm,
-                          std::shared_ptr< DynamicsSystemType> pDynSys ,
-                          std::shared_ptr< ProcessCommunicatorType > pProcComm);
+    InclusionCommunicator(std::shared_ptr<BodyCommunicator>        pBodyComm,
+                          std::shared_ptr<DynamicsSystemType>      pDynSys,
+                          std::shared_ptr<ProcessCommunicatorType> pProcComm);
 
-
-    void setContactGraph(ContactGraphType * pGraph){
+    void setContactGraph(ContactGraphType* pGraph)
+    {
         m_pContactGraph = pGraph;
     }
 
-
-    ~InclusionCommunicator(){}
+    ~InclusionCommunicator()
+    {
+    }
 
     void reset();
     void resetTopology();
@@ -72,20 +72,23 @@ public:
 
     void resetAllWeightings();
 
-    void resetForNextTimestep(){
+    void resetForNextTimestep()
+    {
         m_nbDataMap.emptyAllNeighbourData();
     }
 
-    void setSettings(const InclusionSolverSettingsType & settings){
+    void setSettings(const InclusionSolverSettingsType& settings)
+    {
         m_settings = settings;
     }
 
-    NeighbourMapType * getNeighbourMap(){return &m_nbDataMap;}
+    NeighbourMapType* getNeighbourMap()
+    {
+        return &m_nbDataMap;
+    }
 
-private:
-
+    private:
     InclusionSolverSettingsType m_settings;
-
 
     /** Functions are executed in this order in communicateRemoteContacts() */
     void sendContactMessageToNeighbours();
@@ -94,8 +97,6 @@ private:
     void sendBodyMultiplicityMessageToNeighbours();
     void recvBodyMultiplicityMessageFromNeighbours();
 
-
-
     /** Functions are executed in this order in communicateSplitBodyUpdate() */
     void sendUpdateSplitBodiesToNeighbours();
     void recvUpdateSplitBodiesFromNeighbours();
@@ -103,31 +104,34 @@ private:
     void sendSolutionSplitBodiesToNeighbours();
     void recvSolutionSplitBodiesFromNeighbours();
 
-    PREC m_currentSimulationTime;
+    PREC         m_currentSimulationTime;
     unsigned int m_globalIterationNumber;
 
     /**
     * The NeighbourMessageWrapperInclusion class needs access, to be able to serialize all together!
     */
-    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionContact;
-    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionMultiplicity;
-    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate;
-    template<typename TNeighbourCommunicator> friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution;
+    template <typename TNeighbourCommunicator>
+    friend class MPILayer::NeighbourMessageWrapperInclusionContact;
+    template <typename TNeighbourCommunicator>
+    friend class MPILayer::NeighbourMessageWrapperInclusionMultiplicity;
+    template <typename TNeighbourCommunicator>
+    friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate;
+    template <typename TNeighbourCommunicator>
+    friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution;
 
+    MPILayer::NeighbourMessageWrapperInclusionContact<InclusionCommunicator>           m_messageContact;
+    MPILayer::NeighbourMessageWrapperInclusionMultiplicity<InclusionCommunicator>      m_messageMultiplicity;
+    MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate<InclusionCommunicator>   m_messageSplitBodyUpdate;
+    MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution<InclusionCommunicator> m_messageSplitBodySolution;
 
-    MPILayer::NeighbourMessageWrapperInclusionContact< InclusionCommunicator > m_messageContact;
-    MPILayer::NeighbourMessageWrapperInclusionMultiplicity< InclusionCommunicator > m_messageMultiplicity;
-    MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate< InclusionCommunicator > m_messageSplitBodyUpdate;
-    MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution< InclusionCommunicator > m_messageSplitBodySolution;
-
-    std::shared_ptr< DynamicsSystemType >      m_pDynSys;
-    std::shared_ptr< ProcessCommunicatorType > m_pProcComm;
-    ContactGraphType *                         m_pContactGraph;
-    std::shared_ptr< BodyCommunicator>         m_pBodyComm;
+    std::shared_ptr<DynamicsSystemType>      m_pDynSys;
+    std::shared_ptr<ProcessCommunicatorType> m_pProcComm;
+    ContactGraphType*                        m_pContactGraph;
+    std::shared_ptr<BodyCommunicator>        m_pBodyComm;
 
     RankIdType m_rank;
 
-    ProcessTopologyType * m_pProcTopo;
+    ProcessTopologyType*                                 m_pProcTopo;
     typename ProcessTopologyType::NeighbourRanksListType m_nbRanks;
 
     std::set<RankIdType> m_nbRanksSendRecvRemote;
@@ -138,19 +142,14 @@ private:
     /** If rank is in this set then there are local bodies: recv Velocities from rank,
                                                             send BillateralUpdate to rank */
 
-    RigidBodyContainerType & m_globalLocal;
-    RigidBodyContainerType & m_globalRemote;
+    RigidBodyContainerType& m_globalLocal;
+    RigidBodyContainerType& m_globalRemote;
 
+    NeighbourMapType m_nbDataMap;  ///< map which gives all neighbour data structures
 
-
-    NeighbourMapType m_nbDataMap;   ///< map which gives all neighbour data structures
-
-    Logging::Log *  m_pSimulationLog;
-
+    Logging::Log* m_pSimulationLog;
 };
 
-
 #include "GRSF/dynamics/inclusion/InclusionCommunicator.icc"
-
 
 #endif

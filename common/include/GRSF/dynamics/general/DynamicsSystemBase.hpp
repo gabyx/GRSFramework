@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,9 +11,8 @@
 #ifndef GRSF_dynamics_general_DynamicsSystemBase_hpp
 #define GRSF_dynamics_general_DynamicsSystemBase_hpp
 
-
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
 #include <map>
 #include <unordered_map>
@@ -21,9 +20,9 @@
 
 #include RigidBody_INCLUDE_FILE
 
+#include "GRSF/dynamics/general/ExternalForces.hpp"
 #include "GRSF/dynamics/general/RigidBodyContainer.hpp"
 #include "GRSF/dynamics/inclusion/ContactParameterMap.hpp"
-#include "GRSF/dynamics/general/ExternalForces.hpp"
 
 #include "GRSF/dynamics/buffers/RecorderSettings.hpp"
 #include InclusionSolverSettings_INCLUDE_FILE
@@ -36,60 +35,71 @@
 /** This is the define for all DynamicsSystem classes
 * It only consists of several types which are essetial.
 */
-#define  DEFINE_DYNAMICSYSTEM_BASE_TYPES  \
-     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES\
-    using TimeStepperSettingsType      = TimeStepperSettings;\
-    using RecorderSettingsType         = RecorderSettings;\
-    using ContactParameterMapType      = ContactParameterMap;\
-    using ExternalForceListType        = ExternalForceList;\
-    using GlobalGeometryMapType        = std::unordered_map< unsigned int, typename RigidBodyType::GeometryType>;\
-    using RigidBodyContainerType       = RigidBodyContainer;\
-    using RigidBodySimContainerType    = RigidBodyContainerType;\
-    using RigidBodyStaticContainerType = RigidBodySimContainerType;\
-    using RigidBodyStatesVectorType    = StdVecAligned<RigidBodyState>; \
+#define DEFINE_DYNAMICSYSTEM_BASE_TYPES                                                                          \
+    DEFINE_DYNAMICSSYTEM_CONFIG_TYPES                                                                            \
+    using TimeStepperSettingsType      = TimeStepperSettings;                                                    \
+    using RecorderSettingsType         = RecorderSettings;                                                       \
+    using ContactParameterMapType      = ContactParameterMap;                                                    \
+    using ExternalForceListType        = ExternalForceList;                                                      \
+    using GlobalGeometryMapType        = std::unordered_map<unsigned int, typename RigidBodyType::GeometryType>; \
+    using RigidBodyContainerType       = RigidBodyContainer;                                                     \
+    using RigidBodySimContainerType    = RigidBodyContainerType;                                                 \
+    using RigidBodyStaticContainerType = RigidBodySimContainerType;                                              \
+    using RigidBodyStatesVectorType    = StdVecAligned<RigidBodyState>;                                          \
     using RigidBodyStatesContainerType = StdUMapAligned<RigidBodyIdType, RigidBodyState>;
 
-
-class DynamicsSystemBase {
-public:
-
+class DynamicsSystemBase
+{
+    public:
     DEFINE_DYNAMICSYSTEM_BASE_TYPES
-public:
+    public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     DynamicsSystemBase();
     ~DynamicsSystemBase();
 
     ContactParameterMapType m_ContactParameterMap;
-    ExternalForceListType m_externalForces; ///< Special class of function objects
+    ExternalForceListType   m_externalForces;  ///< Special class of function objects
 
-    //All Global Geometries used in the System
+    // All Global Geometries used in the System
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    RigidBodySimContainerType m_simBodies;    // Simulated Objects
-    RigidBodyStaticContainerType m_staticBodies;    // all not simulated objects
+    RigidBodySimContainerType    m_simBodies;     // Simulated Objects
+    RigidBodyStaticContainerType m_staticBodies;  // all not simulated objects
 
-    //All initial conditions for all bodies
-    //We need an order, which is sorted according to the id!
+    // All initial conditions for all bodies
+    // We need an order, which is sorted according to the id!
     RigidBodyStatesContainerType m_bodiesInitStates;
 
     void initializeLog(Logging::Log* pLog);
 
-    inline void applyInitStatesToBodies(){
+    inline void applyInitStatesToBodies()
+    {
         InitialConditionBodies::applyBodyStatesTo(m_bodiesInitStates, m_simBodies);
     }
-    inline void applySimBodiesToDynamicsState(DynamicsState & state) {
+    inline void applySimBodiesToDynamicsState(DynamicsState& state)
+    {
         state.applyBodies<true>(m_simBodies);
     }
 
+    inline const RecorderSettingsType& getSettingsRecorder()
+    {
+        return m_settingsRecorder;
+    }
+    inline const TimeStepperSettingsType& getSettingsTimeStepper()
+    {
+        return m_settingsTimestepper;
+    }
+    inline const InclusionSolverSettingsType& getSettingsInclusionSolver()
+    {
+        return m_settingsInclusionSolver;
+    }
 
-
-    inline const RecorderSettingsType & getSettingsRecorder() { return m_settingsRecorder;}
-    inline const TimeStepperSettingsType & getSettingsTimeStepper() {return m_settingsTimestepper;}
-    inline const InclusionSolverSettingsType & getSettingsInclusionSolver() { return m_settingsInclusionSolver;}
-
-    inline void setStartTime(PREC startTime){ m_settingsTimestepper.m_startTime = startTime;}
+    inline void setStartTime(PREC startTime)
+    {
+        m_settingsTimestepper.m_startTime = startTime;
+    }
 
     void reset();
     void resetEnergy();
@@ -101,18 +111,13 @@ public:
     PREC m_currentRotKinEnergy;
     PREC m_currentSpinNorm;
 
-
-protected:
-
-    RecorderSettingsType m_settingsRecorder;
-    TimeStepperSettingsType m_settingsTimestepper;
+    protected:
+    RecorderSettingsType        m_settingsRecorder;
+    TimeStepperSettingsType     m_settingsTimestepper;
     InclusionSolverSettingsType m_settingsInclusionSolver;
 
     // Log
-    Logging::Log*	m_pSolverLog;
+    Logging::Log* m_pSolverLog;
 };
 
-
-
-
-#endif // DynamicsSystemBase_hpp
+#endif  // DynamicsSystemBase_hpp

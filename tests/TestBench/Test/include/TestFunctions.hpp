@@ -8,22 +8,19 @@
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
 // ========================================================================================
 
-
 #ifndef TestFunctions_hpp
 #define TestFunctions_hpp
 
-#include <stdlib.h>
 #include <fstream>
 #include <functional>
+#include <stdlib.h>
 
 #include <gtest/gtest.h>
 
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/Asserts.hpp"
 #include "GRSF/common/SfinaeMacros.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-
-#define GRSF_TEST(name1 , name2 ) TEST(name1, name2)
-
+#define GRSF_TEST(name1, name2) TEST(name1, name2)
 
 #endif

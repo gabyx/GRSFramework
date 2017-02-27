@@ -18,26 +18,17 @@
 
 #include "GRSF/dynamics/buffers/StatePoolVisBackFront.hpp"
 
-
 class SharedBufferDynSys : public StatePoolVisBackFront
 {
-public:
+    public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-	template<typename TRigidBodyIterator>
-    SharedBufferDynSys(TRigidBodyIterator beg, TRigidBodyIterator end):
-        StatePoolVisBackFront(beg,end)
-    {};
+    template <typename TRigidBodyIterator>
+    SharedBufferDynSys(TRigidBodyIterator beg, TRigidBodyIterator end) : StatePoolVisBackFront(beg, end){};
 
-	~SharedBufferDynSys(){
-      DESTRUCTOR_MESSAGE
-    };
+    ~SharedBufferDynSys(){DESTRUCTOR_MESSAGE};
 
-private:
-
-
-
+    private:
 };
-
 
 #endif

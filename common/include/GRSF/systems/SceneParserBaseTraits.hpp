@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -11,58 +11,53 @@
 #ifndef GRSF_systems_SceneParserBaseTraits_hpp
 #define GRSF_systems_SceneParserBaseTraits_hpp
 
-
 #include <pugixml.hpp>
 
 #include "GRSF/common/SimpleLogger.hpp"
 
-
-
-#define DEFINE_PARSER_BASE_TYPE_TRAITS( TParserTraits ) \
-    using ParserType = typename TParserTraits::ParserType; \
+#define DEFINE_PARSER_BASE_TYPE_TRAITS(TParserTraits)                      \
+    using ParserType         = typename TParserTraits::ParserType;         \
     using DynamicsSystemType = typename TParserTraits::DynamicsSystemType; \
-    \
-    using LogType = typename TParserTraits::LogType; \
-    using XMLNodeType = typename TParserTraits::XMLNodeType;\
-    using XMLNodeItType = typename TParserTraits::XMLNodeItType;\
-    using XMLAttributeType = typename TParserTraits::XMLAttributeType;\
-    using RandomGenType = typename TParserTraits::RandomGenType; \
-    template<typename T> using UniformDistType = typename TParserTraits::template UniformDistType<T>;
-
+                                                                           \
+    using LogType          = typename TParserTraits::LogType;              \
+    using XMLNodeType      = typename TParserTraits::XMLNodeType;          \
+    using XMLNodeItType    = typename TParserTraits::XMLNodeItType;        \
+    using XMLAttributeType = typename TParserTraits::XMLAttributeType;     \
+    using RandomGenType    = typename TParserTraits::RandomGenType;        \
+    template <typename T>                                                  \
+    using UniformDistType = typename TParserTraits::template UniformDistType<T>;
 
 /** The base traits for every scene parser */
-template<typename TSceneParser, typename TDynamicsSystem>
-struct SceneParserBaseTraits {
-    using ParserType = TSceneParser;
+template <typename TSceneParser, typename TDynamicsSystem>
+struct SceneParserBaseTraits
+{
+    using ParserType         = TSceneParser;
     using DynamicsSystemType = TDynamicsSystem;
 
     using LogType = Logging::Log;
 
-    using XMLNodeType = pugi::xml_node;
-    using XMLNodeItType = pugi::xml_node_iterator;
+    using XMLNodeType      = pugi::xml_node;
+    using XMLNodeItType    = pugi::xml_node_iterator;
     using XMLAttributeType = pugi::xml_attribute;
 
     using RandomGenType = typename DynamicsSystemType::RandomGenType;
-    template<typename T>
+    template <typename T>
     using UniformDistType = std::uniform_real_distribution<T>;
-    template<typename T>
-    using NormalDistType  = std::normal_distribution<T>;
+    template <typename T>
+    using NormalDistType = std::normal_distribution<T>;
 };
 
-
-#define  DEFINE_PARSER_TYPE_TRAITS( TParserTraits )  \
-    DEFINE_PARSER_BASE_TYPE_TRAITS( TParserTraits ) \
-    using SettingsModuleType     = typename TParserTraits::SettingsModuleType;\
-    using GeometryModuleType     = typename TParserTraits::GeometryModuleType;\
-    using ContactParamModuleType = typename TParserTraits::ContactParamModuleType;\
-    \
-    using InitStatesModuleType       = typename TParserTraits::InitStatesModuleType ;\
-    using VisModuleType              = typename TParserTraits::VisModuleType;\
-    using BodyModuleType             = typename TParserTraits::BodyModuleType;\
-    using ExternalForcesModuleType   = typename TParserTraits::ExternalForcesModuleType ; \
-    \
-    using MPIModuleType              = typename TParserTraits::MPIModuleType;\
-
-
+#define DEFINE_PARSER_TYPE_TRAITS(TParserTraits)                                       \
+    DEFINE_PARSER_BASE_TYPE_TRAITS(TParserTraits)                                      \
+    using SettingsModuleType     = typename TParserTraits::SettingsModuleType;         \
+    using GeometryModuleType     = typename TParserTraits::GeometryModuleType;         \
+    using ContactParamModuleType = typename TParserTraits::ContactParamModuleType;     \
+                                                                                       \
+    using InitStatesModuleType     = typename TParserTraits::InitStatesModuleType;     \
+    using VisModuleType            = typename TParserTraits::VisModuleType;            \
+    using BodyModuleType           = typename TParserTraits::BodyModuleType;           \
+    using ExternalForcesModuleType = typename TParserTraits::ExternalForcesModuleType; \
+                                                                                       \
+    using MPIModuleType = typename TParserTraits::MPIModuleType;
 
 #endif

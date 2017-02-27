@@ -12,61 +12,65 @@
 
 #include <fstream>
 
-#include "GRSF/singeltons/contexts/InputContext.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/singeltons/contexts/InputContext.hpp"
 
+SimulationManagerBase::SimulationManagerBase()
+    : m_bSimThreadRunning(false)
+    , m_eSimThreadRunning(NONE)
+    , m_averageIterationTime(0.0)
+    , m_maxIterationTime(0.0)
+    , m_nCurrentContacts(0)
+    , m_bThreadToBeStopped(false)
+    ,
 
-
-SimulationManagerBase::SimulationManagerBase():
-    m_bSimThreadRunning(false),
-    m_eSimThreadRunning(NONE),
-    m_averageIterationTime(0.0),
-    m_maxIterationTime(0.0),
-    m_nCurrentContacts(0),
-    m_bThreadToBeStopped(false),
-
-    m_barrier_start(2) {
-    m_lastTime = 0;
+    m_barrier_start(2)
+{
+    m_lastTime            = 0;
     m_pTimelineSimulation = std::shared_ptr<CPUTimer>(new CPUTimer);
 
     // Setup timeScale List;
     m_timeScaleList.push_back(0);
-    for(int i=1; i<10; i++) {
-        m_timeScaleList.push_back(i*0.01);
+    for (int i = 1; i < 10; i++)
+    {
+        m_timeScaleList.push_back(i * 0.01);
     }
-    for(int i=1; i<=30; i++) {
-        m_timeScaleList.push_back(i*0.1);
+    for (int i = 1; i <= 30; i++)
+    {
+        m_timeScaleList.push_back(i * 0.1);
     }
     m_timeScaleListIdx = 19;
-    m_timeScale = m_timeScaleList[m_timeScaleListIdx];
-
+    m_timeScale        = m_timeScaleList[m_timeScaleListIdx];
 
     m_bPauseEnabled = false;
 };
 
-SimulationManagerBase::~SimulationManagerBase() {
-    DESTRUCTOR_MESSAGE
-};
+SimulationManagerBase::~SimulationManagerBase(){DESTRUCTOR_MESSAGE};
 
-bool SimulationManagerBase::isSimThreadRunning() {
+bool SimulationManagerBase::isSimThreadRunning()
+{
     boost::mutex::scoped_lock l(m_bSimThreadRunning_mutex);
     return m_bSimThreadRunning;
 }
 
-void SimulationManagerBase::setSimThreadRunning( bool value ) {
+void SimulationManagerBase::setSimThreadRunning(bool value)
+{
     boost::mutex::scoped_lock l(m_bSimThreadRunning_mutex);
     m_bSimThreadRunning = value;
 }
-bool  SimulationManagerBase::isSimThreadToBeStopped() {
+bool SimulationManagerBase::isSimThreadToBeStopped()
+{
     boost::mutex::scoped_lock l(m_bThreadToBeStopped_mutex);
     return m_bThreadToBeStopped;
 };
-void  SimulationManagerBase::setThreadToBeStopped(bool stop) {
+void SimulationManagerBase::setThreadToBeStopped(bool stop)
+{
     boost::mutex::scoped_lock l(m_bThreadToBeStopped_mutex);
     m_bThreadToBeStopped = stop;
 };
 
-double SimulationManagerBase::getTimelineSimulation() {
+double SimulationManagerBase::getTimelineSimulation()
+{
     double x;
     m_mutexTimelineSimulation.lock();
     x = m_pTimelineSimulation->elapsedSec() * m_timeScale + m_lastTime;
@@ -74,100 +78,108 @@ double SimulationManagerBase::getTimelineSimulation() {
     return x;
 };
 
-void  SimulationManagerBase::resetTimelineSimulation() {
+void SimulationManagerBase::resetTimelineSimulation()
+{
     m_mutexTimelineSimulation.lock();
     m_pTimelineSimulation->start();
-    m_lastTime = 0;
+    m_lastTime      = 0;
     m_bPauseEnabled = false;
     m_mutexTimelineSimulation.unlock();
 };
 
-void  SimulationManagerBase::stopTimelineSimulation() {
+void SimulationManagerBase::stopTimelineSimulation()
+{
     m_mutexTimelineSimulation.lock();
-    m_lastTime = 0;
+    m_lastTime      = 0;
     m_bPauseEnabled = false;
     m_mutexTimelineSimulation.unlock();
 };
 
-void SimulationManagerBase::getIterationTime(double & averageIterationTime, double & maxIterationTime) {
+void SimulationManagerBase::getIterationTime(double& averageIterationTime, double& maxIterationTime)
+{
     m_mutexIterationtime.lock();
     averageIterationTime = m_averageIterationTime;
-    maxIterationTime =  m_maxIterationTime;
+    maxIterationTime     = m_maxIterationTime;
     m_mutexIterationtime.unlock();
-
 };
 
-void SimulationManagerBase::setIterationTime(double averageIterationTime, double maxIterationTime) {
+void SimulationManagerBase::setIterationTime(double averageIterationTime, double maxIterationTime)
+{
     m_mutexIterationtime.lock();
     m_averageIterationTime = averageIterationTime;
-    m_maxIterationTime = maxIterationTime;
+    m_maxIterationTime     = maxIterationTime;
     m_mutexIterationtime.unlock();
 };
 
-void SimulationManagerBase::addToTimeScale(double step) {
-
+void SimulationManagerBase::addToTimeScale(double step)
+{
     m_mutexTimelineSimulation.lock();
     m_lastTime = m_pTimelineSimulation->elapsedSec() * m_timeScale + m_lastTime;
     m_pTimelineSimulation->start();
 
-
-    //Set mGlobalTimeFactor
-    if(step>0) {
-        if(m_timeScaleListIdx+1 < m_timeScaleList.size()) {
+    // Set mGlobalTimeFactor
+    if (step > 0)
+    {
+        if (m_timeScaleListIdx + 1 < m_timeScaleList.size())
+        {
             m_timeScaleListIdx++;
         }
-    } else {
-        if(m_timeScaleListIdx-1 >= 0) {
+    }
+    else
+    {
+        if (m_timeScaleListIdx - 1 >= 0)
+        {
             m_timeScaleListIdx--;
         }
     }
 
     m_timeScale = m_timeScaleList[m_timeScaleListIdx];
-//    LOG(m_pSimluationLog, "---> TimeScale set to " << m_timeScale <<std::endl;);
+    //    LOG(m_pSimluationLog, "---> TimeScale set to " << m_timeScale <<std::endl;);
 
     m_mutexTimelineSimulation.unlock();
-
 }
 
-void SimulationManagerBase::togglePauseSimulation() {
-
+void SimulationManagerBase::togglePauseSimulation()
+{
     m_mutexTimelineSimulation.lock();
-    if(m_bPauseEnabled==false){
-
+    if (m_bPauseEnabled == false)
+    {
         m_bPauseEnabled = true;
-        std::cout << "Paused Simulation!"<< std::endl;
-
+        std::cout << "Paused Simulation!" << std::endl;
 
         // Reset the Timer
         m_timeScale = m_timeScaleList[0];
-//      m_timeScale = 0;
+        //      m_timeScale = 0;
     }
-    else{
+    else
+    {
         m_bPauseEnabled = false;
-        m_timeScale = m_timeScaleList[m_timeScaleListIdx];
-        m_lastTime = m_pTimelineSimulation->elapsedSec() * m_timeScale + m_lastTime;
+        m_timeScale     = m_timeScaleList[m_timeScaleListIdx];
+        m_lastTime      = m_pTimelineSimulation->elapsedSec() * m_timeScale + m_lastTime;
         m_pTimelineSimulation->start();
-
     }
 
     m_mutexTimelineSimulation.unlock();
 }
 
-bool SimulationManagerBase::isSimulationPaused() {
+bool SimulationManagerBase::isSimulationPaused()
+{
     return m_bPauseEnabled;
 }
 
-double SimulationManagerBase::getTimeScale() {
+double SimulationManagerBase::getTimeScale()
+{
     boost::mutex::scoped_lock l(m_mutexTimelineSimulation);
     return m_timeScale;
 }
 
-void SimulationManagerBase::setNumberOfContacts( unsigned int nContacts ) {
+void SimulationManagerBase::setNumberOfContacts(unsigned int nContacts)
+{
     boost::mutex::scoped_lock l(m_nCurrentContacts_mutex);
     m_nCurrentContacts = nContacts;
 }
-unsigned int SimulationManagerBase::getNumberOfContacts( ) {
+unsigned int SimulationManagerBase::getNumberOfContacts()
+{
     boost::mutex::scoped_lock l(m_nCurrentContacts_mutex);
     return m_nCurrentContacts;
 }
-

@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -10,52 +10,57 @@
 
 #include "GRSF/converters/renderer/RenderConverter.hpp"
 
-#include "GRSF/systems/SceneParser.hpp"
 #include "GRSF/converters/renderer/RenderLogicParser.hpp"
+#include "GRSF/systems/SceneParser.hpp"
 
 #include "GRSF/converters/renderer/RenderLogicParserGenerators.hpp"
 
-RenderConverter::RenderConverter(const std::vector<boost::filesystem::path> & inputFiles,
-                  boost::filesystem::path sceneFile,
-                  boost::filesystem::path logicFile,
-                  Renderer renderer)
+RenderConverter::RenderConverter(const std::vector<boost::filesystem::path>& inputFiles,
+                                 boost::filesystem::path                     sceneFile,
+                                 boost::filesystem::path                     logicFile,
+                                 Renderer                                    renderer)
     : Base(inputFiles)
 {
-    m_renderer = renderer;
+    m_renderer  = renderer;
     m_sceneFile = sceneFile;
     m_logicFile = logicFile;
 
     setupExecutionGraph();
 }
 
-void RenderConverter::convert() {
+void RenderConverter::convert()
+{
     Base::convert(m_executionGraph);
 }
 
-void RenderConverter::setupExecutionGraph() {
-
+void RenderConverter::setupExecutionGraph()
+{
     {
         // SCENE FILE
         LOGRCLEVEL1(m_log, "---> Load Geometries ..." << std::endl;)
         using ParserGen = RenderLogicParserGenerators::SceneParserGen;
         ParserGen c(&m_renderData);
 
-        using SceneParserType = SceneParser< RenderData, ParserGen::SceneParserTraits >;
-        SceneParserType parser(c,m_log, ApplicationCLOptionsRenderer::getSingleton().getMediaDir() );
+        using SceneParserType = SceneParser<RenderData, ParserGen::SceneParserTraits>;
+        SceneParserType parser(c, m_log, ApplicationCLOptionsRenderer::getSingleton().getMediaDir());
         parser.parseScene(m_sceneFile);
-        LOGRCLEVEL1(m_log, "---> Loaded: " << m_renderData.m_geometryMap.size() << " geometries, "
-                    << m_renderData.m_scales.size() << " scales, " << m_renderData.m_visMeshs.size() << " meshs paths" << std::endl;)
+        LOGRCLEVEL1(m_log,
+                    "---> Loaded: " << m_renderData.m_geometryMap.size() << " geometries, "
+                                    << m_renderData.m_scales.size()
+                                    << " scales, "
+                                    << m_renderData.m_visMeshs.size()
+                                    << " meshs paths"
+                                    << std::endl;)
         LOGRCLEVEL1(m_log, "---> Load Geometries finished " << std::endl;)
     }
     {
         // LOGIC FILE
         LOGRCLEVEL1(m_log, "---> Load Logic file ..." << std::endl;)
         using ParserGen = RenderLogicParserGenerators::LogicParserGen;
-        ParserGen c(&m_renderData,&m_executionGraph);
+        ParserGen c(&m_renderData, &m_executionGraph);
 
-
-        using RenderLogicParserType = RenderLogicParser<RenderData /**, StandartTraits*/ >;
-        RenderLogicParserType parser(c,m_log);
+        using RenderLogicParserType = RenderLogicParser<RenderData /**, StandartTraits*/>;
+        RenderLogicParserType parser(c, m_log);
 
         parser.parse(m_logicFile);
         LOGRCLEVEL1(m_log, "---> Load Materials finished " << std::endl;)
@@ -106,5 +111,5 @@ void RenderConverter::setupExecutionGraph() {
     //    m.setup();
     //    LOGRCLEVEL1(m_log, "---> Execute" << std::endl;)
     //    m.execute();
-    //std::cout << n6->getOSocketValue<double>(0) << std::endl;
+    // std::cout << n6->getOSocketValue<double>(0) << std::endl;
 }

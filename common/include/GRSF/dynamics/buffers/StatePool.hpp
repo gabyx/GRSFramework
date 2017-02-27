@@ -11,22 +11,21 @@
 #ifndef GRSF_dynamics_buffers_StatePool_hpp
 #define GRSF_dynamics_buffers_StatePool_hpp
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <memory>
-#include <boost/thread.hpp>
 #include <Eigen/Core>
-
+#include <boost/thread.hpp>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <vector>
 
 #include "GRSF/common/Asserts.hpp"
-#include "GRSF/common/TypeDefs.hpp"
 #include "GRSF/common/LogDefines.hpp"
+#include "GRSF/common/TypeDefs.hpp"
 
-#define DECLERATIONS_STATEPOOL \
+#define DECLERATIONS_STATEPOOL               \
     using StatePool::m_change_pointer_mutex; \
-    using StatePool::m_idx; \
-    using StatePool::m_pool; \
+    using StatePool::m_idx;                  \
+    using StatePool::m_pool;                 \
     using atomic_char = typename StatePool::atomic_char;
 
 /**
@@ -34,31 +33,32 @@
 * @brief This is the StatePool class which is a general base class for different Pools, e.g RingPool etc.
 * @{
 */
-template<typename StateType>
-class StatePool {
-public:
+template <typename StateType>
+class StatePool
+{
+    public:
     DEFINE_LAYOUT_CONFIG_TYPES
 
-    StatePool(const unsigned int nIndices) {
+    StatePool(const unsigned int nIndices)
+    {
         // Allocate how many pointers we have!
         m_idx = new atomic_char[nIndices];
     }
-    ~StatePool(){
+    ~StatePool()
+    {
         DESTRUCTOR_MESSAGE
         // Allocate how many pointers we have!
         delete[] m_idx;
     };
 
-protected:
-
-    boost::mutex    m_change_pointer_mutex; ///< This is the mutex which is used to have a mutual exclusion if the pointers on the buffer changes.
-    std::vector<StateType>  m_pool; ///< This is the vector of states which are present in the pool. The subclass implement how many such states are in the pool.
+    protected:
+    boost::mutex m_change_pointer_mutex;  ///< This is the mutex which is used to have a mutual exclusion if the
+                                          /// pointers on the buffer changes.
+    std::vector<StateType> m_pool;        ///< This is the vector of states which are present in the pool. The subclass
+                                          /// implement how many such states are in the pool.
     using atomic_char = volatile unsigned char;
-    atomic_char*   m_idx; ///< These are the indices into the pool m_pool. The subclasses handle this indices.
-
+    atomic_char* m_idx;  ///< These are the indices into the pool m_pool. The subclasses handle this indices.
 };
 /** @} */
-
-
 
 #endif

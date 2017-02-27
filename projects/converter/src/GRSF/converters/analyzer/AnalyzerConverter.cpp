@@ -1,8 +1,8 @@
 // ========================================================================================
-//  GRSFramework 
-//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com> 
-// 
-//  This Source Code Form is subject to the terms of the GNU General Public License as 
+//  GRSFramework
+//  Copyright (C) 2016 by Gabriel Nützi <gnuetzi (at) gmail (døt) com>
+//
+//  This Source Code Form is subject to the terms of the GNU General Public License as
 //  published by the Free Software Foundation; either version 3 of the License,
 //  or (at your option) any later version. If a copy of the GPL was not distributed with
 //  this file, you can obtain one at http://www.gnu.org/licenses/gpl-3.0.html.
@@ -14,9 +14,9 @@
 #include "GRSF/converters/analyzer/AnalyzerLogicParser.hpp"
 #include "GRSF/converters/analyzer/AnalyzerLogicParserGenerators.hpp"
 
-AnalyzerConverter::AnalyzerConverter(const std::vector<boost::filesystem::path> & inputFiles,
-              boost::filesystem::path sceneFile,
-              boost::filesystem::path logicFile)
+AnalyzerConverter::AnalyzerConverter(const std::vector<boost::filesystem::path>& inputFiles,
+                                     boost::filesystem::path                     sceneFile,
+                                     boost::filesystem::path                     logicFile)
     : Base(inputFiles)
 {
     m_sceneFile = sceneFile;
@@ -25,20 +25,21 @@ AnalyzerConverter::AnalyzerConverter(const std::vector<boost::filesystem::path> 
     setupExecutionGraph();
 }
 
-void AnalyzerConverter::convert() {
+void AnalyzerConverter::convert()
+{
     Base::convert(m_executionGraph);
 }
 
-void AnalyzerConverter::setupExecutionGraph() {
-
+void AnalyzerConverter::setupExecutionGraph()
+{
     {
         // LOGIC FILE
         LOGRCLEVEL1(m_log, "---> Load Logic file ..." << std::endl;)
         using ParserGen = AnaylzerLogicParserGenerators::LogicParserGen;
         ParserGen c(&m_executionGraph);
 
-        using AnalyzerLogicParserType = AnalyzerLogicParser</**, StandartTraits*/ >;
-        AnalyzerLogicParserType parser(c,m_log);
+        using AnalyzerLogicParserType = AnalyzerLogicParser</**, StandartTraits*/>;
+        AnalyzerLogicParserType parser(c, m_log);
 
         parser.parse(m_logicFile);
 
