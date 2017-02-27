@@ -11,7 +11,7 @@
 #ifndef GRSF_common_AxisObject_hpp
 #define GRSF_common_AxisObject_hpp
 
-#include <OgreColorValue.h>
+#include <OgreColourValue.h>
 #include <OgreMaterial.h>
 namespace Ogre
 {
