@@ -11,6 +11,15 @@
 #ifndef GRSF_common_AxisObject_hpp
 #define GRSF_common_AxisObject_hpp
 
+#include <OgreColorValue.h>
+#include <OgreMaterial.h>
+namespace Ogre
+{
+    class String;
+    class ManualObject;
+    class SceneManager;
+}
+
 class AxisObject
 {
     enum BoxParts
