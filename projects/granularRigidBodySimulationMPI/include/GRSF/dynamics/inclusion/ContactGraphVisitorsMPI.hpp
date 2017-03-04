@@ -36,8 +36,8 @@ public:
     using NodeDataType = typename ContactGraphType::SplitBodyNodeDataType;
 
     SorProxStepSplitNodeVisitor(const InclusionSolverSettingsType& settings,
-                                bool&                              globalConverged,
-                                const unsigned int&                globalIterationNeeded)
+                                bool& globalConverged,
+                                const unsigned int& globalIterationNeeded)
         : m_settings(settings), m_bConverged(globalConverged), m_globalIterationCounter(globalIterationNeeded)
     {
     }
@@ -85,10 +85,10 @@ public:
     }
 
 private:
-    Logging::Log*                      m_pSolverLog;
+    Logging::Log* m_pSolverLog;
     const InclusionSolverSettingsType& m_settings;
-    bool&                              m_bConverged;              ///< Access to global flag for cancelation criteria
-    const unsigned int&                m_globalIterationCounter;  ///< Access to global iteration counter
+    bool& m_bConverged;                            ///< Access to global flag for cancelation criteria
+    const unsigned int& m_globalIterationCounter;  ///< Access to global iteration counter
 };
 
 /**

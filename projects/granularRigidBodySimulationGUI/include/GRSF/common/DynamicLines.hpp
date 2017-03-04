@@ -85,7 +85,7 @@ protected:
 private:
     using Vector3Vec = std::vector<Vector3>;
     Vector3Vec mPoints;
-    bool       mDirty;
+    bool mDirty;
 };
 
 #endif

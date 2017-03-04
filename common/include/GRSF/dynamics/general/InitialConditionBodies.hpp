@@ -25,21 +25,21 @@ namespace InitialConditionBodies
 DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
 
 template <typename BodyDataContainer, typename BodyStateContainer>
-void setupPositionBodiesLinear(BodyDataContainer&  bodyDataCont,
+void setupPositionBodiesLinear(BodyDataContainer& bodyDataCont,
                                BodyStateContainer& bodyStates,
-                               RigidBodyIdType     startId,  // used to appropriatly generate random numbers
-                               Vector3             pos,
-                               Vector3             dir,
-                               double              dist,
-                               bool                jitter,
-                               double              delta,
-                               unsigned int        seed)
+                               RigidBodyIdType startId,  // used to appropriatly generate random numbers
+                               Vector3 pos,
+                               Vector3 dir,
+                               double dist,
+                               bool jitter,
+                               double delta,
+                               unsigned int seed)
 {
     dir.normalize();
     Vector3 jitter_vec, random_vec;
 
     // Set only m_q, m_u is zero in constructor!
-    RandomGenType                          gen(seed);
+    RandomGenType gen(seed);
     std::uniform_real_distribution<double> uni(-1.0, 1.0);
     if (jitter)
     {
@@ -72,20 +72,20 @@ void setupPositionBodiesLinear(BodyDataContainer&  bodyDataCont,
 }
 
 template <typename BodyDataContainer, typename BodyStateContainer>
-void setupPositionBodiesGrid(BodyDataContainer&  bodyDataCont,
+void setupPositionBodiesGrid(BodyDataContainer& bodyDataCont,
                              BodyStateContainer& bodyStates,
-                             RigidBodyIdType     startId,
-                             unsigned int        gDim_x,
-                             unsigned int        gDim_y,
-                             double              d,
-                             Vector3             vec_trans,
-                             bool                jitter,
-                             double              delta,
-                             unsigned int        seed,
-                             Vector3             dirZ = Vector3(0, 0, 1),
-                             Vector3             dirX = Vector3(1, 0, 0))
+                             RigidBodyIdType startId,
+                             unsigned int gDim_x,
+                             unsigned int gDim_y,
+                             double d,
+                             Vector3 vec_trans,
+                             bool jitter,
+                             double delta,
+                             unsigned int seed,
+                             Vector3 dirZ = Vector3(0, 0, 1),
+                             Vector3 dirX = Vector3(1, 0, 0))
 {
-    Vector3  random_vec;
+    Vector3 random_vec;
     Matrix33 A_IK;
 
     A_IK.col(1) = dirZ.cross(dirX);
@@ -95,7 +95,7 @@ void setupPositionBodiesGrid(BodyDataContainer&  bodyDataCont,
     A_IK.col(0) = A_IK.col(1).cross(A_IK.col(2));
     A_IK.col(0).normalize();
 
-    RandomGenType                        gen(seed);
+    RandomGenType gen(seed);
     std::uniform_real_distribution<PREC> uni(-1.0, 1.0);
     if (jitter)
     {
@@ -135,11 +135,11 @@ void setupPositionBodiesGrid(BodyDataContainer&  bodyDataCont,
 
 template <typename TBodyStateMap>
 bool setupInitialConditionBodiesFromFile(boost::filesystem::path file_path,
-                                         TBodyStateMap&          bodyDataCont,
-                                         double&                 stateTime,
-                                         bool                    readPos = true,
-                                         bool                    readVel = true,
-                                         short                   which   = 2)
+                                         TBodyStateMap& bodyDataCont,
+                                         double& stateTime,
+                                         bool readPos = true,
+                                         bool readVel = true,
+                                         short which  = 2)
 {
     MultiBodySimFile simFile;
     if (simFile.openRead(file_path,

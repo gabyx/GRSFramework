@@ -39,11 +39,11 @@ public:
     template <typename T>
     struct MyRefTypes
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef const T&  Con;
-        typedef T&        Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T& Con;
+        typedef T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(T& v)
         {
             return &v;
@@ -58,11 +58,11 @@ public:
     template <typename T>
     struct MyRefTypes<T&>
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef T&        Con;
-        typedef T&        Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef T& Con;
+        typedef T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(T& v)
         {
             return &v;
@@ -77,11 +77,11 @@ public:
     template <typename T>
     struct MyRefTypes<const T&>
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef const T&  Con;
-        typedef const T&  Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T& Con;
+        typedef const T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(const T& v)
         {
             return &const_cast<T&>(v);
@@ -96,11 +96,11 @@ public:
     template <typename T>
     struct MyRefTypes<const T>
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef const T&  Con;
-        typedef const T&  Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T& Con;
+        typedef const T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(const T& v)
         {
             return &const_cast<T&>(v);
@@ -115,11 +115,11 @@ public:
     template <typename T>
     struct MyRefTypes<T*>
     {
-        typedef T*        Ptr;
-        typedef T         Org;
-        typedef T*        Con;
-        typedef T&        Ref;
-        typedef T* const  CRef;  //! note this is a pointer....
+        typedef T* Ptr;
+        typedef T Org;
+        typedef T* Con;
+        typedef T& Ref;
+        typedef T* const CRef;  //! note this is a pointer....
         static inline Ptr getUnderlyingPtr(T* v)
         {
             return v;
@@ -134,10 +134,10 @@ public:
     template <typename T>
     struct MyRefTypes<const T*>
     {
-        typedef T              Org;
-        typedef T*             Ptr;
-        typedef const T*       Con;
-        typedef const T&       Ref;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T* Con;
+        typedef const T& Ref;
         typedef const T* const CRef;  //! note this is a pointer....
         static inline Ptr getUnderlyingPtr(const T* v)
         {
@@ -149,17 +149,17 @@ public:
         }
     };
 
-    typedef typename MyRefTypes<TF>::Ref  TFRef;
+    typedef typename MyRefTypes<TF>::Ref TFRef;
     typedef typename MyRefTypes<TF>::CRef TFCRef;
-    typedef typename MyRefTypes<TF>::Con  TFCon;
-    typedef typename MyRefTypes<TF>::Org  TFOrg;
-    typedef typename MyRefTypes<TF>::Ptr  TFPtr;
+    typedef typename MyRefTypes<TF>::Con TFCon;
+    typedef typename MyRefTypes<TF>::Org TFOrg;
+    typedef typename MyRefTypes<TF>::Ptr TFPtr;
 
-    typedef typename MyRefTypes<TB>::Ref  TBRef;
+    typedef typename MyRefTypes<TB>::Ref TBRef;
     typedef typename MyRefTypes<TB>::CRef TBCRef;
-    typedef typename MyRefTypes<TB>::Con  TBCon;
-    typedef typename MyRefTypes<TB>::Org  TBOrg;
-    typedef typename MyRefTypes<TB>::Ptr  TBPtr;
+    typedef typename MyRefTypes<TB>::Con TBCon;
+    typedef typename MyRefTypes<TB>::Org TBOrg;
+    typedef typename MyRefTypes<TB>::Ptr TBPtr;
 
     explicit FrontBackBuffer(TFCon front, TBCon back) : m_Front(front), m_Back(back)
     {
@@ -204,11 +204,11 @@ public:
     template <typename T>
     struct MyRefTypes
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef const T&  Con;
-        typedef T&        Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T& Con;
+        typedef T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(T& v)
         {
             return &v;
@@ -223,11 +223,11 @@ public:
     template <typename T>
     struct MyRefTypes<T&>
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef T&        Con;
-        typedef T&        Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef T& Con;
+        typedef T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(T& v)
         {
             return &v;
@@ -242,11 +242,11 @@ public:
     template <typename T>
     struct MyRefTypes<const T&>
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef const T&  Con;
-        typedef const T&  Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T& Con;
+        typedef const T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(const T& v)
         {
             return &const_cast<T&>(v);
@@ -261,11 +261,11 @@ public:
     template <typename T>
     struct MyRefTypes<const T>
     {
-        typedef T         Org;
-        typedef T*        Ptr;
-        typedef const T&  Con;
-        typedef const T&  Ref;
-        typedef const T&  CRef;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T& Con;
+        typedef const T& Ref;
+        typedef const T& CRef;
         static inline Ptr getUnderlyingPtr(const T& v)
         {
             return &const_cast<T&>(v);
@@ -280,11 +280,11 @@ public:
     template <typename T>
     struct MyRefTypes<T*>
     {
-        typedef T*        Ptr;
-        typedef T         Org;
-        typedef T*        Con;
-        typedef T&        Ref;
-        typedef T* const  CRef;  //! note this is a pointer....
+        typedef T* Ptr;
+        typedef T Org;
+        typedef T* Con;
+        typedef T& Ref;
+        typedef T* const CRef;  //! note this is a pointer....
         static inline Ptr getUnderlyingPtr(T* v)
         {
             return v;
@@ -299,10 +299,10 @@ public:
     template <typename T>
     struct MyRefTypes<T*>
     {
-        typedef T              Org;
-        typedef T*             Ptr;
-        typedef const T*       Con;
-        typedef const T&       Ref;
+        typedef T Org;
+        typedef T* Ptr;
+        typedef const T* Con;
+        typedef const T& Ref;
         typedef const T* const CRef;  //! note this is a pointer....
         static inline Ptr getUnderlyingPtr(const T* v)
         {
@@ -314,17 +314,17 @@ public:
         }
     };
 
-    typedef typename MyRefTypes<TF>::Ref  TFRef;
+    typedef typename MyRefTypes<TF>::Ref TFRef;
     typedef typename MyRefTypes<TF>::CRef TFCRef;
-    typedef typename MyRefTypes<TF>::Con  TFCon;
-    typedef typename MyRefTypes<TF>::Org  TFOrg;
-    typedef typename MyRefTypes<TF>::Ptr  TFPtr;
+    typedef typename MyRefTypes<TF>::Con TFCon;
+    typedef typename MyRefTypes<TF>::Org TFOrg;
+    typedef typename MyRefTypes<TF>::Ptr TFPtr;
 
-    typedef typename MyRefTypes<TB>::Ref  TBRef;
+    typedef typename MyRefTypes<TB>::Ref TBRef;
     typedef typename MyRefTypes<TB>::CRef TBCRef;
-    typedef typename MyRefTypes<TB>::Con  TBCon;
-    typedef typename MyRefTypes<TB>::Org  TBOrg;
-    typedef typename MyRefTypes<TB>::Ptr  TBPtr;
+    typedef typename MyRefTypes<TB>::Con TBCon;
+    typedef typename MyRefTypes<TB>::Org TBOrg;
+    typedef typename MyRefTypes<TB>::Ptr TBPtr;
 
     explicit FrontBackBuffer(const boost::shared_ptr<TF>& front, const boost::shared_ptr<TB>& back)
         : m_Front(front)

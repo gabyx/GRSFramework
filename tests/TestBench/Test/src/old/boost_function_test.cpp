@@ -82,12 +82,12 @@ int main()
     A* a2 = new B();
 
     boost::function<int(int)> f2;
-    boost::bind (&A::foo, a2, _1)(2);
+    boost::bind(&A::foo, a2, _1)(2);
 
     // Switch with some C
     int (A::*f3)(int) = &A::foo;
-    A*       a3       = new C();
-    A*       switcher;
+    A* a3             = new C();
+    A* switcher;
 
     switcher = a;
     (switcher->*f3)(5);

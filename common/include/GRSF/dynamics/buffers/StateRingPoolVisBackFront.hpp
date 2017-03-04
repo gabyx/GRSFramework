@@ -74,8 +74,8 @@ public:
     void resetStateRingPool(const RigidBodyStateContainerType& state_init);
     /** @} */
 protected:
-    boost::mutex             m_mutexStateInit;  ///< Mutex for the initial state.
-    std::ofstream            m_logfile;
+    boost::mutex m_mutexStateInit;  ///< Mutex for the initial state.
+    std::ofstream m_logfile;
     static const std::size_t m_ringPoolSize = 8;  ///< The ring pool size, must not exceed 256 and be lower than 3!,
                                                   /// because of the integer for the index in the StatePool class.
 };

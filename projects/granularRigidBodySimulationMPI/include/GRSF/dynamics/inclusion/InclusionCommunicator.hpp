@@ -46,8 +46,8 @@ public:
     // using NodeDataType = typename ContactGraphType::NodeDataType;
     using NeighbourMapType = NeighbourMap<NeighbourDataInclusionCommunication /*<NodeDataType> */>;
 
-    InclusionCommunicator(std::shared_ptr<BodyCommunicator>        pBodyComm,
-                          std::shared_ptr<DynamicsSystemType>      pDynSys,
+    InclusionCommunicator(std::shared_ptr<BodyCommunicator> pBodyComm,
+                          std::shared_ptr<DynamicsSystemType> pDynSys,
                           std::shared_ptr<ProcessCommunicatorType> pProcComm);
 
     void setContactGraph(ContactGraphType* pGraph)
@@ -104,7 +104,7 @@ private:
     void sendSolutionSplitBodiesToNeighbours();
     void recvSolutionSplitBodiesFromNeighbours();
 
-    PREC         m_currentSimulationTime;
+    PREC m_currentSimulationTime;
     unsigned int m_globalIterationNumber;
 
     /**
@@ -119,19 +119,19 @@ private:
     template <typename TNeighbourCommunicator>
     friend class MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution;
 
-    MPILayer::NeighbourMessageWrapperInclusionContact<InclusionCommunicator>           m_messageContact;
-    MPILayer::NeighbourMessageWrapperInclusionMultiplicity<InclusionCommunicator>      m_messageMultiplicity;
-    MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate<InclusionCommunicator>   m_messageSplitBodyUpdate;
+    MPILayer::NeighbourMessageWrapperInclusionContact<InclusionCommunicator> m_messageContact;
+    MPILayer::NeighbourMessageWrapperInclusionMultiplicity<InclusionCommunicator> m_messageMultiplicity;
+    MPILayer::NeighbourMessageWrapperInclusionSplitBodyUpdate<InclusionCommunicator> m_messageSplitBodyUpdate;
     MPILayer::NeighbourMessageWrapperInclusionSplitBodySolution<InclusionCommunicator> m_messageSplitBodySolution;
 
-    std::shared_ptr<DynamicsSystemType>      m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
     std::shared_ptr<ProcessCommunicatorType> m_pProcComm;
-    ContactGraphType*                        m_pContactGraph;
-    std::shared_ptr<BodyCommunicator>        m_pBodyComm;
+    ContactGraphType* m_pContactGraph;
+    std::shared_ptr<BodyCommunicator> m_pBodyComm;
 
     RankIdType m_rank;
 
-    ProcessTopologyType*                                 m_pProcTopo;
+    ProcessTopologyType* m_pProcTopo;
     typename ProcessTopologyType::NeighbourRanksListType m_nbRanks;
 
     std::set<RankIdType> m_nbRanksSendRecvRemote;

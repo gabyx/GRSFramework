@@ -42,8 +42,8 @@ public:
     /** provide function for SimFileConverter ==================================*/
     void initSimInfo(boost::filesystem::path simFile,
                      boost::filesystem::path filePath,
-                     std::size_t             nBodies,
-                     std::size_t             nStates);
+                     std::size_t nBodies,
+                     std::size_t nStates);
 
     void initState(boost::filesystem::path filePath, double time, std::size_t stateIdx);
 
@@ -117,8 +117,8 @@ private:
         }
 
         RigidBodyStateAdd* m_rigidBodyState = nullptr;
-        PREC               m_distance       = std::numeric_limits<PREC>::lowest();
-        Vector3            m_cellCenter;
+        PREC m_distance                     = std::numeric_limits<PREC>::lowest();
+        Vector3 m_cellCenter;
     };
 
     GridExtractionSettings* m_settings = nullptr;
@@ -131,12 +131,12 @@ private:
 
     /** H5 File (row-major storage)*/
     std::unique_ptr<H5::H5File> m_h5File;
-    void                        closeFile();
-    boost::filesystem::path     m_currentFilePath;
+    void closeFile();
+    boost::filesystem::path m_currentFilePath;
 
     H5::Group m_filesGroup;  ///< /Files
 
-    H5::Group   m_currentSimFileGroup;  ///< /Files/SimFile0 , /Files/SimFile1, ...
+    H5::Group m_currentSimFileGroup;  ///< /Files/SimFile0 , /Files/SimFile1, ...
     std::size_t m_simFileCounter = 0;
 
     /** Stores per SimFile (hdf5 group) a reference for each State */
@@ -144,16 +144,16 @@ private:
                        std::vector<hobj_ref_t>,
                        Hdf5Helpers::Hasher<H5::Group>,
                        Hdf5Helpers::KeyEqual<H5::Group>>
-                             m_stateRefs;
+        m_stateRefs;
     std::vector<hobj_ref_t>* m_currentStateRefs = nullptr;
-    void                     writeReferences();
+    void writeReferences();
 
-    H5::Group   m_statesGroup;       ///< /States
+    H5::Group m_statesGroup;         ///< /States
     std::size_t m_stateCounter = 0;  ///< /States/S0, /States/S1, ...
 
     std::size_t m_nBodies  = 0;
     std::size_t m_nStates  = 0;
-    double      m_time     = 0;
+    double m_time          = 0;
     std::size_t m_stateIdx = 0;  ///< state index in Sim file
     std::size_t m_globalStateOffset =
         0;  ///< The global state index offset overall converted files (in sequence with the files)
@@ -183,7 +183,7 @@ void GridExtractor::addState(BodyStateContainer& states)
     // write output to new group (S0,S1,S2 .... )
     // in "/States"
     std::string groupName = "S" + std::to_string(m_stateCounter++);
-    H5::Group   s         = m_statesGroup.createGroup(groupName);
+    H5::Group s           = m_statesGroup.createGroup(groupName);
     Hdf5Helpers::saveAttribute(s, m_time, "time");
     Hdf5Helpers::saveAttribute(s, m_stateIdx, "stateIdx");
     Hdf5Helpers::saveAttribute(s, m_globalStateOffset + m_stateIdx, "globalStateIdx");

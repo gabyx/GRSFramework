@@ -40,8 +40,8 @@ void GridExtractor::initState(boost::filesystem::path filePath, double time, std
 
 void GridExtractor::initSimInfo(boost::filesystem::path simFile,
                                 boost::filesystem::path filePath,
-                                std::size_t             nBodies,
-                                std::size_t             nStates)
+                                std::size_t nBodies,
+                                std::size_t nStates)
 {
     m_globalStateOffset += m_nStates;  // add old states
 

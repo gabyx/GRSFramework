@@ -115,7 +115,7 @@ private:
     boost::filesystem::path m_folderPath;
 
     boost::mutex m_mutex;
-    bool         m_bDropFrame;
+    bool m_bDropFrame;
 
     double m_currentTime;
 

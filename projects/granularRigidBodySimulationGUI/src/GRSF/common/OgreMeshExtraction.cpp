@@ -17,8 +17,8 @@ std::pair<bool, Ogre::Vector3> RaycastEntity(Ogre::Ray& ray, Ogre::Entity* penti
     std::pair<bool, Ogre::Vector3> results;
 
     // mesh data to retrieve
-    size_t         vertex_count;
-    size_t         index_count;
+    size_t vertex_count;
+    size_t index_count;
     Ogre::Vector3* vertices;
     unsigned long* indices;
 
@@ -41,7 +41,7 @@ std::pair<bool, Ogre::Vector3> RaycastEntity(Ogre::Ray& ray, Ogre::Entity* penti
     //    }
 
     // Test for hitting individual triangles on the mesh
-    bool       closest_found    = false;
+    bool closest_found          = false;
     Ogre::Real closest_distance = -1.0;
 
     for (int i = 0; i < static_cast<int>(index_count); i += 3)
@@ -87,7 +87,7 @@ std::pair<bool, Ogre::Vector3> RaycastEntity(Ogre::Ray& ray, Ogre::Entity* penti
 void getMeshInformation(
     Ogre::Entity* entity, size_t& vertex_count, Ogre::Vector3*& vertices, size_t& index_count, unsigned long*& indices)
 {
-    bool   added_shared   = false;
+    bool added_shared     = false;
     size_t current_offset = 0;
     size_t shared_offset  = 0;
     size_t next_offset    = 0;
@@ -195,13 +195,13 @@ void getMeshInformation(
             next_offset += vertex_data->vertexCount;
         }
 
-        Ogre::IndexData*                   index_data = submesh->indexData;
-        size_t                             numTris    = index_data->indexCount / 3;
-        Ogre::HardwareIndexBufferSharedPtr ibuf       = index_data->indexBuffer;
+        Ogre::IndexData* index_data             = submesh->indexData;
+        size_t numTris                          = index_data->indexCount / 3;
+        Ogre::HardwareIndexBufferSharedPtr ibuf = index_data->indexBuffer;
 
         bool use32bitindexes = (ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT);
 
-        unsigned long*  pLong  = static_cast<unsigned long*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
+        unsigned long* pLong   = static_cast<unsigned long*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
         unsigned short* pShort = reinterpret_cast<unsigned short*>(pLong);
 
         size_t offset      = (submesh->useSharedVertices) ? shared_offset : current_offset;
@@ -228,14 +228,14 @@ void getMeshInformation(
 // Get the mesh information for the given mesh.
 // Code found in Wiki: www.ogre3d.org/wiki/index.php/RetrieveVertexData
 // All Mesh data is turned and orientated with position, orient, scale!
-void getMeshInformation(Ogre::Entity*        entity,
-                        size_t&              vertex_count,
-                        Ogre::Vector3*&      vertices,
-                        size_t&              index_count,
-                        unsigned long*&      indices,
+void getMeshInformation(Ogre::Entity* entity,
+                        size_t& vertex_count,
+                        Ogre::Vector3*& vertices,
+                        size_t& index_count,
+                        unsigned long*& indices,
                         const Ogre::Matrix4& A_IK)
 {
-    bool   added_shared   = false;
+    bool added_shared     = false;
     size_t current_offset = 0;
     size_t shared_offset  = 0;
     size_t next_offset    = 0;
@@ -343,13 +343,13 @@ void getMeshInformation(Ogre::Entity*        entity,
             next_offset += vertex_data->vertexCount;
         }
 
-        Ogre::IndexData*                   index_data = submesh->indexData;
-        size_t                             numTris    = index_data->indexCount / 3;
-        Ogre::HardwareIndexBufferSharedPtr ibuf       = index_data->indexBuffer;
+        Ogre::IndexData* index_data             = submesh->indexData;
+        size_t numTris                          = index_data->indexCount / 3;
+        Ogre::HardwareIndexBufferSharedPtr ibuf = index_data->indexBuffer;
 
         bool use32bitindexes = (ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT);
 
-        unsigned long*  pLong  = static_cast<unsigned long*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
+        unsigned long* pLong   = static_cast<unsigned long*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
         unsigned short* pShort = reinterpret_cast<unsigned short*>(pLong);
 
         size_t offset      = (submesh->useSharedVertices) ? shared_offset : current_offset;

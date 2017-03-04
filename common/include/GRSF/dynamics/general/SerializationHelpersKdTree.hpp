@@ -100,17 +100,17 @@ private:
         void save(Archive& ar, KdTree::NodeSimpleS<Traits>& treeN) const
         {
             static IndexType s;
-            ar&              treeN.m_idx;
-            ar&              treeN.m_splitAxis;
-            ar&              treeN.m_splitPosition;
-            ar&              treeN.m_treeLevel;
-            ar&              treeN.m_aabb;
+            ar& treeN.m_idx;
+            ar& treeN.m_splitAxis;
+            ar& treeN.m_splitPosition;
+            ar& treeN.m_treeLevel;
+            ar& treeN.m_aabb;
 
             // serialize only leaf boundaries!
             // TODO instead of sending, recalculate aabb and bounds after receiving
 
             bool isLeaf = treeN.isLeaf();
-            ar&  isLeaf;
+            ar& isLeaf;
             if (isLeaf)
             {
                 for (auto* b : treeN.m_bound)
@@ -131,7 +131,7 @@ private:
             ar& treeN.m_aabb;
 
             bool isLeaf;
-            ar&  isLeaf;
+            ar& isLeaf;
             if (isLeaf)
             {
                 m_boundaries.emplace_back(treeN.m_idx);
@@ -149,7 +149,7 @@ private:
         {
             // move over all boundary information and set link to subtrees in the corresp. node
             IndexType nodeIdx, bIdx;
-            auto      s = m_boundaries.size();
+            auto s = m_boundaries.size();
             for (std::size_t i = 0; i < s; i += BoundaryInfoType::size + 1)
             {
                 nodeIdx = m_boundaries[i];

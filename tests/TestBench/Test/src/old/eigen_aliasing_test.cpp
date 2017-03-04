@@ -35,7 +35,7 @@ using namespace Eigen;
 template <typename Derived, typename DerivedOther>
 void foo(const MatrixBase<Derived>& a, const MatrixBase<DerivedOther>& b)
 {
-    Eigen::MatrixBase<Derived>&      a_ref = const_cast<Eigen::MatrixBase<Derived>&>(a);
+    Eigen::MatrixBase<Derived>& a_ref      = const_cast<Eigen::MatrixBase<Derived>&>(a);
     Eigen::MatrixBase<DerivedOther>& b_ref = const_cast<Eigen::MatrixBase<DerivedOther>&>(b);
 
     a_ref(0, 0) = 5;
@@ -87,7 +87,7 @@ enum
 };
 
 template <int K>
-void          gagafunction()
+void gagafunction()
 {
     if (K == DD)
     {

@@ -122,7 +122,7 @@ public:
 
 private:
     RigidBodyType* m_rigidBody;
-    PREC           m_density;
+    PREC m_density;
 };
 
 template <typename TRigidBody, typename PREC>

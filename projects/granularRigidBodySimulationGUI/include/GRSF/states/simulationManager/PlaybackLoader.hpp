@@ -52,29 +52,29 @@ private:
     Logging::Log* m_pThreadLog; /**< This log is set to the thread log which calls this loader thread.  */
 
     boost::thread* m_pThreadDynamics;
-    void           initLoaderThread();
-    void           runLoaderThread();
+    void initLoaderThread();
+    void runLoaderThread();
 
     void reset();
     bool loadNextFile();
     void unloadFile();
 
     boost::mutex m_bLoaderThreadRunning_mutex;
-    bool         m_bLoaderThreadRunning;
+    bool m_bLoaderThreadRunning;
     void setLoaderThreadRunning(bool value);
 
     boost::mutex m_bThreadToBeStopped_mutex;
-    bool         m_bThreadToBeStopped;
-    bool         isLoaderThreadToBeStopped();
+    bool m_bThreadToBeStopped;
+    bool isLoaderThreadToBeStopped();
 
     bool m_readVelocities;
 
-    DynamicsState*              m_state; /**<   This is the actual loader state pointer ;*/
+    DynamicsState* m_state; /**<   This is the actual loader state pointer ;*/
     std::shared_ptr<TStatePool> m_pStatePool;
 
-    std::set<boost::filesystem::path>           m_simFileList;
+    std::set<boost::filesystem::path> m_simFileList;
     std::set<boost::filesystem::path>::iterator m_currentFileIt;
-    unsigned int                                m_currentFileIndex;
+    unsigned int m_currentFileIndex;
 };
 
 // Implementation
@@ -160,7 +160,7 @@ template <typename TStatePool>
 void PlaybackLoader<TStatePool>::runLoaderThread()
 {
     static std::stringstream logstream;
-    static bool              bMovedBuffer;
+    static bool bMovedBuffer;
     enum
     {
         LOAD_NEXT_FILE,

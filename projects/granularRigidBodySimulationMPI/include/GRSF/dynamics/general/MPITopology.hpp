@@ -90,9 +90,9 @@ public:
         return belongsPointToProcess(point, ownerRank);
     }
 
-    inline bool checkOverlap(const RigidBodyType*    body,
+    inline bool checkOverlap(const RigidBodyType* body,
                              NeighbourRanksListType& neighbourProcessRanks,
-                             bool&                   overlapsOwnProcess)
+                             bool& overlapsOwnProcess)
     {
         TopologyVisitors::CheckOverlap<ProcessTopology> vis(body, neighbourProcessRanks, overlapsOwnProcess);
         return m_procTopo.apply_visitor(vis);
@@ -107,9 +107,9 @@ public:
     {
         GRSF_ASSERTMSG(m_nbRanks.find(neighbourRank) != m_nbRanks.end(),
                        "No neighbour rank: " << neighbourRank << " for this process rank: " << m_rank << "!");
-        GRSF_ASSERTMSG(m_adjNbRanks.find(neighbourRank) != m_adjNbRanks.end(),
-                       "No adjacent ranks for this neighbour: " << neighbourRank << "for process rank: " << m_rank
-                                                                << "!");
+        GRSF_ASSERTMSG(
+            m_adjNbRanks.find(neighbourRank) != m_adjNbRanks.end(),
+            "No adjacent ranks for this neighbour: " << neighbourRank << "for process rank: " << m_rank << "!");
         return m_adjNbRanks.find(neighbourRank)->second;
     }
 
@@ -157,7 +157,7 @@ private:
     RankIdType m_rank;
 
     // These values are set by the create Functions for different topologies
-    NeighbourRanksListType        m_nbRanks;     ///< Neighbour ranks
+    NeighbourRanksListType m_nbRanks;            ///< Neighbour ranks
     AdjacentNeighbourRanksMapType m_adjNbRanks;  ///< Adjacent ranks between m_rank and each neighbour
 };
 

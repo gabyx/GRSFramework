@@ -60,8 +60,8 @@ private:
         ar& minutes;
         ar& seconds;
     }
-    int   degrees;
-    int   minutes;
+    int degrees;
+    int minutes;
     float seconds;
 
 public:
@@ -160,7 +160,7 @@ void serializationTestClass()
     serialTestClass b2(2);  // INITIALIZE (POINTER IS NOT ZERO!)
     b2.print();
     {
-        std::ifstream                   ifs("filename");
+        std::ifstream ifs("filename");
         boost::archive::binary_iarchive ia(ifs);
         ia >> b2;
     }
@@ -425,7 +425,7 @@ void serialize(Archive& ar, RigidBodyBase<TRigidBodyConfig>& g, const unsigned i
     if (Archive::is_loading::value)
     {
         bool hadData = false;
-        ar&  hadData;
+        ar& hadData;
         if (hadData)
         {
             if (!g.m_pSolverData)
@@ -515,7 +515,7 @@ int testSerializationRigidBodyFile()
     std::cout << "Unmarshalling Body:" << std::endl;
     {
         // create and open an archive for input
-        std::ifstream                   ifs("filename");
+        std::ifstream ifs("filename");
         boost::archive::binary_iarchive ia(ifs);
 
         // read class state from archive
@@ -539,9 +539,9 @@ int testSerializationRigidBodyString()
     // save data to archive
     {
         serial_str.clear();  // Clear serializable string!
-        boost::iostreams::back_insert_device<std::string>                           inserter(serial_str);
+        boost::iostreams::back_insert_device<std::string> inserter(serial_str);
         boost::iostreams::stream<boost::iostreams::back_insert_device<std::string>> s(inserter);
-        boost::archive::binary_oarchive                                             oa(s);
+        boost::archive::binary_oarchive oa(s);
 
         oa << b;
     }
@@ -555,7 +555,7 @@ int testSerializationRigidBodyString()
     {
         boost::iostreams::basic_array_source<char> device(serial_str.data(), serial_str.size());
         boost::iostreams::stream<boost::iostreams::basic_array_source<char>> s(device);
-        boost::archive::binary_iarchive                                      ia(s);
+        boost::archive::binary_iarchive ia(s);
         // read class state from archive
         ia >> b2;
         // archive and stream closed when destructors are called
@@ -567,7 +567,7 @@ int testSerializationRigidBodyString()
 int testSerializationRigidBodyMessage()
 {
     // YOU CAN EITHER TAKE A Serial_str of Char_vector
-    std::string       serial_str;
+    std::string serial_str;
     std::vector<char> char_vector;
 
     // create class message
@@ -583,9 +583,9 @@ int testSerializationRigidBodyMessage()
     {
         char_vector.clear();
         serial_str.clear();  // Clear serializable string!
-        boost::iostreams::back_insert_device<std::vector<char>>                           inserter(char_vector);
+        boost::iostreams::back_insert_device<std::vector<char>> inserter(char_vector);
         boost::iostreams::stream<boost::iostreams::back_insert_device<std::vector<char>>> s(inserter);
-        boost::archive::binary_oarchive                                                   oa(s);
+        boost::archive::binary_oarchive oa(s);
 
         oa << rbmess;
     }
@@ -598,7 +598,7 @@ int testSerializationRigidBodyMessage()
     {
         boost::iostreams::basic_array_source<char> device(&char_vector[0], char_vector.size() * sizeof(char));
         boost::iostreams::stream<boost::iostreams::basic_array_source<char>> s(device);
-        boost::archive::binary_iarchive                                      ia(s);
+        boost::archive::binary_iarchive ia(s);
         // read class state from archive
         ia >> rbmess2;
         // archive and stream closed when destructors are called
@@ -641,15 +641,15 @@ void sendBodyMPI(std::ostream& f = std::cout)
         // save data to archive
         {
             serial_str.clear();  // Clear serializable string!
-            boost::iostreams::back_insert_device<std::string>                           inserter(serial_str);
+            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
             boost::iostreams::stream<boost::iostreams::back_insert_device<std::string>> s(inserter);
-            boost::archive::binary_oarchive                                             oa(s);
+            boost::archive::binary_oarchive oa(s);
             oa << b;
         }
 
         // MPI SENDING to Rank 0!
-        int          dest = 0;
-        int          tag  = 0;
+        int dest = 0;
+        int tag  = 0;
         MPI::Request request;
         request = MPI::COMM_WORLD.Isend(const_cast<char*>(serial_str.data()), serial_str.size(), MPI::CHAR, dest, tag);
     }
@@ -659,9 +659,9 @@ void receiveBodyMPI(int source, std::ostream& f = std::cout)
 {
     f << "=========== Receving Body (MPI), ProcID," << source << " ==============" << std::endl;
 
-    char*       buf;
-    int         msglen = 0;
-    int         tag    = 0;
+    char* buf;
+    int msglen = 0;
+    int tag    = 0;
     MPI::Status status;
     f << "Probe: " << std::endl;
     bool flag = false;
@@ -685,9 +685,9 @@ void receiveBodyMPI(int source, std::ostream& f = std::cout)
     MyRigidBody b2;
     f << "Unmarshalling Body:" << std::endl;
     {
-        boost::iostreams::basic_array_source<char>                           device(buf, msglen);
+        boost::iostreams::basic_array_source<char> device(buf, msglen);
         boost::iostreams::stream<boost::iostreams::basic_array_source<char>> s(device);
-        boost::archive::binary_iarchive                                      ia(s);
+        boost::archive::binary_iarchive ia(s);
         // read class state from archive
         ia >> b2;
         // archive and stream closed when destructors are called
@@ -702,11 +702,11 @@ void receiveBodyMPI(int source, std::ostream& f = std::cout)
 
 int testSerializationRigidBodyMPI(int argc, char** argv)
 {
-    int         my_rank;
-    int         p;
-    int         source;
-    int         dest;
-    int         tag = 0;
+    int my_rank;
+    int p;
+    int source;
+    int dest;
+    int tag = 0;
     MPI::Status status;
 
     MPI::Init(argc, argv);
@@ -771,15 +771,15 @@ void sendBodyMessageMPI(std::ostream& f = std::cout)
         // save data to archive
         {
             serial_str.clear();  // Clear serializable string!
-            boost::iostreams::back_insert_device<std::string>                           inserter(serial_str);
+            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
             boost::iostreams::stream<boost::iostreams::back_insert_device<std::string>> s(inserter);
-            boost::archive::binary_oarchive                                             oa(s);
+            boost::archive::binary_oarchive oa(s);
             oa << b;
         }
 
         // MPI SENDING to Rank 0!
-        int          dest = 0;
-        int          tag  = 0;
+        int dest = 0;
+        int tag  = 0;
         MPI::Request request;
         // f << "Sending String: " << serial_str <<std::endl;
         request = MPI::COMM_WORLD.Isend(const_cast<char*>(serial_str.data()), serial_str.size(), MPI::BYTE, dest, tag);
@@ -789,9 +789,9 @@ void receiveBodyMessageMPI(int source, std::ostream& f = std::cout)
 {
     f << "=========== Receving Body (MPI), ProcID," << source << " ==============" << std::endl;
 
-    char*       buf;
-    int         msglen = 0;
-    int         tag    = 0;
+    char* buf;
+    int msglen = 0;
+    int tag    = 0;
     MPI::Status status;
     f << "Probe: " << std::endl;
     bool flag = false;
@@ -817,9 +817,9 @@ void receiveBodyMessageMPI(int source, std::ostream& f = std::cout)
 
     f << "Unmarshalling Body:" << std::endl;
     {
-        boost::iostreams::basic_array_source<char>                           device(buf, msglen);
+        boost::iostreams::basic_array_source<char> device(buf, msglen);
         boost::iostreams::stream<boost::iostreams::basic_array_source<char>> s(device);
-        boost::archive::binary_iarchive                                      ia(s);
+        boost::archive::binary_iarchive ia(s);
         // read class state from archive
         ia >> b2;
         // archive and stream closed when destructors are called
@@ -945,11 +945,11 @@ void receiveBodyMessageMPIBoost2(int source, std::ostream & f = std::cout){
 
 int testSerializationRigidBodyMessageMPI(int argc, char** argv)
 {
-    int         my_rank;
-    int         p;
-    int         source;
-    int         dest;
-    int         tag = 0;
+    int my_rank;
+    int p;
+    int source;
+    int dest;
+    int tag = 0;
     MPI::Status status;
 
     MPI::Init(argc, argv);
@@ -981,9 +981,9 @@ int testSerializationRigidBodyMessageMPI(int argc, char** argv)
 
 void testWaitAll(int argc, char** argv)
 {
-    int         numtasks, rank, next, prev, buf[2], tag1 = 1, tag2 = 2;
+    int numtasks, rank, next, prev, buf[2], tag1 = 1, tag2 = 2;
     MPI_Request reqs[4];
-    MPI_Status  stats[4];
+    MPI_Status stats[4];
 
     std::vector<MPI_Request> reqs2;
 

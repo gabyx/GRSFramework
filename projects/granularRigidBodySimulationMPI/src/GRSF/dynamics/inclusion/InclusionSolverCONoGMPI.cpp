@@ -23,9 +23,9 @@
 #include "SorProxGPUVariant.hpp"
 #endif
 
-InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(std::shared_ptr<BodyCommunicator>        pBodyComm,
-                                                 std::shared_ptr<CollisionSolverType>     pCollisionSolver,
-                                                 std::shared_ptr<DynamicsSystemType>      pDynSys,
+InclusionSolverCONoGMPI::InclusionSolverCONoGMPI(std::shared_ptr<BodyCommunicator> pBodyComm,
+                                                 std::shared_ptr<CollisionSolverType> pCollisionSolver,
+                                                 std::shared_ptr<DynamicsSystemType> pDynSys,
                                                  std::shared_ptr<ProcessCommunicatorType> pProcComm)
     : m_pDynSys(pDynSys)
     , m_pCollisionSolver(pCollisionSolver)
@@ -546,7 +546,7 @@ void InclusionSolverCONoGMPI::sorProxOverAllNodes()
     // (m_settings.m_convergenceCheckRatio*m_settings.m_splitNodeUpdateRatio) = local iterations per convergence checks
     if (doConvergenceCheck)
     {
-        bool  converged;
+        bool converged;
         auto& localWithContacts   = m_pContactGraph->getLocalBodiesWithContactsListRef();
         auto& remotesWithContacts = m_pContactGraph->getRemoteBodiesWithContactsListRef();
 

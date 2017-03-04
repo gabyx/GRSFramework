@@ -139,8 +139,8 @@ public:
     template <typename TParserTraitsOptions = SceneParserDynamicOptions,
               typename TBodyParserOptions   = BodyModuleDynamicOptionsType>
     bool parseScene(const boost::filesystem::path& file,
-                    TParserTraitsOptions&&         opt     = TParserTraitsOptions(),
-                    TBodyParserOptions&&           optBody = TBodyParserOptions())
+                    TParserTraitsOptions&& opt   = TParserTraitsOptions(),
+                    TBodyParserOptions&& optBody = TBodyParserOptions())
     {
         // Forward all settings
         m_opts = std::forward<TParserTraitsOptions>(opt);
@@ -401,19 +401,19 @@ protected:
 
     /** XML Declarations */
     std::shared_ptr<pugi::xml_document> m_xmlDoc;
-    bool                                m_loadedFile = false;
-    pugi::xml_node                      m_xmlRootNode;
+    bool m_loadedFile = false;
+    pugi::xml_node m_xmlRootNode;
 
     /** Log */
     LogType* m_pSimulationLog;
 
     /** Modules */
-    std::unique_ptr<SettingsModuleType>       m_pSettingsModule;
-    std::unique_ptr<GeometryModuleType>       m_pGeometryModule;
+    std::unique_ptr<SettingsModuleType> m_pSettingsModule;
+    std::unique_ptr<GeometryModuleType> m_pGeometryModule;
     std::unique_ptr<ExternalForcesModuleType> m_pExternalForcesModule;
-    std::unique_ptr<ContactParamModuleType>   m_pContactParamModule;
+    std::unique_ptr<ContactParamModuleType> m_pContactParamModule;
 
-    std::unique_ptr<BodyModuleType>       m_pBodyModule;
+    std::unique_ptr<BodyModuleType> m_pBodyModule;
     std::unique_ptr<InitStatesModuleType> m_pInitStatesModule;
 
     std::unique_ptr<VisModuleType> m_pVisModule;

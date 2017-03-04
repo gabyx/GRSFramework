@@ -77,9 +77,9 @@ public:
     * @return true if the file is successfully opened and writable and false if not.
     */
     bool openWrite(const boost::filesystem::path& file_path,
-                   unsigned int                   nDOFqBody,
-                   unsigned int                   nDOFuBody,
-                   bool                           truncate);
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   bool truncate);
 
     /**
     * @brief Write all states of the bodies to the file, writes position and velocity!
@@ -120,7 +120,7 @@ private:
 
     std::fstream m_file_stream;  ///< The file stream which represents the binary data.
     unsigned int m_buf_size;     ///< The internal buffer size.
-    char*        m_Buffer;       ///< The buffer.
+    char* m_Buffer;              ///< The buffer.
 
     static const char m_simFileSignature[SIM_FILE_PART_SIGNATURE_LENGTH];  ///< The .sim file header.
 
@@ -138,15 +138,15 @@ private:
     std::streampos m_beginHeader   = 0;
     std::streampos m_beginOfStates = 0;
 
-    unsigned int                m_nDOFuBody = 0, m_nDOFqBody = 0, m_nStates = 0;
-    std::streamoff              m_nBytesPerBody  = 0;
-    std::streamoff              m_nBytesPerQBody = 0;
-    std::streamoff              m_nBytesPerUBody = 0;
+    unsigned int m_nDOFuBody = 0, m_nDOFqBody = 0, m_nStates = 0;
+    std::streamoff m_nBytesPerBody  = 0;
+    std::streamoff m_nBytesPerQBody = 0;
+    std::streamoff m_nBytesPerUBody = 0;
     static const std::streamoff m_headerLength =
         (2 * sizeof(unsigned int) + SIM_FILE_PART_SIGNATURE_LENGTH * sizeof(char));
 
     // Write addditional bytes, not yet implemented, but the type is written in the header
-    unsigned int    m_additionalBytesPerBodyType = 0;
+    unsigned int m_additionalBytesPerBodyType = 0;
     std::streamsize getAdditionalBytesPerBody();
     std::streamsize m_nAdditionalBytesPerBody = 0;
 

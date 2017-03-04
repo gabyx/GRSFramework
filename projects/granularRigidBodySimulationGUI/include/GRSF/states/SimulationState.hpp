@@ -82,7 +82,7 @@ public:
     void update(double timeSinceLastFrame);
 
     boost::function<void(double)>
-         updateSceneFunction;  // this function binds to updateScenePlayback() or  updateSceneRealtime()
+        updateSceneFunction;  // this function binds to updateScenePlayback() or  updateSceneRealtime()
     void updateSceneRealtime(double timeSinceLastFrame);
 
     std::shared_ptr<SimulationManagerGUI> m_pSimMgr;
@@ -95,7 +95,7 @@ private:
     Ogre::SceneNode* m_pBaseNode;
 
     std::shared_ptr<OrbitCamera> m_pOrbitCamera;
-    std::shared_ptr<MenuMouse>   m_pMenuMouse;
+    std::shared_ptr<MenuMouse> m_pMenuMouse;
 
     void switchToPlaybackState();
 
@@ -118,17 +118,17 @@ private:
     void updateParamsPanelSimulation();
 
     unsigned int m_SceneDetailIndex;
-    void         switchSceneDetailIndex();
-    void         toggleMPIVisualization();
+    void switchSceneDetailIndex();
+    void toggleMPIVisualization();
 
     std::shared_ptr<Ogre::Timer> m_pTimelineRendering;
 
     double m_lengthScale;
 
     std::shared_ptr<OgreBites::SdkTrayManager> m_pTrayMgr;
-    OgreBites::ParamsPanel*                    m_pPhysicsStatsPanel;
-    Ogre::StringVector                         m_PhysicsStatsParams;
-    Ogre::StringVector                         m_pPhysicsStatsValues;
+    OgreBites::ParamsPanel* m_pPhysicsStatsPanel;
+    Ogre::StringVector m_PhysicsStatsParams;
+    Ogre::StringVector m_pPhysicsStatsValues;
 
     OgreBites::SelectMenu* m_pActiveModeSelectMenu;
     void itemSelected(OgreBites::SelectMenu* menu);  // Virtual of SdkTrayListner

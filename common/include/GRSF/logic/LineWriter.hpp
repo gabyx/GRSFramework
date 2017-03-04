@@ -96,8 +96,8 @@ public:
 
 private:
     boost::filesystem::path m_openedFile = "";
-    std::ofstream           m_file;
-    bool                    m_truncate = true;
+    std::ofstream m_file;
+    bool m_truncate = true;
 };
 };
 

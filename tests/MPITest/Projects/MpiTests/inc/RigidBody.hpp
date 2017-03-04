@@ -179,7 +179,7 @@ public:
 
     GeometryType m_geometry;  ///< A boost::variant which takes different geometry shared pointers.
 
-    PREC    m_mass;       ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
+    PREC m_mass;          ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
     Vector3 m_K_Theta_S;  ///< The rigid body inertia tensor in diagonal form, \f$ {_K}\mathbf{\Theta}_{S}\f$ in \f$
                           ///[\textrm{kg} \cdot \textrm{m}^2] \f$
 
@@ -202,9 +202,9 @@ public:
                         ///\f$,  at time t_s + deltaT/2.
 
     typedef RigidBodyId::Type RigidBodyIdType;
-    RigidBodyIdType           m_id;  ///< This is the id of the body.
+    RigidBodyIdType m_id;  ///< This is the id of the body.
 
-    BodyState    m_eState;     ///< The state of the body.
+    BodyState m_eState;        ///< The state of the body.
     BodyMaterial m_eMaterial;  ///< The material id.
 
     RigidBodySolverDataType* m_pSolverData;  /// Simulated bodies have a solverData. For all others, animated and not

@@ -20,9 +20,9 @@ public:
     DEFINE_MPI_INFORMATION_CONFIG_TYPES
 
     BodyProcessInfo(RankIdType ownRank,
-                    bool       overlapsThisRank = true,
-                    bool       isRemote         = false,
-                    bool       receivedUpdate   = false)
+                    bool overlapsThisRank = true,
+                    bool isRemote         = false,
+                    bool receivedUpdate   = false)
         : m_ownerRank(ownRank)
         , m_overlapsThisRank(overlapsThisRank)
         , m_isRemote(isRemote)

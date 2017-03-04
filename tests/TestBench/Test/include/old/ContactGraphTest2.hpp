@@ -244,7 +244,7 @@ int contactGraphTest()
                                  meta::list<EdgeDataAA, EdgeDataAB, EdgeDataAC, EdgeDataBB, EdgeDataBC, EdgeDataCC>>;
         GeneralGraph<cg> g;
 
-        std::default_random_engine         gen;
+        std::default_random_engine gen;
         std::uniform_int_distribution<int> d(0, size - 1);
 
         START_TIMER(ins1);

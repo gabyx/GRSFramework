@@ -362,7 +362,7 @@ void SimulationManagerMPI::initSim()
 
         LOG(m_pSimulationLog, "MPI> Broadcast new simulation directory: " << m_SimFolderPath << std::endl;);
         boost::filesystem::path sceneFilePath = m_SimFolderPath;
-        std::string             filename      = SIM_SCENE_FILE_NAME;
+        std::string filename                  = SIM_SCENE_FILE_NAME;
         filename += ".xml";
         sceneFilePath /= filename;
 
@@ -435,7 +435,7 @@ void SimulationManagerMPI::reloadScene()
         optScene.m_parseSceneObjects  = true;
 
         SceneParserType2::BodyModuleDynamicOptionsType optBodyM;
-        std::set<RigidBodyIdType>                      bodiesToload;
+        std::set<RigidBodyIdType> bodiesToload;
         for (auto& s : m_pDynSys->m_bodiesInitStates)
         {
             bodiesToload.insert(s.second.m_id);

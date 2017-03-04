@@ -115,7 +115,7 @@ public:
     void addISock(const T& defaultValue)
     {
         unsigned int idx = m_inputs.size() + m_outputs.size();
-        auto*        t   = new LogicSocket<T>(this, true, defaultValue, idx);
+        auto* t          = new LogicSocket<T>(this, true, defaultValue, idx);
         m_inputs.push_back(t);
     }
 
@@ -123,7 +123,7 @@ public:
     void addOSock(const T& defaultValue)
     {
         unsigned int idx = m_inputs.size() + m_outputs.size();
-        auto*        t   = new LogicSocket<T>(this, false, defaultValue, idx);
+        auto* t          = new LogicSocket<T>(this, false, defaultValue, idx);
         m_outputs.push_back(t);
     }
 
@@ -157,10 +157,10 @@ public:
     static void makeWriteLink(LogicNode* outN, unsigned int outS, LogicNode* inN, unsigned int inS);
 
 protected:
-    bool           m_hasLinks;
+    bool m_hasLinks;
     SocketListType m_inputs;
     SocketListType m_outputs;
-    unsigned int   m_priority;
+    unsigned int m_priority;
 
     // SocketListType m_sockets;
 };

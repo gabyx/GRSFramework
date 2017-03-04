@@ -81,7 +81,7 @@ private:
             return 1;
         }
 
-        TYPE         m_t;
+        TYPE m_t;
         unsigned int m_bodyC;
     };
 
@@ -136,9 +136,9 @@ private:
 
 public:
     void join(const std::vector<boost::filesystem::path>& inputFiles,
-              boost::filesystem::path                     outputFile,
-              const TypesTimeRange::VariantType&          timeRange,
-              const TypesBodyRange::VariantType&          bodyRange)
+              boost::filesystem::path outputFile,
+              const TypesTimeRange::VariantType& timeRange,
+              const TypesBodyRange::VariantType& bodyRange)
     {
         m_iFiles    = inputFiles;
         m_oFile     = outputFile;
@@ -159,7 +159,7 @@ public:
 
 private:
     std::vector<boost::filesystem::path> m_iFiles;
-    boost::filesystem::path              m_oFile;
+    boost::filesystem::path m_oFile;
 
     TypesTimeRange::VariantType m_timeRange;
     TypesBodyRange::VariantType m_bodyRange;
@@ -172,8 +172,8 @@ private:
         unsigned int bodies, dofq, dofu;
 
         MultiBodySimFile simFile;
-        std::streamsize  bState;
-        unsigned int     i = 0;
+        std::streamsize bState;
+        unsigned int i = 0;
 
         if (m_iFiles.size() < 1)
         {
@@ -248,8 +248,8 @@ private:
         unsigned int bodies, dofq, dofu;
 
         MultiBodySimFile simFile;
-        std::streamsize  bState;
-        unsigned int     i = 0;
+        std::streamsize bState;
+        unsigned int i = 0;
 
         if (m_iFiles.size() < 1)
         {
@@ -348,12 +348,12 @@ private:
         output.close();
     }
 
-    void writeTo(MultiBodySimFile&                   toFile,
-                 MultiBodySimFile&                   fromFile,
-                 TypesTimeRange::ListType&           timeList,
+    void writeTo(MultiBodySimFile& toFile,
+                 MultiBodySimFile& fromFile,
+                 TypesTimeRange::ListType& timeList,
                  TypesTimeRange::ListType::iterator& lastMatchedTime,
-                 TypesBodyRange::VariantType&        bodyRange,
-                 bool                                firstFile = true)
+                 TypesBodyRange::VariantType& bodyRange,
+                 bool firstFile = true)
     {
         std::cerr << std::setprecision(9);
 
@@ -465,10 +465,10 @@ private:
             return;
         }
 
-        std::streamsize   size = fromFile.m_nBytesPerBody - std::streamsize(sizeof(RigidBodyIdType));
+        std::streamsize size = fromFile.m_nBytesPerBody - std::streamsize(sizeof(RigidBodyIdType));
         std::vector<char> byteBuffer(size);  // buffer
-        unsigned int      initBodyCounter = 0;
-        bool              firstRun        = true;
+        unsigned int initBodyCounter = 0;
+        bool firstRun                = true;
 
         // Jump in file over the matched times and
         for (auto matchedTimesIt = matchedTimesAndRelOff.begin(); matchedTimesIt != matchedTimesAndRelOff.end();
@@ -482,7 +482,7 @@ private:
 
             // Move over all bodies
             RigidBodyIdType id;
-            unsigned int    bodyCounter = 0;
+            unsigned int bodyCounter = 0;
             LOGSJ(std::cerr << "---> Write bodies: ";)
             for (unsigned int body = 0; body < fromFile.m_nSimBodies; body++)
             {
@@ -543,12 +543,12 @@ private:
         lastMatchedTime = currMatchListTime;
     }
 
-    void writeTo(MultiBodySimFile&            toFile,
-                 MultiBodySimFile&            fromFile,
-                 TypesTimeRange::RangeType&   timeRange,
-                 double&                      lastTimeWritten,
+    void writeTo(MultiBodySimFile& toFile,
+                 MultiBodySimFile& fromFile,
+                 TypesTimeRange::RangeType& timeRange,
+                 double& lastTimeWritten,
                  TypesBodyRange::VariantType& bodyRange,
-                 bool                         firstFile = true)
+                 bool firstFile = true)
     {
         if (!toFile.m_file_stream.good() || !fromFile.m_file_stream.good())
         {
@@ -612,10 +612,10 @@ private:
             return;
         }
 
-        std::streamsize   size = fromFile.m_nBytesPerBody - std::streamsize(sizeof(RigidBodyIdType));
+        std::streamsize size = fromFile.m_nBytesPerBody - std::streamsize(sizeof(RigidBodyIdType));
         std::vector<char> byteBuffer(size);  // buffer 1mb of bodies
-        unsigned int      initBodyCounter = 0;
-        bool              firstRun        = true;
+        unsigned int initBodyCounter = 0;
+        bool firstRun                = true;
 
         // Jump in file over the matched times and
         for (auto fileTimeIt = startIt; fileTimeIt != fileTimesAndOff.end(); fileTimeIt++)
@@ -636,7 +636,7 @@ private:
 
             // Move over all bodies
             RigidBodyIdType id;
-            unsigned int    bodyCounter = 0;
+            unsigned int bodyCounter = 0;
             LOGSJ(std::cerr << "---> Write bodies: ";)
             for (unsigned int body = 0; body < fromFile.m_nSimBodies; body++)
             {

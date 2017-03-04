@@ -19,7 +19,7 @@ void foo(B& b, C& c)
 
 void test()
 {
-    int    a;
+    int a;
     double b;
     foo<float, int, double>(a, b);
 }

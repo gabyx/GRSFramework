@@ -60,7 +60,7 @@ inline uint32_t colorToHandle(Ogre::PixelFormat fmt, uint32_t col)
     return handle;
 }
 
-typedef uint32_t        CollObjectHandle;
+typedef uint32_t CollObjectHandle;
 inline CollObjectHandle colorToHandle(const Ogre::ColourValue& color)
 {
     return (int(color.r * 255) << 16) | (int(color.g * 255) << 8) | int(color.b * 255);
@@ -92,10 +92,10 @@ public:
 
 private:
     Ogre::MaterialPtr material_;
-    OgrePointCloud*   parent_;
+    OgrePointCloud* parent_;
 };
 typedef std::shared_ptr<OgrePointCloudRenderable> OgrePointCloudRenderablePtr;
-typedef std::vector<OgrePointCloudRenderablePtr>  V_OgrePointCloudRenderable;
+typedef std::vector<OgrePointCloudRenderablePtr> V_OgrePointCloudRenderable;
 
 /**
  * \class OgrePointCloud
@@ -142,7 +142,7 @@ public:
             color = Ogre::ColourValue(r, g, b, a);
         }
 
-        Ogre::Vector3     position;
+        Ogre::Vector3 position;
         Ogre::ColourValue color;
     };
 
@@ -205,7 +205,7 @@ public:
         return sm_Type;
     }
     virtual const Ogre::AxisAlignedBox& getBoundingBox() const;
-    virtual Ogre::Real                  getBoundingRadius() const;
+    virtual Ogre::Real getBoundingRadius() const;
     virtual void getWorldTransforms(Ogre::Matrix4* xform) const;
     virtual unsigned short getNumWorldTransforms() const
     {
@@ -224,22 +224,22 @@ public:
     }
 
 private:
-    uint32_t                    getVerticesPerPoint();
+    uint32_t getVerticesPerPoint();
     OgrePointCloudRenderablePtr createRenderable(int num_points);
     void regenerateAll();
     void shrinkRenderables();
 
-    Ogre::AxisAlignedBox bounding_box_;     ///< The bounding box of this point cloud
-    Ogre::Real           bounding_radius_;  ///< The bounding radius of this point cloud
+    Ogre::AxisAlignedBox bounding_box_;  ///< The bounding box of this point cloud
+    Ogre::Real bounding_radius_;         ///< The bounding radius of this point cloud
 
     typedef std::vector<Point> V_Point;
-    V_Point                    points_;       ///< The list of points we're displaying.  Allocates to a high-water-mark.
-    uint32_t                   point_count_;  ///< The number of points currently in #points_
+    V_Point points_;        ///< The list of points we're displaying.  Allocates to a high-water-mark.
+    uint32_t point_count_;  ///< The number of points currently in #points_
 
-    RenderMode    render_mode_;
-    Ogre::Real    width_;             ///< width
-    Ogre::Real    height_;            ///< height
-    Ogre::Real    depth_;             ///< depth
+    RenderMode render_mode_;
+    Ogre::Real width_;                ///< width
+    Ogre::Real height_;               ///< height
+    Ogre::Real depth_;                ///< depth
     Ogre::Vector3 common_direction_;  ///< See Ogre::BillboardSet::setCommonDirection
     Ogre::Vector3 common_up_vector_;  ///< See Ogre::BillboardSet::setCommonUpVector
 
@@ -250,13 +250,13 @@ private:
     Ogre::MaterialPtr tile_material_;
     Ogre::MaterialPtr box_material_;
     Ogre::MaterialPtr current_material_;
-    Ogre::Real        alpha_;
+    Ogre::Real alpha_;
 
     bool color_by_index_;
 
     V_OgrePointCloudRenderable renderables_;
 
-    bool              current_mode_supports_geometry_shader_;
+    bool current_mode_supports_geometry_shader_;
     Ogre::ColourValue pick_color_;
 
     static Ogre::String sm_Type;  ///< The "renderable type" used by Ogre

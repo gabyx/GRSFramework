@@ -291,10 +291,10 @@ public:
 
 private:
     StartNodeType* m_startNode = nullptr;
-    EndNodeType*   m_endNode   = nullptr;
-    TwinEdgeType*  m_twinEdge  = nullptr;
+    EndNodeType* m_endNode     = nullptr;
+    TwinEdgeType* m_twinEdge   = nullptr;
 
-    EdgeDataType      m_data;
+    EdgeDataType m_data;
     const std::size_t m_id;
 };
 
@@ -352,7 +352,7 @@ public:
 
 private:
     OutEdgeStoragesTypes m_edgesOut;
-    InEdgeStoragesTypes  m_edgesIn;
+    InEdgeStoragesTypes m_edgesIn;
 
     struct ClearConnections
     {
@@ -414,7 +414,7 @@ public:
     }
 
 private:
-    NodeDataType      m_data;
+    NodeDataType m_data;
     const std::size_t m_id;
 };
 

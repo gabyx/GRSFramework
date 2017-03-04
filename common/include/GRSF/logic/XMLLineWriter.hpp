@@ -58,10 +58,10 @@ public:
     DECLARE_ISOCKET_TYPE(File, boost::filesystem::path);
     DECLARE_ISOCKET_TYPE(Value, TValue);
 
-    XMLLineWriter(unsigned int                  id,
-                  const boost::filesystem::path filePath  = "",
-                  std::string                   rootName  = "Root",
-                  std::string                   childName = "Child")
+    XMLLineWriter(unsigned int id,
+                  const boost::filesystem::path filePath = "",
+                  std::string rootName                   = "Root",
+                  std::string childName                  = "Child")
         : LogicNode(id), m_rootName(rootName), m_childName(childName)
     {
         ADD_ISOCK(File, filePath);
@@ -107,8 +107,8 @@ private:
     std::stringstream m_stream;
 
     boost::filesystem::path m_openedFile;
-    XMLDocumentType         m_xmlFile;
-    XMLNodeType             m_root;
+    XMLDocumentType m_xmlFile;
+    XMLNodeType m_root;
 
     std::string m_rootName, m_childName;
 };

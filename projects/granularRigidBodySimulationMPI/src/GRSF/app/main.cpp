@@ -80,10 +80,10 @@ void start(int argc, char** argv)
 
     // Calculate the directory where the processes have their local dir
     {
-        auto&        localDirs = ApplicationCLOptions::getSingleton().getLocalDirs();
-        unsigned int groups    = nProcesses / localDirs.size();
-        unsigned int index     = std::min((unsigned int)(my_rank / groups), (unsigned int)localDirs.size() - 1);
-        localDirPath           = localDirs[index];
+        auto& localDirs     = ApplicationCLOptions::getSingleton().getLocalDirs();
+        unsigned int groups = nProcesses / localDirs.size();
+        unsigned int index  = std::min((unsigned int)(my_rank / groups), (unsigned int)localDirs.size() - 1);
+        localDirPath        = localDirs[index];
         localDirPath /= processFolder.str();
     }
 
@@ -104,7 +104,7 @@ void start(int argc, char** argv)
 
     // Redirect std::cerr to Global file:
     boost::filesystem::path file = FileManager::getSingleton().getGlobalDirectoryPath();
-    std::stringstream       name;
+    std::stringstream name;
     name << "MPIError_Rank" << my_rank << ".log";
     file /= name.str();
     std::fstream f;

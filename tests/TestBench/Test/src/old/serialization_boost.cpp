@@ -34,8 +34,8 @@ private:
         ar& BOOST_SERIALIZATION_NVP(c);
     }
 
-    int   a;
-    int   b;
+    int a;
+    int b;
     float c;
 
     boost::shared_ptr<Object> pObj;
@@ -60,7 +60,7 @@ int main()
     boost::archive::xml_oarchive oa(ofs);
     oa << BOOST_SERIALIZATION_NVP(t);
 
-    Test*                        t2;
+    Test* t2;
     boost::archive::xml_oarchive oa(ofs);
     oa >> t2;
 

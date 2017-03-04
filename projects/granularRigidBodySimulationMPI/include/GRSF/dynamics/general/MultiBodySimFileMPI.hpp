@@ -48,12 +48,12 @@ public:
     MultiBodySimFileMPI();
     ~MultiBodySimFileMPI();
 
-    bool openWrite(MPI_Comm                       comm,
+    bool openWrite(MPI_Comm comm,
                    const boost::filesystem::path& file_path,
-                   unsigned int                   nDOFqBody,
-                   unsigned int                   nDOFuBody,
-                   const unsigned int             nSimBodies,
-                   bool                           truncate = true);
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   const unsigned int nSimBodies,
+                   bool truncate = true);
     void close();
 
     inline void write(double time, const std::vector<char>& bytes, unsigned int nBodies);
@@ -75,12 +75,12 @@ private:
 
     // Communicator which is used to write the file in parallel, this communicator is duplicated from the one inputed
     // This prevents that accidentaly some other synchronization and stuff is
-    MPI_Comm    m_comm;
-    RankIdType  m_rank      = 0;  // rank in the communicator;
+    MPI_Comm m_comm;
+    RankIdType m_rank       = 0;  // rank in the communicator;
     std::size_t m_processes = 0;
 
     MPI_Datatype m_bodyStateTypeMPI;
-    MPI_File     m_file_handle;  ///< The file stream which represents the binary data.
+    MPI_File m_file_handle;  ///< The file stream which represents the binary data.
 
     static const char m_simFileSignature[SIM_FILE_MPI_SIGNATURE_LENGTH];  ///< The .sim file header.
 
@@ -88,11 +88,11 @@ private:
     void writeByOffsets(double time, const typename DynamicsSystemType::RigidBodySimContainerType& bodyList);
     void writeByOffsets2(double time, const typename DynamicsSystemType::RigidBodySimContainerType& bodyList);
 
-    void                    writeHeader();
+    void writeHeader();
     boost::filesystem::path m_filePath;
 
-    void            setByteLengths();
-    unsigned int    m_nSimBodies     = 0;
+    void setByteLengths();
+    unsigned int m_nSimBodies        = 0;
     std::streamsize m_nBytesPerState = 0;  ///< m_nSimBodies*(id,q,u) + time
     std::streamsize m_nBytesPerQ = 0, m_nBytesPerU = 0;
 
@@ -130,7 +130,7 @@ private:
         if (err != MPI_SUCCESS)
         {
             char* string = nullptr;
-            int   length;
+            int length;
             MPI_Error_string(err, string, &length);
             m_errorString << string;
             return false;

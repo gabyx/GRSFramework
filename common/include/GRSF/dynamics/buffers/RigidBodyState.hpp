@@ -36,15 +36,15 @@ public:
     DEFINE_LAYOUT_CONFIG_TYPES
     friend void Interpolate::lerp<PREC>(const RigidBodyState& A,
                                         const RigidBodyState& B,
-                                        RigidBodyState&       X,
-                                        PREC                  factor);
+                                        RigidBodyState& X,
+                                        PREC factor);
 
     using DisplacementType = VectorQBody;
     using VelocityType     = VectorUBody;
 
-    RigidBodyIdType  m_id;
+    RigidBodyIdType m_id;
     DisplacementType m_q;  ///< These are the generalized coordinates \f$\mathbf{q}\f$ of a rigid body.
-    VelocityType     m_u;  ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
+    VelocityType m_u;      ///< These are the generalized velocities \f$\mathbf{u}\f$ of a rigid body.
 
 public:
     RigidBodyState()

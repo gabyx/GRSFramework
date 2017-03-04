@@ -28,8 +28,8 @@ struct A
     {
     }
     const unsigned int id;
-    double             b;
-    float              c;
+    double b;
+    float c;
 };
 
 class Container
@@ -66,7 +66,7 @@ public:
     typedef typename MapType::index<by_insertion>::type MapByInsertionType;
     typedef typename MapType::index<by_hashed_id>::type MapByHashedIdType;
     // typedef  typename MapType::index<by_ordered_id>::type   MapByOrderedIdType;
-    MapByHashedIdType&  m_mapByHashedId;
+    MapByHashedIdType& m_mapByHashedId;
     MapByInsertionType& m_mapByInsertion;
     // MapByOrderedIdType & m_mapByOrderedId;
 
@@ -74,7 +74,7 @@ public:
     /*m_mapByOrderedId( m_map.get<by_ordered_id>())*/ {
     }
 
-    typedef typename MapByInsertionType::iterator       iterator;
+    typedef typename MapByInsertionType::iterator iterator;
     typedef typename MapByInsertionType::const_iterator const_iterator;
 
     //    typedef typename MapByOrderedIdType::iterator iterator_ordered;
@@ -152,20 +152,20 @@ public:
 void runTest()
 {
     srand(time(NULL));
-    int            max = 100000;
-    Container      c;                                      // sorted to insertion, sorted to id , and hashed
-    std::vector<A> vec;                                    // unsorted to id (
-    std::map<unsigned int, A>                          m;  // sorted to id
-    std::unordered_map<unsigned int, unsigned int>     idToidx;
+    int max = 100000;
+    Container c;                  // sorted to insertion, sorted to id , and hashed
+    std::vector<A> vec;           // unsorted to id (
+    std::map<unsigned int, A> m;  // sorted to id
+    std::unordered_map<unsigned int, unsigned int> idToidx;
     std::vector<std::pair<unsigned int, unsigned int>> idToidxVec;
-    std::unordered_map<unsigned int, A*>               idToA;
+    std::unordered_map<unsigned int, A*> idToA;
     std::vector<unsigned int> sortedIds;    // used to iterate over some ids
     std::vector<unsigned int> insertedIds;  // used to iterate over some ids
-    unsigned int              ins = 0;
+    unsigned int ins = 0;
     while (m.size() < max)
     {
-        unsigned int i   = rand();
-        auto         res = m.insert(std::make_pair(i, A(i)));
+        unsigned int i = rand();
+        auto res       = m.insert(std::make_pair(i, A(i)));
         if (res.second)
         {
             vec.push_back(A(i));

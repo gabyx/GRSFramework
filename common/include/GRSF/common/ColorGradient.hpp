@@ -22,7 +22,7 @@ private:
     struct ColorPoint
     {                   // Internal class used to store m_colors at different points in the gradient.
         Vector3 m_rgb;  // Red, green and blue values of our color.
-        PREC    m_val;  // Position of our m_color along the gradient (between 0 and 1).
+        PREC m_val;     // Position of our m_color along the gradient (between 0 and 1).
         ColorPoint(Vector3 rgb, PREC value) : m_rgb(rgb), m_val(value)
         {
         }
@@ -84,10 +84,10 @@ public:
             ColorPoint& currC = m_color[i];
             if (value < currC.m_val)
             {
-                ColorPoint& prevC        = m_color[std::max(0, i - 1)];
-                PREC        valueDiff    = (currC.m_val - prevC.m_val);
-                PREC        fractBetween = (valueDiff == 0.0) ? 0.0 : (value - prevC.m_val) / valueDiff;
-                rgb                      = (currC.m_rgb - prevC.m_rgb) * fractBetween + prevC.m_rgb;
+                ColorPoint& prevC = m_color[std::max(0, i - 1)];
+                PREC valueDiff    = (currC.m_val - prevC.m_val);
+                PREC fractBetween = (valueDiff == 0.0) ? 0.0 : (value - prevC.m_val) / valueDiff;
+                rgb               = (currC.m_rgb - prevC.m_rgb) * fractBetween + prevC.m_rgb;
                 // std::cout << rgb.transpose() << std::endl;
                 return;
             }

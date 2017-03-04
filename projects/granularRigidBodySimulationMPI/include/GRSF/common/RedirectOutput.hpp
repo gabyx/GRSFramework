@@ -15,7 +15,7 @@
 
 class RedirectOutputs
 {
-    std::ostream&         myStream;
+    std::ostream& myStream;
     std::streambuf* const myBuffer;
 
 public:

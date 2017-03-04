@@ -288,8 +288,8 @@ void PlaybackState::itemSelected(OgreBites::SelectMenu* menu)
 {
     if (menu == m_pPlaybackFiles)
     {
-        Ogre::DisplayString str      = menu->getSelectedItem();
-        std::string         str_utf8 = str.asUTF8();
+        Ogre::DisplayString str = menu->getSelectedItem();
+        std::string str_utf8    = str.asUTF8();
         FileManager::getSingleton().setPathCurrentSimFolder(str_utf8);
         changeScene();
     }
@@ -355,7 +355,7 @@ void PlaybackState::switchSimulationMode()
 void PlaybackState::setupScene()
 {
     // World Axes
-    Entity*    ent       = m_pSceneMgr->createEntity("WorldAxes", "axes.mesh");
+    Entity* ent          = m_pSceneMgr->createEntity("WorldAxes", "axes.mesh");
     SceneNode* WorldAxes = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("WorldAxes");
     WorldAxes->attachObject(ent);
 

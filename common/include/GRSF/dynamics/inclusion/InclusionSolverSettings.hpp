@@ -60,8 +60,8 @@ struct InclusionSolverSettings
     } m_RStrategy;
     unsigned int m_MaxIter;
     unsigned int m_MinIter;
-    PREC         m_AbsTol;
-    PREC         m_RelTol;
+    PREC m_AbsTol;
+    PREC m_RelTol;
 
     /**
     *  SOR_CONTACT (project contacts consecutively)
@@ -116,7 +116,7 @@ struct InclusionSolverSettings
     bool m_bComputeResidual;  ///< If true convergence check is done for all contacts/bodies, no break in the loop
     bool m_bUseGPU;
     unsigned int m_UseGPUDeviceId;
-    bool         m_bIsFiniteCheck;
+    bool m_bIsFiniteCheck;
 };
 
 #endif

@@ -100,7 +100,7 @@ public:
     {
         Flags(unsigned int splitBodyIdx) : m_splitBodyIdx(splitBodyIdx), m_bGotUpdate(false){};
         const unsigned int m_splitBodyIdx;  ///< index in the range [0,getMultiplicity()-2] into m_uBack
-        bool               m_bGotUpdate;
+        bool m_bGotUpdate;
     };
     std::unordered_map<RankIdType, Flags>
         m_partRanks;  ///< Flags for all participating ranks, size defines the multiplicity
@@ -109,7 +109,7 @@ public:
 
     /** velocities of all split bodies m_u_G = [ u_1,u_2,u_3,u_4...], local velocity u_0 is not contained */
     MatrixUBodyDyn m_uBack;
-    VectorUBody    m_uFront;  ///< The affinely combined velocity of m_uBack
+    VectorUBody m_uFront;  ///< The affinely combined velocity of m_uBack
 
     /** Contains the weight factor for the partition of unity: [alpha_0, alpha_1, alpha_2,... , alpha_multiplicity-1]
     *   alpha_i = 1 / multiplicity so far, needs to be initialized before the global prox loop */

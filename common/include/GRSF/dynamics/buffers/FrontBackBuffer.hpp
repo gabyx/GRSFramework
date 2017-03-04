@@ -65,8 +65,8 @@ public:
         m_pBack.reset();
     };
 
-    std::shared_ptr<TBufferType>       m_pFront;  ///< The front buffer which is readable and writable.
-    std::shared_ptr<const TBufferType> m_pBack;   ///< The back buffer which is only readable.
+    std::shared_ptr<TBufferType> m_pFront;       ///< The front buffer which is readable and writable.
+    std::shared_ptr<const TBufferType> m_pBack;  ///< The back buffer which is only readable.
 };
 
 // Specialization for normal ptr, objects do not get deleted!
@@ -83,8 +83,8 @@ public:
     ~FrontBackBuffer(){
         /** NO OBJECT DELETION! */
     };
-    TBufferType*       m_pFront;  ///< The front buffer which is readable and writable.
-    const TBufferType* m_pBack;   ///< The back buffer which is only readable.
+    TBufferType* m_pFront;       ///< The front buffer which is readable and writable.
+    const TBufferType* m_pBack;  ///< The back buffer which is only readable.
 };
 
 template <typename TBufferType>

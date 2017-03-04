@@ -61,9 +61,9 @@ public:
         A2_MK.col(1) = dirY;
         A2_MK.transposeInPlace();
 
-        AABB2d  aabb;
+        AABB2d aabb;
         Vector2 p;
-        auto    size = m_p.cols();
+        auto size = m_p.cols();
         for (unsigned int i = 0; i < size; ++i)
         {
             p.noalias() = A2_MK * m_p.col(i);  // Transform all points
@@ -193,9 +193,9 @@ private:
 
     Matrix2Dyn m_p;  ///< Projected points in frame K
 
-    Vector3  m_zDir;
+    Vector3 m_zDir;
     Matrix33 m_A_KI;  ///< Transformation from I frame into the projection frame K
-    PREC     m_minZValue, m_maxZValue;
+    PREC m_minZValue, m_maxZValue;
 };
 
 #endif

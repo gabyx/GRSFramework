@@ -61,7 +61,7 @@ public:
         Vector2 m_p;  ///< first corner x = m_p0 + m_u * u + m_v * v  , u,v in [0,1]
         Vector2 m_u;  ///< vector of first side (x-Axis)
         Vector2 m_v;  ///< vector of second side (y-Axis)
-        PREC    m_area = 0.0;
+        PREC m_area = 0.0;
     };
 
     const Box2d& getMinRectangle()
@@ -174,9 +174,9 @@ private:
 
     struct Caliper
     {
-        unsigned int m_idx       = 0;  // index in m_hullIdx
-        unsigned int m_ptIdx     = 0;  // index in m_p
-        PREC         m_currAngle = 0.0;
+        unsigned int m_idx   = 0;  // index in m_hullIdx
+        unsigned int m_ptIdx = 0;  // index in m_p
+        PREC m_currAngle     = 0.0;
     };
 
     void updateCalipers(PREC edgeAngle, Caliper (&c)[4])
@@ -215,7 +215,7 @@ private:
         PREC nextAngle;
 
         unsigned int nPoints = m_hullIdx.size();
-        bool         found   = false;
+        bool found           = false;
         unsigned int i       = 0;
         while (!found && i < nPoints)
         {
@@ -278,8 +278,8 @@ private:
 
     std::vector<unsigned int> m_hullIdx;
 
-    std::vector<PREC>                 m_angles;
-    Box2d                             m_minBox;
+    std::vector<PREC> m_angles;
+    Box2d m_minBox;
     const MatrixRef<const Matrix2Dyn> m_p;
 
     ConvexHull2D m_convh;

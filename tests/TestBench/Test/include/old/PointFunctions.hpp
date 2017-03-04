@@ -34,7 +34,7 @@ void applyRandomRotTrans(Matrix3Dyn& points)
     q.coeffs().setRandom();
     q.normalize();
     Matrix33 R = q.matrix();
-    Vector3  trans;
+    Vector3 trans;
     trans.setRandom();
     points = R * points;
     points.colwise() += trans;
@@ -71,8 +71,8 @@ inline PREC getAngle(const VecT1& a, const VecT2& b)
 {
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(VecT1, 2)
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(VecT2, 2)
-    Vector2 t     = b - a;
-    PREC    angle = std::atan2(t(1), t(0));
+    Vector2 t  = b - a;
+    PREC angle = std::atan2(t(1), t(0));
     if (angle < 0.0)
     {
         angle += 2 * M_PI;
@@ -144,7 +144,7 @@ std::pair<TVector, TVector> estimateDiameter(const MatrixBase<Derived>& points, 
     MatrixBase<Derived>& pp = const_cast<MatrixBase<Derived>&>(points);
 
     // Construct pointer list
-    auto   size  = pp.cols();
+    auto size    = pp.cols();
     PREC** pList = new PREC*[size];
     for (decltype(size) i = 0; i < size; ++i)
     {
@@ -221,7 +221,7 @@ public:
     }
 
 private:
-    const Vector2                     m_base;
+    const Vector2 m_base;
     const MatrixRef<const Matrix2Dyn> m_p;
 };
 };

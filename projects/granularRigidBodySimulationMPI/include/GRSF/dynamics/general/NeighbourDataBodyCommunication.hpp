@@ -27,7 +27,7 @@ struct RemoteData
 {
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     RemoteData(RigidBodyType* body) : m_pBody(body){};
-    RigidBodyType* const      m_pBody;
+    RigidBodyType* const m_pBody;
 };
 
 // All overlapping local bodies
@@ -38,7 +38,7 @@ struct LocalData
 {
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     LocalData(RigidBodyType* body) : m_pBody(body), m_commStatus(SEND_NOTIFICATION){};
-    RigidBodyType* const     m_pBody;
+    RigidBodyType* const m_pBody;
     enum
     {
         SEND_NOTIFICATION,

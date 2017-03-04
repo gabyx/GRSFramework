@@ -61,8 +61,8 @@ public:
   * @return true if the file is successfully opened and readable and false if not.
   */
     bool openSimFileRead(const boost::filesystem::path& file_path,
-                         const unsigned int             nSimBodies,
-                         bool                           readFullState = true);
+                         const unsigned int nSimBodies,
+                         bool readFullState = true);
     /**
   * @brief Opens a .sim file for write only.
   * @param file_path The path to the file to open.
@@ -70,8 +70,8 @@ public:
   * @return true if the file is successfully opened and writable and false if not.
   */
     bool openSimFileWrite(const boost::filesystem::path& file_path,
-                          const unsigned int             nSimBodies,
-                          bool                           truncate = true);
+                          const unsigned int nSimBodies,
+                          bool truncate = true);
 
     /**
   * @brief Closes the .sim file which was opened by an openSimFileWrite or openSimFileRead command.
@@ -152,7 +152,7 @@ private:
   * @brief Reads in all the length of the .sim file.
   * @{
   */
-    bool           readLength();
+    bool readLength();
     std::streamoff m_nBytes;
     std::streamoff m_nStates;
     /** @}*/
@@ -162,7 +162,7 @@ private:
 
     /** @brief Determined from number of bodies! @{*/
     void setByteLengths(const unsigned int nSimBodies);
-    std::streamoff         m_nBytesPerState, m_nBytesPerQ, m_nBytesPerU;
+    std::streamoff m_nBytesPerState, m_nBytesPerQ, m_nBytesPerU;
     unsigned long long int m_nSimBodies;
     /** @}*/
 
@@ -279,8 +279,8 @@ void MultiBodySimFile<TLayoutConfig>::setByteLengths(const unsigned int nSimBodi
 
 template <typename TLayoutConfig>
 bool MultiBodySimFile<TLayoutConfig>::openSimFileWrite(const boost::filesystem::path& file_path,
-                                                       const unsigned int             nSimBodies,
-                                                       bool                           truncate)
+                                                       const unsigned int nSimBodies,
+                                                       bool truncate)
 {
     m_errorString.str("");
 
@@ -420,8 +420,8 @@ MultiBodySimFile<TLayoutConfig>& MultiBodySimFile<TLayoutConfig>::operator>>(
 
 template <typename TLayoutConfig>
 bool MultiBodySimFile<TLayoutConfig>::openSimFileRead(const boost::filesystem::path& file_path,
-                                                      const unsigned int             nSimBodies,
-                                                      bool                           readFullState)
+                                                      const unsigned int nSimBodies,
+                                                      bool readFullState)
 {
     m_errorString.str("");
 

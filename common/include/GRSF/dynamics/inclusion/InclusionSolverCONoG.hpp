@@ -46,7 +46,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     InclusionSolverCONoG(std::shared_ptr<CollisionSolverType> pCollisionSolver,
-                         std::shared_ptr<DynamicsSystemType>  pDynSys);
+                         std::shared_ptr<DynamicsSystemType> pDynSys);
     ~InclusionSolverCONoG();
 
     void initializeLog(Logging::Log* pSolverLog, boost::filesystem::path folder_path);
@@ -69,17 +69,17 @@ public:
 
 protected:
     unsigned int m_globalIterationCounter;
-    bool         m_bConverged;
-    PREC         m_maxResidual;
+    bool m_bConverged;
+    PREC m_maxResidual;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
-    bool         m_bUsedGPU;
-    double       m_timeProx, m_proxIterationTime;
+    bool m_bUsedGPU;
+    double m_timeProx, m_proxIterationTime;
 
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
-    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
-    typename DynamicsSystemType::RigidBodySimContainerType&    m_simBodies;
+    typename DynamicsSystemType::RigidBodySimContainerType& m_simBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType& m_staticBodies;
 
     // General CPU Iteration visitors (only SOR Prox on velocity level)
@@ -90,14 +90,14 @@ protected:
     // Different visitors for the various SOR implementations
     // For SOR_FULL, SOR_CONTACT
     ContactSorProxStepNodeVisitor<ContactGraphType>* m_pContactSorProxStepNodeVisitor = nullptr;
-    FullSorProxStepNodeVisitor<ContactGraphType>*    m_pFullSorProxStepNodeVisitor    = nullptr;
+    FullSorProxStepNodeVisitor<ContactGraphType>* m_pFullSorProxStepNodeVisitor       = nullptr;
     // For SOR_NORMAL_TANGENTIAL
-    NormalSorProxStepNodeVisitor<ContactGraphType>*     m_pNormalSorProxStepNodeVisitor     = nullptr;
+    NormalSorProxStepNodeVisitor<ContactGraphType>* m_pNormalSorProxStepNodeVisitor         = nullptr;
     TangentialSorProxStepNodeVisitor<ContactGraphType>* m_pTangentialSorProxStepNodeVisitor = nullptr;
     // Init Visitor for the contacts
     SorProxInitNodeVisitor<ContactGraphType>* m_pSorProxInitNodeVisitor = nullptr;
 
-    void        doSORProxCPU();
+    void doSORProxCPU();
     inline void sorProxOverAllNodes();
 
 #if HAVE_CUDA_SUPPORT == 1
@@ -108,13 +108,13 @@ protected:
     void doJORProxGPU();
 
     template <bool onlyNotInContactGraph = false>
-    void           integrateAllBodyVelocities();
+    void integrateAllBodyVelocities();
 
     inline void doJorProx();
     inline void doSorProx();
 
     // Percussion cache
-    PercussionPool*                               m_percussionPool          = nullptr;
+    PercussionPool* m_percussionPool                                        = nullptr;
     CachePercussionNodeVisitor<ContactGraphType>* m_pCachePercussionVisitor = nullptr;
 
     // Drift Corrector

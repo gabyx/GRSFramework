@@ -59,7 +59,7 @@ public:
         }
 
     private:
-        FuncType    m_func;
+        FuncType m_func;
         std::string m_name;
     };
 
@@ -93,8 +93,8 @@ public:
                               << signum
                               << " because not added to SignalHandler at instantiation!")
             }
-            auto& callBacks  = callBacksIt->second;
-            auto  callbackIt = std::find(callBacks.begin(), callBacks.end(), name);  // find already exiting callback
+            auto& callBacks = callBacksIt->second;
+            auto callbackIt = std::find(callBacks.begin(), callBacks.end(), name);  // find already exiting callback
             if (callbackIt == callBacks.end())
             {
                 callBacks.push_front(c);
@@ -117,8 +117,8 @@ public:
         auto it = m_signalHandlers.find(signum);
         if (it != m_signalHandlers.end())
         {
-            auto& callBacks  = it->second;
-            auto  callbackIt = std::find(callBacks.begin(), callBacks.end(), name);  // find already existing callback
+            auto& callBacks = it->second;
+            auto callbackIt = std::find(callBacks.begin(), callBacks.end(), name);  // find already existing callback
             if (callbackIt != callBacks.end())
             {
                 callBacks.erase(callbackIt);
@@ -140,8 +140,8 @@ public:
     {
         for (auto& sH : m_signalHandlers)
         {
-            auto& callBacks  = sH.second;
-            auto  callbackIt = std::find(callBacks.begin(), callBacks.end(), name);  // find already existing callback
+            auto& callBacks = sH.second;
+            auto callbackIt = std::find(callBacks.begin(), callBacks.end(), name);  // find already existing callback
             if (callbackIt != callBacks.end())
             {
                 callBacks.erase(callbackIt);

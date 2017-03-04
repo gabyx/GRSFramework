@@ -59,7 +59,7 @@ public:
     }
 
 private:
-    std::string   m_prefix;
+    std::string m_prefix;
     Logging::Log* m_pLog;
 };
 

@@ -75,9 +75,9 @@ template <typename ProcessTopologyBase>
 class CheckOverlap : public boost::static_visitor<bool>
 {
 public:
-    CheckOverlap(const typename ProcessTopologyBase::RigidBodyType*    body,
+    CheckOverlap(const typename ProcessTopologyBase::RigidBodyType* body,
                  typename ProcessTopologyBase::NeighbourRanksListType& neighbourProcessRanks,
-                 bool&                                                 overlapsOwnProcess)
+                 bool& overlapsOwnProcess)
         : m_body(body), m_neighbourProcessRanks(neighbourProcessRanks), m_overlapsOwnProcess(overlapsOwnProcess)
     {
     }
@@ -104,7 +104,7 @@ private:
     const typename ProcessTopologyBase::RigidBodyType* m_body;
     // Results
     typename ProcessTopologyBase::NeighbourRanksListType& m_neighbourProcessRanks;
-    bool&                                                 m_overlapsOwnProcess;
+    bool& m_overlapsOwnProcess;
 };
 
 //    template<typename ProcessTopologyBase>

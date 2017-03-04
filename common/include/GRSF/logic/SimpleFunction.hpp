@@ -32,13 +32,13 @@ private:
     using TEval        = EvalType;
     using expression_t = exprtk::expression<TEval>;
     exprtk::symbol_table<TEval> m_symbol_table;
-    expression_t                m_expression;
-    exprtk::parser<TEval>       m_parser;
+    expression_t m_expression;
+    exprtk::parser<TEval> m_parser;
 
     unsigned int m_nInputs = 0;
 
     using vector_holder_ptr = decltype(m_symbol_table.get_vector("in"));
-    vector_holder_ptr  m_vectorHolder;  ///< Is not really used after add_vector, but keep it here, for safety
+    vector_holder_ptr m_vectorHolder;  ///< Is not really used after add_vector, but keep it here, for safety
     std::vector<TEval> m_v;
 
     struct CastVisitor

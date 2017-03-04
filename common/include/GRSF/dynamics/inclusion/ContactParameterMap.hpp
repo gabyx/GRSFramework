@@ -85,8 +85,8 @@ public:
     * @return The reference to the ContactParameter which corresponds to this kind of contact meterial pair.
     */
 
-    bool addContactParameter(const MaterialIdType&   material1,
-                             const MaterialIdType&   material2,
+    bool addContactParameter(const MaterialIdType& material1,
+                             const MaterialIdType& material2,
                              const ContactParameter& params)
     {
         auto res = m_ContactParams.emplace(std::make_pair(ContactParameterTag(material1, material2), params));

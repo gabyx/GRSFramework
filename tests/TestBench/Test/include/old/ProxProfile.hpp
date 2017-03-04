@@ -21,7 +21,6 @@
 #include <string>
 #include <type_traits>
 #include <utility>
-#include <utility>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -35,9 +34,9 @@
 
 // THIS ONE SHOULD BE BETTER!
 template <typename PREC, typename Derived>
-static void inline doProxSingle1(const PREC&                       radius,
+static void inline doProxSingle1(const PREC& radius,
                                  const Eigen::MatrixBase<Derived>& y,
-                                 Eigen::MatrixBase<Derived>&       out)
+                                 Eigen::MatrixBase<Derived>& out)
 {
     PREC absvalue = y.squaredNorm();
     if (absvalue > radius * radius)
@@ -48,9 +47,9 @@ static void inline doProxSingle1(const PREC&                       radius,
 }
 
 template <typename PREC, typename Derived>
-static void inline doProxSingle2(const PREC&                       radius,
+static void inline doProxSingle2(const PREC& radius,
                                  const Eigen::MatrixBase<Derived>& y,
-                                 Eigen::MatrixBase<Derived>&       out)
+                                 Eigen::MatrixBase<Derived>& out)
 {
     PREC absvalue = y.norm();
     if (absvalue > radius)
@@ -62,9 +61,9 @@ static void inline doProxSingle2(const PREC&                       radius,
 
 // THIS ONE SHOULD BE EVEN BETTER (only one division)!
 template <typename PREC, typename Derived>
-static void inline doProxSingle3(const PREC&                       radius,
+static void inline doProxSingle3(const PREC& radius,
                                  const Eigen::MatrixBase<Derived>& y,
-                                 Eigen::MatrixBase<Derived>&       out)
+                                 Eigen::MatrixBase<Derived>& out)
 {
     PREC absvalue = y.squaredNorm();
     if (absvalue > radius * radius)
@@ -75,9 +74,9 @@ static void inline doProxSingle3(const PREC&                       radius,
 }
 
 template <typename PREC, typename Derived>
-static void inline doProxSingle4(const PREC&                       radius,
+static void inline doProxSingle4(const PREC& radius,
                                  const Eigen::MatrixBase<Derived>& y,
-                                 Eigen::MatrixBase<Derived>&       out)
+                                 Eigen::MatrixBase<Derived>& out)
 {
     PREC absvalue = y.norm();
     if (absvalue > radius)

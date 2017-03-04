@@ -52,14 +52,14 @@ private:
     using Base::m_A_KI;
 
 public:
-    ProcessTopologyGrid(NeighbourRanksListType&        nbRanks,
+    ProcessTopologyGrid(NeighbourRanksListType& nbRanks,
                         AdjacentNeighbourRanksMapType& adjNbRanks,
-                        RankIdType                     processRank,
-                        RankIdType                     masterRank,
-                        const AABB3d&                  aabb,
-                        const IndexType&               dim,
-                        bool                           aligned = true,
-                        const Matrix33&                A_IK    = Matrix33::Identity())
+                        RankIdType processRank,
+                        RankIdType masterRank,
+                        const AABB3d& aabb,
+                        const IndexType& dim,
+                        bool aligned         = true,
+                        const Matrix33& A_IK = Matrix33::Identity())
         : Base(aabb, dim, A_IK.transpose())
         , /** Grid wants A_KI */
         m_cellNumberingStart(masterRank)
@@ -149,7 +149,7 @@ public:
                        "cellRank: " << cellRank << " not in Dimension: " << m_dim.transpose() << std::endl);
 
         MyMatrix::Array3<unsigned int> v;
-        unsigned int                   cellNumberTemp;
+        unsigned int cellNumberTemp;
 
         cellNumberTemp = cellRank;
         v(2)           = cellNumberTemp / (m_dim(0) * m_dim(1));
@@ -169,7 +169,7 @@ public:
     AABB3d getCellAABB(RankIdType cellRank) const
     {
         MyMatrix::Array3<unsigned int> cell_index = getCellIndex(cellRank);
-        AABB3d                         ret(Base::m_aabb.m_minPoint);
+        AABB3d ret(Base::m_aabb.m_minPoint);
         ret.m_minPoint.array() += cell_index.array().cast<PREC>() * m_dxyz.array();
         ret.m_maxPoint.array() += (cell_index.array() + 1).cast<PREC>() * m_dxyz.array();
 
@@ -189,9 +189,9 @@ public:
         return ret;
     };
 
-    bool checkOverlap(const RigidBodyType*    body,
+    bool checkOverlap(const RigidBodyType* body,
                       NeighbourRanksListType& neighbourProcessRanks,
-                      bool&                   overlapsOwnRank) const
+                      bool& overlapsOwnRank) const
     {
         neighbourProcessRanks.clear();
         if (m_axisAligned)
@@ -206,10 +206,10 @@ public:
 
 private:
     template <typename Collider, typename... AddArgs>
-    inline bool checkOverlapImpl(Collider&               collider,
+    inline bool checkOverlapImpl(Collider& collider,
                                  NeighbourRanksListType& neighbourProcessRanks,
-                                 bool&                   overlapsOwnRank,
-                                 const RigidBodyType*    body,
+                                 bool& overlapsOwnRank,
+                                 const RigidBodyType* body,
                                  AddArgs&&... args) const
     {
         // Check neighbour AABB
@@ -230,7 +230,7 @@ private:
     RankIdType m_rank;  ///< Own rank;
 
     RankToAABBType m_nbAABB;  ///< Neighbour AABB in frame G
-    AABB3d         m_aabb;    ///< Own AABB of this process in frame G
+    AABB3d m_aabb;            ///< Own AABB of this process in frame G
 
     bool m_axisAligned = true;
 

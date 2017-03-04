@@ -179,7 +179,7 @@ OgrePointCloud::OgrePointCloud()
     , current_mode_supports_geometry_shader_(false)
 {
     std::stringstream ss;
-    static int        count = 0;
+    static int count = 0;
     ss << "OgrePointCloudMaterial" << count++;
     point_material_       = Ogre::MaterialManager::getSingleton().getByName("rviz/PointCloudPoint");
     square_material_      = Ogre::MaterialManager::getSingleton().getByName("rviz/PointCloudSquare");
@@ -337,8 +337,8 @@ void OgrePointCloud::setRenderMode(RenderMode mode)
     // ROS_INFO("Best technique [%s] [gp=%s]", current_material_->getBestTechnique()->getName().c_str(),
     // current_material_->getBestTechnique()->getPass(0)->getGeometryProgramName().c_str());
 
-    bool             geom_support_changed = false;
-    Ogre::Technique* best                 = current_material_->getBestTechnique();
+    bool geom_support_changed = false;
+    Ogre::Technique* best     = current_material_->getBestTechnique();
     if (best)
     {
         if (current_material_->getBestTechnique()->getName() == "gp")
@@ -476,7 +476,7 @@ void OgrePointCloud::setAlpha(Ogre::Real alpha, bool per_point_alpha)
         setReplace(box_material_);
     }
 
-    Ogre::Vector4                        alpha4(alpha_, alpha_, alpha_, alpha_);
+    Ogre::Vector4 alpha4(alpha_, alpha_, alpha_, alpha_);
     V_OgrePointCloudRenderable::iterator it  = renderables_.begin();
     V_OgrePointCloudRenderable::iterator end = renderables_.end();
     for (; it != end; ++it)
@@ -501,7 +501,7 @@ void OgrePointCloud::addPoints(Point* points, uint32_t num_points)
     Point* begin = &points_.front() + point_count_;
     memcpy(begin, points, sizeof(Point) * num_points);
 
-    uint32_t                             vpp = getVerticesPerPoint();
+    uint32_t vpp = getVerticesPerPoint();
     Ogre::RenderOperation::OperationType op_type;
     if (current_mode_supports_geometry_shader_)
     {
@@ -552,11 +552,11 @@ void OgrePointCloud::addPoints(Point* points, uint32_t num_points)
         }
     }
 
-    OgrePointCloudRenderablePtr         rend;
+    OgrePointCloudRenderablePtr rend;
     Ogre::HardwareVertexBufferSharedPtr vbuf;
-    void*                               vdata = 0;
-    Ogre::RenderOperation*              op    = 0;
-    float*                              fptr  = 0;
+    void* vdata               = 0;
+    Ogre::RenderOperation* op = 0;
+    float* fptr               = 0;
 
     Ogre::AxisAlignedBox aabb;
     aabb.setNull();
@@ -685,7 +685,7 @@ void OgrePointCloud::popPoints(uint32_t num_points)
     while (popped_count < num_points * vpp)
     {
         OgrePointCloudRenderablePtr rend = renderables_.front();
-        Ogre::RenderOperation*      op   = rend->getRenderOperation();
+        Ogre::RenderOperation* op        = rend->getRenderOperation();
 
         uint32_t popped = std::min((size_t)(num_points * vpp - popped_count), op->vertexData->vertexCount);
         op->vertexData->vertexStart += popped;
@@ -726,7 +726,7 @@ void OgrePointCloud::shrinkRenderables()
     while (!renderables_.empty())
     {
         OgrePointCloudRenderablePtr rend = renderables_.back();
-        Ogre::RenderOperation*      op   = rend->getRenderOperation();
+        Ogre::RenderOperation* op        = rend->getRenderOperation();
         if (op->vertexData->vertexCount == 0)
         {
             renderables_.pop_back();
@@ -754,11 +754,11 @@ void OgrePointCloud::_updateRenderQueue(Ogre::RenderQueue* queue)
     bounding_box_.setNull();
 
     Ogre::HardwareVertexBufferSharedPtr vbuf;
-    void*                               vdata         = 0;
-    Ogre::RenderOperation*              op            = 0;
-    float*                              fptr          = 0;
-    uint32_t                            current_point = 0;
-    uint32_t                            vpp           = getVerticesPerPoint();
+    void* vdata               = 0;
+    Ogre::RenderOperation* op = 0;
+    float* fptr               = 0;
+    uint32_t current_point    = 0;
+    uint32_t vpp              = getVerticesPerPoint();
     // uint32_t size = points_.size();
 
     V_OgrePointCloudRenderable::iterator it  = renderables_.begin();
@@ -925,8 +925,8 @@ OgrePointCloudRenderable::OgrePointCloudRenderable(OgrePointCloud* parent, int n
     mRenderOp.vertexData->vertexStart = 0;
     mRenderOp.vertexData->vertexCount = 0;
 
-    Ogre::VertexDeclaration* decl   = mRenderOp.vertexData->vertexDeclaration;
-    size_t                   offset = 0;
+    Ogre::VertexDeclaration* decl = mRenderOp.vertexData->vertexDeclaration;
+    size_t offset                 = 0;
 
     decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
     offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);

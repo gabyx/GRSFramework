@@ -38,7 +38,7 @@ class AppStateManager : public AppStateListener
 public:
     typedef struct
     {
-        Ogre::String                    name;
+        Ogre::String name;
         std::shared_ptr<RenderAppState> state;
     } state_info;
 
@@ -63,8 +63,8 @@ protected:
     void init(std::shared_ptr<AppState> state);
 
     std::list<std::shared_ptr<RenderAppState>> m_ActiveStateStack;
-    std::vector<state_info>                    m_States;
-    bool                                       m_bShutdown;
+    std::vector<state_info> m_States;
+    bool m_bShutdown;
 };
 //=========================================================
 

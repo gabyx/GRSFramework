@@ -38,7 +38,7 @@ public:
     Ogre::SceneNode* m_node = nullptr;
 
     OgrePointCloud* m_pointCloud = nullptr;
-    unsigned int    m_pointIdx   = 0;
+    unsigned int m_pointIdx      = 0;
 
     void setPointCloud(OgrePointCloud* pc, unsigned int idx)
     {
@@ -345,7 +345,7 @@ public:
         };
     };
 
-    GlobalGeometryMapType        m_globalGeometries;
+    GlobalGeometryMapType m_globalGeometries;
     RigidBodyStatesContainerType m_bodiesInitStates;
 
     using RigidBodyGraphicsType     = RigidBodyGraphics;

@@ -160,7 +160,7 @@ private:
     PREC m_maxResidual    = 0.0;
 
     InclusionCommunicatorType* m_pInclusionComm;
-    NeighbourMapType*          m_pNbDataMap;  ///< NeighbourMap to insert remote bodies which have contacts
+    NeighbourMapType* m_pNbDataMap;  ///< NeighbourMap to insert remote bodies which have contacts
 
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
 
@@ -168,7 +168,7 @@ private:
         m_splittedNodes;  ///< These are the billateral nodes between the splitted bodies in the contact graph
 
     RigidBodyContainerType
-                           m_remoteBodiesWithContacts;  ///< This is our storage of all remote bodies which are in the contact graph
+        m_remoteBodiesWithContacts;  ///< This is our storage of all remote bodies which are in the contact graph
     RigidBodyContainerType m_localBodiesWithContacts;
 
     using NodeListType     = std::vector<Graph::NodeBase<Traits>*>;
@@ -205,7 +205,7 @@ private:
         }
 
         ContactGraph* m_p = nullptr;
-        NodeDataInit  m_nodeDataInit;
+        NodeDataInit m_nodeDataInit;
 
         template <bool addEdges, typename TNode, typename TCollData, typename TContactParams, typename TRemotePair>
         void apply(TNode* pNode, TCollData* pCollData, TContactParams& contactParams, TRemotePair& isRemote)
@@ -304,9 +304,9 @@ private:
             // Add to the corresponding bodyWithContacts list
             if (isRemote)
             {
-                LOGSLLEVEL2_CONTACT(m_p->m_pSolverLog,
-                                    "\t---> Remote body id: " << RigidBodyId::getBodyIdString(pBody->m_id)
-                                                              << std::endl;)
+                LOGSLLEVEL2_CONTACT(
+                    m_p->m_pSolverLog,
+                    "\t---> Remote body id: " << RigidBodyId::getBodyIdString(pBody->m_id) << std::endl;)
 
                 // Add to the neighbour data if remote contact
                 if (nodeData.m_nodeColor == EnumConversion::toIntegral(NodeColor::REMOTENODE))

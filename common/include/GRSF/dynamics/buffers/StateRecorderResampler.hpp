@@ -114,10 +114,10 @@ public:
 
 private:
     std::vector<DynamicsState> m_pStateArray;
-    DynamicsState*             m_pPrevState;
-    DynamicsState*             m_pNextState;
-    DynamicsState*             m_pLerpState;
-    bool                       m_bFirstInsert;
+    DynamicsState* m_pPrevState;
+    DynamicsState* m_pNextState;
+    DynamicsState* m_pLerpState;
+    bool m_bFirstInsert;
 
     boost::filesystem::path m_folderPath;
 

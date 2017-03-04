@@ -70,8 +70,8 @@ public:
         m_pBack.reset();
     };
 
-    boost::shared_ptr<TBufferType>       m_pFront;  ///< The front buffer which is readable and writable.
-    boost::shared_ptr<const TBufferType> m_pBack;   ///< The back buffer which is only readable.
+    boost::shared_ptr<TBufferType> m_pFront;       ///< The front buffer which is readable and writable.
+    boost::shared_ptr<const TBufferType> m_pBack;  ///< The back buffer which is only readable.
 };
 
 // Specialization for normal ptr, objects do not get deleted!
@@ -97,8 +97,8 @@ public:
         /// NO OBJECT DELETION!
     };
 
-    TBufferType*       m_pFront;  ///< The front buffer which is readable and writable.
-    const TBufferType* m_pBack;   ///< The back buffer which is only readable.
+    TBufferType* m_pFront;       ///< The front buffer which is readable and writable.
+    const TBufferType* m_pBack;  ///< The back buffer which is only readable.
 };
 
 // Specialization for shared ptr!

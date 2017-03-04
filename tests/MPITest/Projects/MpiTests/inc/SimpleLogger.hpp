@@ -28,7 +28,7 @@ namespace Logging
 class LogSink
 {
 protected:
-    std::string   m_sinkName;
+    std::string m_sinkName;
     std::ostream* m_pOutStream;
 
 public:
@@ -64,7 +64,7 @@ public:
 class Log
 {
 protected:
-    std::string  m_logName;
+    std::string m_logName;
     boost::mutex m_busy_mutex;
 
     // Can have multiple streams!
@@ -74,7 +74,7 @@ protected:
 
     inline void writeOut(std::stringstream& s)
     {
-        boost::mutex::scoped_lock       l(m_busy_mutex);
+        boost::mutex::scoped_lock l(m_busy_mutex);
         std::vector<LogSink*>::iterator it;
         for (it = m_sinkList.begin(); it != m_sinkList.end(); it++)
         {
@@ -91,7 +91,7 @@ public:
     template <typename T>
     void logMessage(const T& str)
     {
-        boost::mutex::scoped_lock       l(m_busy_mutex);
+        boost::mutex::scoped_lock l(m_busy_mutex);
         std::vector<LogSink*>::iterator it;
         for (it = m_sinkList.begin(); it != m_sinkList.end(); it++)
         {
@@ -147,15 +147,15 @@ public:
 
     private:
         std::stringstream* s;
-        bool               flag;  // When flag is false, the flush gets executed in deconstructor!
-        Log&               m_log;
+        bool flag;  // When flag is false, the flush gets executed in deconstructor!
+        Log& m_log;
     };
 };
 
 class LogManager : public Utilities::Singleton<LogManager>
 {
 private:
-    typedef std::map<std::string, Log*>           LogListType;
+    typedef std::map<std::string, Log*> LogListType;
     typedef std::map<std::string, Log*>::iterator LogListIteratorType;
     LogListType m_logList;
 

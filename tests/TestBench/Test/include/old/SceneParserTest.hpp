@@ -114,7 +114,7 @@ int test()
     ParserGUI<double> d;
     d.foo();
 
-    ParserGUI<double>        r;
+    ParserGUI<double> r;
     ParserGUI<double>::Base& base = r;
     base.foo();
 }
@@ -149,7 +149,7 @@ struct ParserGUI : Parser<D, ParserGUI<D>>
 
 int test()
 {
-    Parser<double>    t;
+    Parser<double> t;
     ParserGUI<double> d;
 }
 };

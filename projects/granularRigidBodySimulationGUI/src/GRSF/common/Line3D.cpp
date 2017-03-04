@@ -76,7 +76,7 @@ void Line3D::drawLines(void)
     mRenderOp.operationType           = RenderOperation::OT_LINE_STRIP;  // OT_LINE_LIST, OT_LINE_STRIP
     mRenderOp.useIndexes              = false;
 
-    VertexDeclaration*   decl = mRenderOp.vertexData->vertexDeclaration;
+    VertexDeclaration* decl   = mRenderOp.vertexData->vertexDeclaration;
     VertexBufferBinding* bind = mRenderOp.vertexData->vertexBufferBinding;
 
     decl->addElement(POSITION_BINDING, 0, VET_FLOAT3, VES_POSITION);
@@ -89,7 +89,7 @@ void Line3D::drawLines(void)
     bind->setBinding(POSITION_BINDING, vbuf);
 
     // Drawing stuff
-    int     size    = mPoints.size();
+    int size        = mPoints.size();
     Vector3 vaabMin = mPoints[0];
     Vector3 vaabMax = mPoints[0];
 

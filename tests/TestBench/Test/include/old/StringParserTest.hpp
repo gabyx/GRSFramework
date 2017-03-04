@@ -41,14 +41,14 @@ void stringTest()
 
     std::cout << std::endl << "Vector3 bool:" << std::endl;
     {
-        const std::string                s = "true false true";
+        const std::string s = "true false true";
         typename MyMatrix<bool>::Vector3 v;
         Utilities::stringToVector3(v, s);
         std::cout << "v: " << v << std::endl;
     }
     std::cout << std::endl << "vector:" << std::endl;
     {
-        const std::string   s = "1 2 3 4 5 6.234 7 8.2 9 10.123 11";
+        const std::string s = "1 2 3 4 5 6.234 7 8.2 9 10.123 11";
         std::vector<double> v;
         if (!Utilities::stringToType(v, s))
         {
@@ -62,7 +62,7 @@ void stringTest()
 
     std::cout << std::endl << "vector:" << std::endl;
     {
-        const std::string   s = "1 2 3 4 5 6.234 7 8.2 9.3 10.123 11";
+        const std::string s = "1 2 3 4 5 6.234 7 8.2 9.3 10.123 11";
         std::vector<double> v;
         if (!Utilities::stringToType(v, s))
         {
@@ -91,7 +91,7 @@ void stringTest()
     {
         std::cout << std::endl << "Special Binary Pairs Test" << std::endl;
         //        const std::string s = "1,3 0,4 0,7 1,2";
-        const std::string     s = "1,3";
+        const std::string s = "1,3";
         std::vector<uint64_t> v;
         if (!Utilities::stringToType<std::vector<uint64_t>, Utilities::CommaSeperatedPairBinShift<uint64_t, uint32_t>>(
                 v, s))
@@ -122,11 +122,11 @@ void stringTest()
 
 void doBenchmark()
 {
-    const int    loops = 1000000;
-    unsigned int i     = 0;
+    const int loops = 1000000;
+    unsigned int i  = 0;
 
     START_TIMER(start)
-    const std::string        s = "1 2 3 4 5 6.234 7 8.2 9.3 10.123 11";
+    const std::string s = "1 2 3 4 5 6.234 7 8.2 9.3 10.123 11";
     std::vector<std::string> strings(loops, s);
 
     for (auto& ss : strings)

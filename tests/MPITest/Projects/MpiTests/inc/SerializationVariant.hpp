@@ -114,7 +114,7 @@ void serialize(Archive& ar, boost::variant<int*, std::string*>& g, const unsigne
                 g = new std::string();
             }
             std::string* ptr = boost::get<std::string*>(g);
-            ar&*         ptr;
+            ar&* ptr;
         }
     }
     else
@@ -130,7 +130,7 @@ void serialize(Archive& ar, boost::variant<int*, std::string*>& g, const unsigne
         else if (g.which() == 1)
         {
             std::string* ptr = boost::get<std::string*>(g);
-            ar&*         ptr;
+            ar&* ptr;
         }
     }
     // serialize(ar, *g);

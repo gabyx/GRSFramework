@@ -48,7 +48,7 @@ public:
         using VariantType = boost::variant<ListType, RangeType>;  // Indexes into the variants are defined above!
     };
 
-    typedef ListOrRangeTypes<T>                   ListOrRangeType;
+    typedef ListOrRangeTypes<T> ListOrRangeType;
     typedef typename ListOrRangeType::VariantType VariantType;
 
     Range(typename ListOrRangeType::ListType& l) : m_rangeVariant(l){};
@@ -77,7 +77,7 @@ public:
             m_currVal  = T1();
 
             get_pointer vis;
-            void*       ptr = var.apply_visitor(vis);
+            void* ptr = var.apply_visitor(vis);
             switch (var.which())
             {
                 case (ListOrRangeType::ListTypeIdx):
@@ -182,12 +182,12 @@ public:
         }
 
     private:
-        typename ListOrRangeType::ListType*          m_listPtr;
+        typename ListOrRangeType::ListType* m_listPtr;
         typename ListOrRangeType::ListType::iterator m_listIt;
 
         typename ListOrRangeType::RangeType* m_rangePtr;
-        T1                                   m_currVal;  // For Range and All types
-        bool                                 m_atEnd;
+        T1 m_currVal;  // For Range and All types
+        bool m_atEnd;
     };
 
     iterator<T> begin()
@@ -214,9 +214,9 @@ private:
 void doTest()
 {
     typedef unsigned int Type;
-    std::set<Type>       s;
-    unsigned int         max = 10000;
-    std::vector<Type>    vec(max);
+    std::set<Type> s;
+    unsigned int max = 10000;
+    std::vector<Type> vec(max);
     std::pair<Type, Type> a(0, max);
 
     for (int j = 0; j < vec.size(); j++)

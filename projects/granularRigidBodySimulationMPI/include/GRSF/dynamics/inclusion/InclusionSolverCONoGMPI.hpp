@@ -56,9 +56,9 @@ public:
     using ProcessInfoType         = typename ProcessCommunicatorType::ProcessInfoType;
     using ProcessTopologyType     = typename ProcessCommunicatorType::ProcessInfoType::ProcessTopologyType;
 
-    InclusionSolverCONoGMPI(std::shared_ptr<BodyCommunicator>        pBodyComm,
-                            std::shared_ptr<CollisionSolverType>     pCollisionSolver,
-                            std::shared_ptr<DynamicsSystemType>      pDynSys,
+    InclusionSolverCONoGMPI(std::shared_ptr<BodyCommunicator> pBodyComm,
+                            std::shared_ptr<CollisionSolverType> pCollisionSolver,
+                            std::shared_ptr<DynamicsSystemType> pDynSys,
                             std::shared_ptr<ProcessCommunicatorType> pProcComm);
     ~InclusionSolverCONoGMPI();
 
@@ -69,18 +69,18 @@ public:
                                   // reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem(PREC currentSimulationTime);
 
-    std::string  getIterationStats();
-    std::string  getStatsHeader();
-    PREC         m_currentSimulationTime;
+    std::string getIterationStats();
+    std::string getStatsHeader();
+    PREC m_currentSimulationTime;
     unsigned int m_globalIterationCounter;
-    bool         m_bConverged;
+    bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
     unsigned int m_nLocalNodes;
     unsigned int m_nRemoteNodes;
     unsigned int m_nSplitBodyNodes;
 
-    bool   m_bUsedGPU;
+    bool m_bUsedGPU;
     double m_timeProx, m_proxIterationTime;
 
     InclusionSolverSettingsType m_settings;
@@ -90,7 +90,7 @@ protected:
 
     //    const typename ProcessTopologyType::NeighbourRanksListType & m_nbRanks;
 
-    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
 
     std::shared_ptr<BodyCommunicator> m_pBodyComm;
@@ -120,7 +120,7 @@ protected:
     ContactGraphType* m_pContactGraph = nullptr;
     /// =========================================================================
 
-    typename DynamicsSystemType::RigidBodySimContainerType&    m_simBodies;
+    typename DynamicsSystemType::RigidBodySimContainerType& m_simBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType& m_staticBodies;
 
     void integrateAllBodyVelocities();
@@ -135,9 +135,9 @@ protected:
     // Different visitors for the various SOR implementations
     // For SOR_FULL, SOR_CONTACT
     ContactSorProxStepNodeVisitor<ContactGraphType>* m_pContactSorProxStepNodeVisitor = nullptr;
-    FullSorProxStepNodeVisitor<ContactGraphType>*    m_pFullSorProxStepNodeVisitor    = nullptr;
+    FullSorProxStepNodeVisitor<ContactGraphType>* m_pFullSorProxStepNodeVisitor       = nullptr;
     // For SOR_NORMAL_TANGENTIAL
-    NormalSorProxStepNodeVisitor<ContactGraphType>*     m_pNormalSorProxStepNodeVisitor     = nullptr;
+    NormalSorProxStepNodeVisitor<ContactGraphType>* m_pNormalSorProxStepNodeVisitor         = nullptr;
     TangentialSorProxStepNodeVisitor<ContactGraphType>* m_pTangentialSorProxStepNodeVisitor = nullptr;
     // Init Visitor for the contacts
     SorProxInitNodeVisitor<ContactGraphType>* m_pSorProxInitNodeVisitor = nullptr;

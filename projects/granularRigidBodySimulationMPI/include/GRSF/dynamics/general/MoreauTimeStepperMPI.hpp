@@ -56,15 +56,15 @@ public:
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType>      pDynSys,
+    MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
                          std::shared_ptr<ProcessCommunicatorType> pProcCommunicator,
-                         std::shared_ptr<TopologyBuilderType>     pTopologyBuilder);
+                         std::shared_ptr<TopologyBuilderType> pTopologyBuilder);
     ~MoreauTimeStepperMPI();
 
     // The Core Objects ==================================
     std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
-    std::shared_ptr<BodyCommunicator>        m_pBodyCommunicator;
-    std::shared_ptr<TopologyBuilderType>     m_pTopologyBuilder;
+    std::shared_ptr<BodyCommunicator> m_pBodyCommunicator;
+    std::shared_ptr<TopologyBuilderType> m_pTopologyBuilder;
     // ===================================================
 
     void initLogs(const boost::filesystem::path& folder_path, const boost::filesystem::path& simDataFile = "");
@@ -85,12 +85,12 @@ protected:
 
     // Timer for the Performance
     CPUTimer m_PerformanceTimer;
-    PREC     m_startBodyCommunication, m_endBodyCommunication;
+    PREC m_startBodyCommunication, m_endBodyCommunication;
 };
 
-MoreauTimeStepperMPI::MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType>      pDynSys,
+MoreauTimeStepperMPI::MoreauTimeStepperMPI(std::shared_ptr<DynamicsSystemType> pDynSys,
                                            std::shared_ptr<ProcessCommunicatorType> pProcCommunicator,
-                                           std::shared_ptr<TopologyBuilderType>     pTopologyBuilder)
+                                           std::shared_ptr<TopologyBuilderType> pTopologyBuilder)
     : TimeStepperBase<MoreauTimeStepperMPI, MoreauTimeStepperMPITraits>(pDynSys)
     , m_pProcCommunicator(pProcCommunicator)
     , m_pTopologyBuilder(pTopologyBuilder)

@@ -38,7 +38,7 @@ public:
         using StateIndices = std::vector<std::streamsize>;
 
         ResampleInfo(std::streamsize startIdx,
-                     std::streamoff  endIdx,
+                     std::streamoff endIdx,
                      std::streamsize increment,
                      std::streamsize nStates)
             : m_startIdx(startIdx), m_endIdx(endIdx), m_increment(increment), m_nStates(nStates)
@@ -89,7 +89,7 @@ public:
                     }
                     // save to xml
                     static const auto nodePCData = pugi::node_pcdata;
-                    XMLNodeType       node       = s.append_child("Indices");
+                    XMLNodeType node             = s.append_child("Indices");
                     node.append_child(nodePCData).set_value(ss.str().c_str());
                 }
             }
@@ -97,7 +97,7 @@ public:
 
     private:
         std::streamsize m_startIdx;
-        std::streamoff  m_endIdx;
+        std::streamoff m_endIdx;
         std::streamsize m_increment;
         std::streamsize m_nStates;
     };
@@ -105,12 +105,12 @@ public:
     using DetailsList = std::vector<std::pair<MultiBodySimFile::Details, ResampleInfo>>;
 
     std::string getInfoString(const std::vector<boost::filesystem::path>& inputFiles,
-                              std::streamsize                             increment     = 1,
-                              std::streamsize                             startStateIdx = 0,
-                              std::streamsize endStateIdx    = std::numeric_limits<unsigned int>::max(),
-                              bool            skipFirstState = true,
-                              bool            prettyPrint    = false,
-                              bool            withTimeList   = true)
+                              std::streamsize increment     = 1,
+                              std::streamsize startStateIdx = 0,
+                              std::streamsize endStateIdx   = std::numeric_limits<unsigned int>::max(),
+                              bool skipFirstState           = true,
+                              bool prettyPrint              = false,
+                              bool withTimeList             = true)
     {
         // get  Description first then pretty print if needed
         DetailsList l;
@@ -118,7 +118,7 @@ public:
 
         if (!prettyPrint)
         {
-            auto              doc = xmlDocument(l, withTimeList);
+            auto doc = xmlDocument(l, withTimeList);
             std::stringstream ss;
             doc->save(ss);
             return ss.str();
@@ -143,7 +143,7 @@ public:
     std::unique_ptr<XMLDocumentType> xmlDocument(DetailsList& d, bool withTimeList)
     {
         std::unique_ptr<XMLDocumentType> doc(new XMLDocumentType{});
-        XMLNodeType                      root = doc->append_child("SimInfo");
+        XMLNodeType root = doc->append_child("SimInfo");
         for (auto& l : d)
         {
             auto s = l.first.addXML(root, withTimeList);
@@ -152,13 +152,13 @@ public:
         return std::move(doc);
     }
 
-    void addInfo(DetailsList&                                d,
+    void addInfo(DetailsList& d,
                  const std::vector<boost::filesystem::path>& inputFiles,
-                 std::streamsize                             increment      = 1,
-                 std::streamsize                             startStateIdx  = 0,
-                 std::streamsize                             endStateIdx    = std::numeric_limits<unsigned int>::max(),
-                 bool                                        skipFirstState = true,
-                 bool                                        withTimeList   = true)
+                 std::streamsize increment     = 1,
+                 std::streamsize startStateIdx = 0,
+                 std::streamsize endStateIdx   = std::numeric_limits<unsigned int>::max(),
+                 bool skipFirstState           = true,
+                 bool withTimeList             = true)
     {
         // Track the startStateIdx for each file to resample
         // Skip all first states in all files except the first file,
@@ -180,14 +180,14 @@ public:
     }
 
 private:
-    void addInfoFile(DetailsList&            detailList,
+    void addInfoFile(DetailsList& detailList,
                      boost::filesystem::path f,
                      //                        std::streamsize & states,
                      const std::streamoff increment,
-                     std::streamoff&      startStateIdx,
-                     std::streamoff&      endStateIdx,
-                     const bool           skipFirstState,
-                     bool                 withTimeList = true)
+                     std::streamoff& startStateIdx,
+                     std::streamoff& endStateIdx,
+                     const bool skipFirstState,
+                     bool withTimeList = true)
     {
         MultiBodySimFile fromFile;
         if (!fromFile.openRead(f))
@@ -195,7 +195,7 @@ private:
             GRSF_ERRORMSG(fromFile.getErrorString());
         };
 
-        auto           details    = fromFile.getDetails(withTimeList);
+        auto details              = fromFile.getDetails(withTimeList);
         std::streamoff statesFile = fromFile.getNStates();
 
         if (startStateIdx >= endStateIdx)

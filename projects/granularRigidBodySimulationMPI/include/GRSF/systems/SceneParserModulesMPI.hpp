@@ -27,9 +27,9 @@ private:
     using InclusionSolverSettingsType = typename SettingsModule<TParserTraits>::InclusionSolverSettingsType;
 
 public:
-    SettingsModuleMPI(ParserType*                  p,
-                      RecorderSettingsType*        r,
-                      TimeStepperSettingsType*     t,
+    SettingsModuleMPI(ParserType* p,
+                      RecorderSettingsType* r,
+                      TimeStepperSettingsType* t,
                       InclusionSolverSettingsType* i)
         : SettingsModule<TParserTraits>(p, r, t, i){};
 
@@ -165,8 +165,8 @@ public:
                 GRSF_ERRORMSG("---> String conversion in parseMPISettings: dimension failed");
             }
 
-            XMLAttributeType att                     = topo.attribute("matchProcessDimToExtent");
-            bool             matchProcessDimToExtent = true;
+            XMLAttributeType att         = topo.attribute("matchProcessDimToExtent");
+            bool matchProcessDimToExtent = true;
             if (att)
             {
                 if (!Utilities::stringToType(matchProcessDimToExtent, att.value()))

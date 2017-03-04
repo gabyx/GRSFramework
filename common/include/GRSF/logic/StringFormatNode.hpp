@@ -83,7 +83,7 @@ private:
         };
 
         std::vector<tfm::detail::FormatArg> m_argList;
-        std::vector<std::unique_ptr<Any>>   m_argStore;
+        std::vector<std::unique_ptr<Any>> m_argStore;
     };
 
     // Visitor for adding to Format List
@@ -200,7 +200,7 @@ public:
 
         // Iterate over all inputs and add to format_list with visitor
         auto& ins = getInputs();
-        auto  s   = ins.size();
+        auto s    = ins.size();
         for (auto i = 1U; i < s; ++i)
         {
             ins[i]->applyVisitor(m_adder);
@@ -228,9 +228,9 @@ protected:
     std::stringstream m_s;
 
 private:
-    VFormatList     m_formatList;
+    VFormatList m_formatList;
     FormatListAdder m_adder;
-    ValueSetter     m_setter;
+    ValueSetter m_setter;
 };
 };
 

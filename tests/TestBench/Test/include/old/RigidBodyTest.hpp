@@ -110,7 +110,7 @@ public:
 
     // Actual Buffer
     Eigen::Matrix<double, 6, 1>& uBack;
-    Eigen::Matrix<double, 6, 1>  uFront;
+    Eigen::Matrix<double, 6, 1> uFront;
 
 private:
 };
@@ -132,7 +132,7 @@ public:
     // Material
 
     RigidBodyState state;
-    SolverData     solvData;
+    SolverData solvData;
 };
 
 // class AA{
@@ -187,14 +187,14 @@ int testRigidBody()
     r.state.get_r_S() = Vector3d::Ones() * 3;
     cout << "q.r: " << r.state.get_r_S() << endl << endl;
 
-    int                   b;
-    int                   a;
+    int b;
+    int a;
     FrontBackBuffer<int&> buffer(a, b);
     buffer.m_Back  = 33;
     buffer.m_Front = 55;
     cout << a << "," << b << endl;
 
-    int        c;
+    int c;
     const int& d = c;
     // int & f= d;
     // AA aaa(a)

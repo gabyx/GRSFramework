@@ -56,7 +56,7 @@ struct MyPointGetter
 
 struct MyPoint2
 {
-    Vector3Spec  m_p;
+    Vector3Spec m_p;
     unsigned int m_id;
 };
 
@@ -98,8 +98,8 @@ void pointCloudTest()
     // neighbours
     int K = 10;
 
-    std::vector<int>                    pointIdxNKNSearch(K);
-    std::vector<float>                  pointNKNSquaredDistance(K);
+    std::vector<int> pointIdxNKNSearch(K);
+    std::vector<float> pointNKNSquaredDistance(K);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     // Generate pointcloud data
     cloud->width  = s.m_SimBodyStates.size();
@@ -169,8 +169,8 @@ void pointCloudTest()
         0.0,
         0.1);
 
-    auto         rootData = std::unique_ptr<NodeDataType>(new NodeDataType(t.begin(), t.end()));
-    unsigned int inf      = std::numeric_limits<unsigned int>::max();
+    auto rootData    = std::unique_ptr<NodeDataType>(new NodeDataType(t.begin(), t.end()));
+    unsigned int inf = std::numeric_limits<unsigned int>::max();
     START_TIMER(start);
     tree.build(aabb, std::move(rootData), inf /*max tree depth*/, inf /*max leafs*/);
     STOP_TIMER_SEC(count, start);
@@ -278,7 +278,7 @@ void pointCloudTest()
         }
 
         {
-            PointListType                                   output;
+            PointListType output;
             KdTree::NearestNeighbourFilter<PointDataTraits> f(K, 5.0);
             START_TIMER(start3);
             std::cout << "input: " << t.size() << std::endl;
@@ -309,7 +309,7 @@ void pointCloudTest()
             using PointDataTraits = KdTree::DefaultPointDataTraits<3, Vector3Spec, MyPoint2, MyPointGetter2>;
 
             StdVecAligned<MyPoint2> temp2;
-            unsigned int            i = 0;
+            unsigned int i = 0;
             for (auto v : temp)
             {
                 temp2.emplace_back(MyPoint2{v, i});

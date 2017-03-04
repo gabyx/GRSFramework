@@ -12,7 +12,7 @@
 
 #include "GRSF/dynamics/general/MPIMessageTag.hpp"
 
-BodyCommunicator::BodyCommunicator(std::shared_ptr<DynamicsSystemType>      pDynSys,
+BodyCommunicator::BodyCommunicator(std::shared_ptr<DynamicsSystemType> pDynSys,
                                    std::shared_ptr<ProcessCommunicatorType> pProcComm)
     : m_pDynSys(pDynSys)
     , m_pProcComm(pProcComm)

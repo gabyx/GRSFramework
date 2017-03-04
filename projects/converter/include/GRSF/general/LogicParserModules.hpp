@@ -300,7 +300,7 @@ protected:
     void createToolConstant(XMLNodeType& logicNode, unsigned int id)
     {
         std::string t = logicNode.attribute("outputType").value();
-        LogicNode*  n;
+        LogicNode* n;
         if
             DEFINE_CONSTANT(float)
         else if
@@ -354,7 +354,7 @@ protected:
     void createToolNorm(XMLNodeType& logicNode, unsigned int id)
     {
         std::string t = logicNode.attribute("inputType").value();
-        LogicNode*  n;
+        LogicNode* n;
         if
             DEFINE_NORM(Vector3)
         else
@@ -378,7 +378,7 @@ protected:
     void createToolInnerProduct(XMLNodeType& logicNode, unsigned int id)
     {
         std::string t = logicNode.attribute("inputType").value();
-        LogicNode*  n;
+        LogicNode* n;
         if
             DEFINE_INNERPRODUCT(Vector3)
         else
@@ -404,7 +404,7 @@ protected:
         GRSF_ERRORMSG("Implementation not finished, parse index!")
 
         std::string t = logicNode.attribute("inputType").value();
-        LogicNode*  n;
+        LogicNode* n;
         if
             DEFINE_VECTORTOCOMPONENT(Vector3)
         // else if DEFINE_VECTORTOCOMPONENT(Quaternion)
@@ -581,7 +581,7 @@ protected:
         }
         // Make tool
         std::string t1 = logicNode.attribute("evalType").value();
-        LogicNode*  node;
+        LogicNode* node;
         if
             DEFINE_SIMPLEFUNCTION(float)
         else if
@@ -675,8 +675,8 @@ protected:
     {                                                                                                 \
         using T = type;                                                                               \
         XMLAttributeType att;                                                                         \
-        bool             truncate = true;                                                             \
-        att                       = logicNode.attribute("truncate");                                  \
+        bool truncate = true;                                                                         \
+        att           = logicNode.attribute("truncate");                                              \
         if (att)                                                                                      \
         {                                                                                             \
             if (!Utilities::stringToType(truncate, att.value()))                                      \
@@ -747,8 +747,8 @@ protected:
     {                                                                                                 \
         using T = type;                                                                               \
         XMLAttributeType att;                                                                         \
-        std::string      rootName = "Root";                                                           \
-        att                       = logicNode.attribute("rootName");                                  \
+        std::string rootName = "Root";                                                                \
+        att                  = logicNode.attribute("rootName");                                       \
         if (att)                                                                                      \
         {                                                                                             \
             rootName = att.value();                                                                   \
@@ -888,7 +888,7 @@ protected:
             GRSF_ERRORMSG_PARSERTOOL("---> String conversion 'maxPoint' failed", id);
         }
         Quaternion q_KI;
-        Vector3    I_r_IK;
+        Vector3 I_r_IK;
         ParserFunctions::parseTransformSequence(logicNode, q_KI, I_r_IK);
         Matrix33 R_KI = q_KI.toRotationMatrix();
         I_r_IK        = R_KI.transpose() * I_r_IK;  // make K_r_IK  = A_KI * I_r_IK
@@ -909,7 +909,7 @@ protected:
     void createToolTransform3D(XMLNodeType& logicNode, unsigned int id)
     {
         Quaternion q_KI;
-        Vector3    I_r_IK;
+        Vector3 I_r_IK;
         ParserFunctions::parseTransformSequence(logicNode, q_KI, I_r_IK);
         auto* node = new LogicNodes::Transform3D(id, q_KI, I_r_IK);
         LOGLPLEVEL3(m_pLog,
@@ -924,8 +924,8 @@ protected:
         addNodeToGroup(logicNode, id, "Body");
     }
 
-    ParserType*            m_parser;
-    LogType*               m_pLog;
+    ParserType* m_parser;
+    LogType* m_pLog;
     SimFileExecutionGraph* m_executionGraph;
 };
 };

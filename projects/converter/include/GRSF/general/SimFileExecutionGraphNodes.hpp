@@ -75,8 +75,8 @@ public:
 
     void setOutput(boost::filesystem::path simFile,
                    boost::filesystem::path filePath,
-                   unsigned long int       nBodies,
-                   unsigned long int       nStates)
+                   unsigned long int nBodies,
+                   unsigned long int nStates)
     {
         if (!filePath.has_filename())
         {
@@ -278,10 +278,7 @@ private:
             SET_OSOCKET_VALUE_PTR(m_p, OverlapTotal, add->m_overlapTotal);
         }
         template <typename T>
-        void operator()(T* p)
-        {
-            GRSF_ERRORMSG("Additional bytes could not be filled into input Node!")
-        }
+        void operator()(T* p){GRSF_ERRORMSG("Additional bytes could not be filled into input Node!")}
 
         BodyData* m_p;
     };
@@ -458,8 +455,8 @@ public:
     }
 
 private:
-    Vector3  p;       ///< temporary point
-    AABB3d   m_aabb;  ///< in K Frame
+    Vector3 p;        ///< temporary point
+    AABB3d m_aabb;    ///< in K Frame
     Matrix33 m_R_KI;  ///< rotation R_KI
 };
 };

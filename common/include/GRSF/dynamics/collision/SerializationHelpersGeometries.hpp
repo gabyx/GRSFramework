@@ -83,10 +83,10 @@ private:
     GeometryType& m_g;
 
     typedef decltype(m_g.which()) WhichType;
-    WhichType                     m_w;
+    WhichType m_w;
 
     template <int N>
-    void          createGeom_impl()
+    void createGeom_impl()
     {
         using SharedPtrType = typename boost::mpl::at_c<VariantTypes, N>::type;
         using GeomType      = typename SharedPtrType::element_type;

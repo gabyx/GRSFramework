@@ -30,7 +30,7 @@ struct A
     {
         v.setConstant(a);
     };
-    void            foo(){};
+    void foo(){};
     Eigen::Vector4f v;
     ~A()
     {
@@ -167,7 +167,7 @@ void linearReusableStorageTest()
     }
 
     const auto& vecC = vec;
-    auto        it   = vecC.begin();
+    auto it          = vecC.begin();
     std::cout << it->v(0) << demangle::type(it) << std::endl;
     auto it2 = vec.cbegin();
     std::cout << it2->v(0) << demangle::type(it2) << std::endl;

@@ -48,7 +48,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     InclusionSolverNTContactOrdered(std::shared_ptr<TCollisionSolver> pCollisionSolver,
-                                    std::shared_ptr<TDynamicsSystem>  pDynSys);
+                                    std::shared_ptr<TDynamicsSystem> pDynSys);
 
     void initializeLog(Ogre::Log* pSolverLog);
     void reset();
@@ -56,7 +56,7 @@ public:
                               // reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem(const DynamicsState<TLayoutConfig>* state_s,
                                const DynamicsState<TLayoutConfig>* state_m,
-                               DynamicsState<TLayoutConfig>*       state_e);
+                               DynamicsState<TLayoutConfig>* state_e);
 
     // These are updated from the System, over Inclusion Solver;
     // VectorU m_Minv_diag;
@@ -64,9 +64,9 @@ public:
     // VectorU m_h_const;    // constant terms (gravity)
     // VectorU m_delta_u_E;  // the delta which adds to the final u_E
 
-    PREC         m_G_conditionNumber;
+    PREC m_G_conditionNumber;
     unsigned int m_iterationsNeeded;
-    bool         m_bConverged;
+    bool m_bConverged;
     unsigned int m_nContacts;
 
     ContactParameterMap<TLayoutConfig> m_ContactParameterMap;
@@ -86,8 +86,8 @@ protected:
 
     unsigned int m_nExpectedContacts;
 
-    std::shared_ptr<TCollisionSolver>                       m_pCollisionSolver;
-    std::shared_ptr<TDynamicsSystem>                        m_pDynSys;
+    std::shared_ptr<TCollisionSolver> m_pCollisionSolver;
+    std::shared_ptr<TDynamicsSystem> m_pDynSys;
     std::vector<std::shared_ptr<RigidBody<TLayoutConfig>>>& m_SimBodies;
     std::vector<std::shared_ptr<RigidBody<TLayoutConfig>>>& m_Bodies;
 
@@ -113,8 +113,8 @@ protected:
 #define P_back (*m_P_back)
 #define P_front (*m_P_front)
 
-    void      swapPercussionBuffer();
-    void      resetPercussionBuffer();
+    void swapPercussionBuffer();
+    void resetPercussionBuffer();
     VectorDyn m_P_1;
     VectorDyn m_P_2;
     // ==========================
@@ -131,14 +131,14 @@ protected:
     inline void doSorProx();
 
     // Log
-    Ogre::Log*        m_pSolverLog;
+    Ogre::Log* m_pSolverLog;
     std::stringstream logstream;
 };
 
 template <typename TLayoutConfig, typename TDynamicsSystem, typename TCollisionSolver, typename TContactGraph>
 InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::
     InclusionSolverNTContactOrdered(std::shared_ptr<TCollisionSolver> pCollisionSolver,
-                                    std::shared_ptr<TDynamicsSystem>  pDynSys)
+                                    std::shared_ptr<TDynamicsSystem> pDynSys)
     : m_SimBodies(pCollisionSolver->m_SimBodies), m_Bodies(pCollisionSolver->m_Bodies)
 {
     m_nSimBodies   = pCollisionSolver->m_nSimBodies;
@@ -230,7 +230,7 @@ template <typename TLayoutConfig, typename TDynamicsSystem, typename TCollisionS
 void InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::
     solveInclusionProblem(const DynamicsState<TLayoutConfig>* state_s,
                           const DynamicsState<TLayoutConfig>* state_m,
-                          DynamicsState<TLayoutConfig>*       state_e)
+                          DynamicsState<TLayoutConfig>* state_e)
 {
 #if CoutLevelSolver > 0
     CLEARLOG;
@@ -240,7 +240,7 @@ void InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionS
 
     // Iterate over all nodes set and assemble the matrices...
     TContactGraph::NodeList& nodes = m_ContactGraph.getNodeListRef();
-    TContactGraph::Node*     currentContactNode;
+    TContactGraph::Node* currentContactNode;
     m_nContacts        = (unsigned int)nodes.size();
     m_iterationsNeeded = 0;
     m_bConverged       = false;
@@ -267,14 +267,14 @@ void InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionS
 
         // Assemble W_N and W_T and xi_N and xi_T =====================================================
         static const CollisionData<TLayoutConfig>* pCollData;
-        static Matrix33                            I_r_SiCi_hat = Matrix33::Zero();
-        static Matrix33                            I_Jacobi_2;  // this is the second part of the Jacobi;
-        static VectorUObj                          w_part;
+        static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
+        static Matrix33 I_Jacobi_2;  // this is the second part of the Jacobi;
+        static VectorUObj w_part;
 
-        static Eigen::Matrix<PREC, Eigen::Dynamic, Eigen::Dynamic>  G_part;
+        static Eigen::Matrix<PREC, Eigen::Dynamic, Eigen::Dynamic> G_part;
         static const Eigen::Matrix<PREC, NDOFuObj, Eigen::Dynamic>* W_j_body;
         static const Eigen::Matrix<PREC, NDOFuObj, Eigen::Dynamic>* W_i_body;
-        static Eigen::Matrix<PREC, Eigen::Dynamic, NDOFuObj>        W_i_bodyT_M_body;
+        static Eigen::Matrix<PREC, Eigen::Dynamic, NDOFuObj> W_i_bodyT_M_body;
 
         for (unsigned int contactIdx = 0; contactIdx < m_nContacts; contactIdx++)
         {
@@ -290,7 +290,7 @@ void InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionS
 
             // iterate over all edges in current contact to build up G;
             TContactGraph::EdgeListIterator it;
-            RigidBody<TLayoutConfig>*       edgesBody;
+            RigidBody<TLayoutConfig>* edgesBody;
 
             for (it = currentContactNode->m_edgeList.begin(); it != currentContactNode->m_edgeList.end(); it++)
             {
@@ -480,7 +480,7 @@ template <typename TLayoutConfig, typename TDynamicsSystem, typename TCollisionS
 void InclusionSolverNTContactOrdered<TLayoutConfig, TDynamicsSystem, TCollisionSolver, TContactGraph>::doSorProx()
 {
     static VectorPContact PContact_back;
-    static unsigned int   counterConverged;
+    static unsigned int counterConverged;
     // Calculate  R_N, R_T,
     setupRMatrix(m_Settings.m_alphaSORProx);
 

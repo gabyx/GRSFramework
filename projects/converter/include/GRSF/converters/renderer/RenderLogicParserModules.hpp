@@ -72,8 +72,8 @@ public:
     }
 
 private:
-    ParserType*      m_parser;
-    LogType*         m_pLog;
+    ParserType* m_parser;
+    LogType* m_pLog;
     MaterialMapType* m_materials;
 };
 };
@@ -226,10 +226,10 @@ private:
     }                                                                                       \
     else if (g == "list")                                                                   \
     {                                                                                       \
-        auto node         = new LogicNodes::ColorList<T>(id);                               \
-        n                 = node;                                                           \
-        auto    nodes     = logicNode.children("Color");                                    \
-        auto    itNodeEnd = nodes.end();                                                    \
+        auto node      = new LogicNodes::ColorList<T>(id);                                  \
+        n              = node;                                                              \
+        auto nodes     = logicNode.children("Color");                                       \
+        auto itNodeEnd = nodes.end();                                                       \
         Vector3 rgb;                                                                        \
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode)                    \
         {                                                                                   \
@@ -258,7 +258,7 @@ private:
     void createToolColorList(XMLNodeType& logicNode, unsigned int id)
     {
         std::string t1 = logicNode.attribute("inputType").value();
-        LogicNode*  n;
+        LogicNode* n;
         if
             DEFINE_ColorList(char) else if DEFINE_ColorList(short) else if DEFINE_ColorList(int) else if DEFINE_ColorList(long int) else if DEFINE_ColorList(long long int) else if DEFINE_ColorList(
                 unsigned char) else if DEFINE_ColorList(unsigned short) else if DEFINE_ColorList(unsigned int) else if DEFINE_ColorList(unsigned long int) else if DEFINE_ColorList(unsigned long long int) else
@@ -349,7 +349,7 @@ private:
         LOGLPLEVEL3(this->m_pLog, "Default Material set to: " << std::endl << it->second->str() << std::endl)
 
         std::string type = logicNode.attribute("inputType").value();
-        LogicNode*  node = nullptr;
+        LogicNode* node  = nullptr;
         if (type == "unsigned int")
         {
             node = new LogicNodes::LookUpTable<unsigned int, RenderMaterial*, MaterialMapType>(
@@ -377,9 +377,9 @@ private:
     void createToolRendermanOutput(XMLNodeType& logicNode, unsigned int id)
     {
         XMLAttributeType att;
-        bool             pipe    = false;
-        std::string      command = "";
-        att                      = logicNode.attribute("pipeToSubprocess");
+        bool pipe           = false;
+        std::string command = "";
+        att                 = logicNode.attribute("pipeToSubprocess");
         if (att)
         {
             if (!Utilities::stringToType(pipe, att.value()))
@@ -402,8 +402,8 @@ private:
     }
 
     RenderExecutionGraph* m_executionGraph;
-    MaterialMapType*      m_materials;
-    GeometryMapType*      m_geomMap;
+    MaterialMapType* m_materials;
+    GeometryMapType* m_geomMap;
 };
 };
 

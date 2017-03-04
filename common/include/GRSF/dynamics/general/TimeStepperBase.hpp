@@ -53,7 +53,7 @@ public:
     // The Core Objects ==================================
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
     std::shared_ptr<InclusionSolverType> m_pInclusionSolver;
-    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
     // ===================================================
 
     inline void initLogs(const boost::filesystem::path& folder_path, const boost::filesystem::path& simDataFile = "");
@@ -97,13 +97,13 @@ protected:
     PREC m_currentSimulationTime;
     PREC m_startSimulationTime;
 
-    int  m_IterationCounter;
+    int m_IterationCounter;
     bool m_bIterationFinished;
     bool m_bFinished;
 
     // Timer for the Performance
     CPUTimer m_PerformanceTimer;
-    double   m_startTime, m_endTime, m_startTimeCollisionSolver, m_endTimeCollisionSolver, m_startTimeInclusionSolver,
+    double m_startTime, m_endTime, m_startTimeCollisionSolver, m_endTimeCollisionSolver, m_startTimeInclusionSolver,
         m_endTimeInclusionSolver;
 
     // Collision Data file

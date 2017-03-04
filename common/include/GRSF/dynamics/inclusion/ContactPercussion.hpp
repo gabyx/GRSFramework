@@ -26,7 +26,7 @@ public:
 
     ContactPercussion(unsigned int dim, bool used) : m_used(true), m_Lambda(dim){};
 
-    bool      m_used;    ///< A flag which defines if this Percussion has been used in the current timestep.
+    bool m_used;         ///< A flag which defines if this Percussion has been used in the current timestep.
     VectorDyn m_Lambda;  ///< The contact percussion, e.g \f$[\Lambda_N,\Lambda_{T1},\Lambda_{T2}]\f$
 };
 /** @} */

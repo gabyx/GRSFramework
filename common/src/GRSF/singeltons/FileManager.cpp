@@ -61,10 +61,7 @@ void FileManager::init(boost::filesystem::path globalDirPath, boost::filesystem:
     }
 }
 
-FileManager::~FileManager()
-{
-    DESTRUCTOR_MESSAGE
-}
+FileManager::~FileManager(){DESTRUCTOR_MESSAGE}
 
 boost::filesystem::path FileManager::getGlobalDirectoryPath()
 {
@@ -98,7 +95,7 @@ boost::filesystem::path FileManager::copyFile(boost::filesystem::path from, boos
 }
 
 boost::filesystem::path FileManager::getNewSimFolderPath(boost::filesystem::path relDirectoryPath,
-                                                         std::string             folder_prefix)
+                                                         std::string folder_prefix)
 {
     boost::mutex::scoped_lock l(m_busy_mutex);
 
@@ -169,8 +166,8 @@ void FileManager::updateAllSimDataFiles(const boost::filesystem::path& directory
 }
 
 void FileManager::scanAllSimFolders(const boost::filesystem::path& directory,
-                                    const std::string&             folder_prefix,
-                                    const bool&                    with_SubDirs)
+                                    const std::string& folder_prefix,
+                                    const bool& with_SubDirs)
 {
     // std::cout << "directory: " << directory << std::endl;
 
@@ -197,7 +194,7 @@ void FileManager::scanAllSimFolders(const boost::filesystem::path& directory,
                     // std::cout << "number_length: " << number_length << std::endl;
                     if (number_length > 0)
                     {
-                        std::string  number_string = name.substr(found, number_length);
+                        std::string number_string = name.substr(found, number_length);
                         unsigned int numberId;
                         if (Utilities::stringToType<unsigned int>(numberId, number_string))
                         {
@@ -230,7 +227,7 @@ boost::filesystem::path FileManager::getPathCurrentSimFolder()
 std::set<boost::filesystem::path> FileManager::getPathsSimFilesOfCurrentSimFolder()
 {
     boost::mutex::scoped_lock l(m_busy_mutex);
-    auto                      it = m_SimFilePaths.find(m_selectedFolderPath);
+    auto it = m_SimFilePaths.find(m_selectedFolderPath);
     if (it != m_SimFilePaths.end())
     {
         return it->second;
@@ -247,7 +244,7 @@ boost::filesystem::path FileManager::getPathSceneFileOfCurrentSimFolder()
     }
 
     boost::filesystem::path sceneFilePath = m_selectedFolderPath;
-    std::string             sceneFile     = SIM_SCENE_FILE_NAME + std::string(".xml");
+    std::string sceneFile                 = SIM_SCENE_FILE_NAME + std::string(".xml");
     sceneFilePath /= sceneFile;
     if (boost::filesystem::exists(sceneFilePath))
     {
@@ -260,7 +257,7 @@ boost::filesystem::path FileManager::getPathSceneFileOfCurrentSimFolder()
 void FileManager::setPathCurrentSimFolder(std::string file_name)
 {
     boost::mutex::scoped_lock l(m_busy_mutex);
-    boost::filesystem::path   name = file_name;
+    boost::filesystem::path name = file_name;
 
     auto it = m_SimFilePaths.find(name);
     if (it != m_SimFilePaths.end())

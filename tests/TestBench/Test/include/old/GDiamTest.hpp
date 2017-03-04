@@ -41,7 +41,7 @@ void test_itself(gdiam_real* points, int num)
         pair.q[2]);
 
     gdiam_point* pnt_arr;
-    gdiam_bbox   bb;
+    gdiam_bbox bb;
 
     pnt_arr = gdiam_convert((gdiam_real*)points, num);
 
@@ -64,7 +64,7 @@ void test_itself(gdiam_real* points, int num)
 void standard_test()
 {
     gdiam_real* points;
-    int         num;
+    int num;
 
     num = 1000000 * 5;
 
@@ -86,7 +86,7 @@ void standard_test()
 
 void read_points(FILE* fl, gdiam_real* points, int points_num)
 {
-    int    args;
+    int args;
     double x, y, z;
 
     for (int ind = 0; ind < points_num; ind++)
@@ -102,8 +102,8 @@ void read_points(FILE* fl, gdiam_real* points, int points_num)
 void test_file(const char* file_name)
 {
     gdiam_real* points;
-    FILE*       fl;
-    int         args, points_num;
+    FILE* fl;
+    int args, points_num;
 
     fl = fopen(file_name, "rt");
     if (fl == NULL)

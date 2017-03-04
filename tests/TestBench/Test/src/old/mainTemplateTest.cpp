@@ -95,7 +95,7 @@ class Test2
 {
 protected:
 protected:
-    int  a;
+    int a;
     void foo();
 };
 

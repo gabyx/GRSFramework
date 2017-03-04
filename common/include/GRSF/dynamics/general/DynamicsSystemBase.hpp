@@ -59,13 +59,13 @@ public:
     ~DynamicsSystemBase();
 
     ContactParameterMapType m_ContactParameterMap;
-    ExternalForceListType   m_externalForces;  ///< Special class of function objects
+    ExternalForceListType m_externalForces;  ///< Special class of function objects
 
     // All Global Geometries used in the System
     GlobalGeometryMapType m_globalGeometries;
 
     // All RigidBodies which are owned by this class!
-    RigidBodySimContainerType    m_simBodies;     // Simulated Objects
+    RigidBodySimContainerType m_simBodies;        // Simulated Objects
     RigidBodyStaticContainerType m_staticBodies;  // all not simulated objects
 
     // All initial conditions for all bodies
@@ -112,8 +112,8 @@ public:
     PREC m_currentSpinNorm;
 
 protected:
-    RecorderSettingsType        m_settingsRecorder;
-    TimeStepperSettingsType     m_settingsTimestepper;
+    RecorderSettingsType m_settingsRecorder;
+    TimeStepperSettingsType m_settingsTimestepper;
     InclusionSolverSettingsType m_settingsInclusionSolver;
 
     // Log

@@ -49,7 +49,7 @@ public:
             delete m_randomG;
         }
 
-        boost::mt19937            generator(m_seed);
+        boost::mt19937 generator(m_seed);
         boost::uniform_real<PREC> uniform(-1, 1);
         m_randomG = new boost::variate_generator<boost::mt19937, boost::uniform_real<PREC>>(generator, uniform);
 
@@ -63,7 +63,7 @@ public:
     //        }
 private:
     boost::variate_generator<boost::mt19937, boost::uniform_real<PREC>>* m_randomG;
-    PREC         m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ;
+    PREC m_boostTime, m_pauseTime, m_amplitude, m_offsetX, m_offsetY, m_offsetZ;
     unsigned int m_seed;
 };
 

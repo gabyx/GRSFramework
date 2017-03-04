@@ -230,7 +230,7 @@ private:
         }
 
         ContactGraph* m_p = nullptr;
-        NodeDataInit  m_nodeDataInit;
+        NodeDataInit m_nodeDataInit;
 
         template <bool addEdges, typename TNode, typename TCollData, typename TContactParams>
         void apply(TNode* pNode, TCollData* pCollData, TContactParams& contactParams)
@@ -346,8 +346,8 @@ private:
     typedef std::multiset<std::pair<PREC, NodeType*>, CType> NodeListTypeResidualSorted;
     NodeListTypeResidualSorted* m_nodesBackRes;   // The list on which we are iterating
     NodeListTypeResidualSorted* m_nodesFrontRes;  // The list on which we are inserting (sorted)
-    NodeListTypeResidualSorted  m_nodesResSorted1;
-    NodeListTypeResidualSorted  m_nodesResSorted2;
+    NodeListTypeResidualSorted m_nodesResSorted1;
+    NodeListTypeResidualSorted m_nodesResSorted2;
 /** ========================================================================================= */
 #endif
 };

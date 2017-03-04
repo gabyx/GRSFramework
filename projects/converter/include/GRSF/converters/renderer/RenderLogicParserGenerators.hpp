@@ -105,7 +105,7 @@ struct LogicParserGen
     {
     }
 
-    RenderData*           m_p;
+    RenderData* m_p;
     RenderExecutionGraph* m_g;
 
     template <typename TParser>

@@ -106,7 +106,7 @@ public:
         }
     }
 
-    PREC    m_mass;       ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
+    PREC m_mass;          ///< The rigid body mass \f$m\f$ in \f$ \textrm{[kg]} \f$
     Vector3 m_K_Theta_S;  ///< The rigid body inertia tensor in diagonal form, \f$ {_K}\mathbf{\Theta}_{S}\f$ in \f$
                           ///[\textrm{kg} \cdot \textrm{m}^2] \f$
 
@@ -131,7 +131,7 @@ public:
     using RigidBodyIdType = RigidBodyId::Type;
     const RigidBodyIdType m_id;  ///< This is the id of the body.
 
-    BodyMode         m_eMode;      ///< The state of the body.
+    BodyMode m_eMode;              ///< The state of the body.
     BodyMaterialType m_eMaterial;  ///< The material id.
 
     unsigned char

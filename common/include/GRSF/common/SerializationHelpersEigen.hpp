@@ -34,7 +34,7 @@ void serializeEigen(Archive& ar, const Eigen::EigenBase<Derived>& gc)
     //                ar & *(g.derived().data() + i);
     //            }
     Eigen::EigenBase<Derived>& g = const_cast<Eigen::EigenBase<Derived>&>(gc);
-    ar&                        boost::serialization::make_array(g.derived().data(), g.size());
+    ar& boost::serialization::make_array(g.derived().data(), g.size());
 };
 
 namespace boost

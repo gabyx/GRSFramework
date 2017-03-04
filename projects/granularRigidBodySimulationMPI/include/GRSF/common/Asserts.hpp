@@ -112,7 +112,7 @@
         if (error_code != MPI_SUCCESS)                     \
         {                                                  \
             char* string = nullptr;                        \
-            int   length;                                  \
+            int length;                                    \
             MPI_Error_string(error_code, string, &length); \
             GRSF_ERRORMSG2(string, message);               \
         }                                                  \
@@ -126,7 +126,7 @@
         if (error_code != MPI_SUCCESS)                     \
         {                                                  \
             char* string = nullptr;                        \
-            int   length;                                  \
+            int length;                                    \
             MPI_Error_string(error_code, string, &length); \
             GRSF_ERRORMSG2(string, message);               \
         }                                                  \

@@ -207,8 +207,8 @@ void SimulationManagerGUI::updateSimBodies()
 {
     // update objects...
     static decltype(m_pDynSys->m_SceneNodeSimBodies.begin()) gBodyIt;
-    static decltype(m_pVisBuffer->m_SimBodyStates.begin())   stateIt;
-    static unsigned int                                      size;
+    static decltype(m_pVisBuffer->m_SimBodyStates.begin()) stateIt;
+    static unsigned int size;
 
     gBodyIt = m_pDynSys->m_SceneNodeSimBodies.begin();
     stateIt = m_pVisBuffer->m_SimBodyStates.begin();

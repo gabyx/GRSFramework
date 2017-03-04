@@ -168,7 +168,7 @@ public:
         }
 
     private:
-        IntType                      m_diffValue;
+        IntType m_diffValue;
         typename RangeType::iterator m_it;
     };
 
@@ -192,7 +192,7 @@ public:
     }
 
 private:
-    bool      m_linear;
+    bool m_linear;
     RangeType m_v;
 
     inline void init()
@@ -311,7 +311,7 @@ public:
         }
 
     private:
-        Type                                 m_diffValue;
+        Type m_diffValue;
         typename std::vector<Type>::iterator m_it;
     };
 
@@ -326,7 +326,7 @@ public:
 
 private:
     std::vector<Type> m_v;
-    void              sort()
+    void sort()
     {
         std::sort(m_v.begin(), m_v.end());
     }
@@ -627,9 +627,9 @@ public:
         }
 
     private:
-        Range*                 m_r;
+        Range* m_r;
         typename Set::iterator m_it;
-        Type                   m_cur;
+        Type m_cur;
     };
 
     iterator begin()
@@ -644,7 +644,7 @@ public:
 
 private:
     unsigned int m_which = 0;
-    void*        m_ptr   = nullptr;
+    void* m_ptr          = nullptr;
 
     void swap(Range& other) noexcept
     {
@@ -682,9 +682,9 @@ int runRangeTest()
     foo(2);
 
     std::cout << "Speed Test ============================" << std::endl;
-    typedef int    Type;
+    typedef int Type;
     std::set<Type> s;
-    unsigned int   max = MAXEL;
+    unsigned int max = MAXEL;
 
     // Filling vector and set
     std::vector<Type> vec(max);
@@ -707,7 +707,7 @@ int runRangeTest()
         INIT_TIMER
         START_TIMER
         test1::Range<Type> range(a);
-        auto               itEnd = range.end();
+        auto itEnd = range.end();
         for (int i = 1; i < loops; i++)
         {
             for (auto it = range.begin(); it != itEnd; ++it)
@@ -722,7 +722,7 @@ int runRangeTest()
         INIT_TIMER
         START_TIMER
         test1::Range<Type> range(vec);
-        auto               itEnd = range.end();
+        auto itEnd = range.end();
         for (int i = 1; i < loops; i++)
         {
             for (auto it = range.begin(); it != itEnd; ++it)
@@ -782,7 +782,7 @@ int runRangeTest()
         INIT_TIMER
         START_TIMER
         test2::Range<Type> range(vec);
-        auto               itEnd = range.end();
+        auto itEnd = range.end();
         for (int i = 1; i < loops; i++)
         {
             for (auto it = range.begin(); it != itEnd; ++it)
@@ -797,7 +797,7 @@ int runRangeTest()
         INIT_TIMER
         START_TIMER
         test2::Range<Type> range{a};
-        auto               itEnd = range.end();
+        auto itEnd = range.end();
         for (int i = 1; i < loops; i++)
         {
             for (auto it = range.begin(); it != itEnd; ++it)
@@ -905,12 +905,10 @@ int runRangeTest()
                 // std::cout << *it << std::endl;
             }
         }
-        {
-            STOP_TIMER("iterate set")
-        }
+        {STOP_TIMER("iterate set")}
 
-        START_TIMER
-        std::vector<Type> v;
+        START_TIMER std::vector<Type>
+            v;
         v.resize(s.size());
         std::copy(s.begin(), s.end(), v.begin());
         {

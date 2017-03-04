@@ -56,10 +56,10 @@ public:
 
     using RebuildSettingsType = TopologyBuilderSettings::RebuildSettings;
 
-    TopologyBuilder(TopologyBuilderEnumType                  type,
-                    std::shared_ptr<DynamicsSystemType>      pDynSys,
+    TopologyBuilder(TopologyBuilderEnumType type,
+                    std::shared_ptr<DynamicsSystemType> pDynSys,
                     std::shared_ptr<ProcessCommunicatorType> pProcCommunicator,
-                    RebuildSettingsType                      rebuildSettings)
+                    RebuildSettingsType rebuildSettings)
         : m_type(type)
         , m_rebuildSettings(rebuildSettings)
         , m_pDynSys(pDynSys)
@@ -119,7 +119,7 @@ protected:
         // Synchronize rebuilding over all processes by communication
         LOGTBLEVEL1(m_pSimulationLog, "MPI> Gather topology rebuild flags: " << std::endl;)
         std::vector<char> rebuildGather;
-        char              r = rebuild ? 1 : 0;
+        char r = rebuild ? 1 : 0;
         m_pProcCommunicator->allGather(r, rebuildGather, MPILayer::MPICommunicatorId::SIM_COMM);
 
         if (TOPOBUILDER_LOGLEVEL > 2)
@@ -139,16 +139,16 @@ protected:
         return false;
     }
 
-    PREC         m_currentTime;
+    PREC m_currentTime;
     unsigned int m_builtTopologies = 0;
 
     const TopologyBuilderEnumType m_type;
-    const RebuildSettingsType     m_rebuildSettings;
+    const RebuildSettingsType m_rebuildSettings;
 
-    std::shared_ptr<DynamicsSystemType>      m_pDynSys;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
     std::shared_ptr<ProcessCommunicatorType> m_pProcCommunicator;
 
-    Logging::Log*           m_pSimulationLog;
+    Logging::Log* m_pSimulationLog;
     boost::filesystem::path m_localSimFolderPath;
 };
 
@@ -191,7 +191,7 @@ public:
         {
         }
 
-        Vector3Vec*  m_points    = nullptr;
+        Vector3Vec* m_points     = nullptr;
         unsigned int m_pointIdx  = 0;
         unsigned int m_numPoints = 0;
 
@@ -226,16 +226,16 @@ public:
          */
     template <typename TExternalForceList, typename TRigidBodyContainer, bool predictOutliers = false>
     void predictMassPoints(std::vector<MassPointType>& massPoints,
-                           const TExternalForceList&   forceList,
-                           const TRigidBodyContainer&  staticBodies,
-                           Vector3Vec&                 predictedPoints)
+                           const TExternalForceList& forceList,
+                           const TRigidBodyContainer& staticBodies,
+                           Vector3Vec& predictedPoints)
     {
         ColliderPoint pointCollider;
-        PREC          dT      = m_massPointPredSettings.m_deltaT;
-        unsigned int  nPoints = m_massPointPredSettings.m_nPoints;
+        PREC dT              = m_massPointPredSettings.m_deltaT;
+        unsigned int nPoints = m_massPointPredSettings.m_nPoints;
 
-        auto*   gravityField = forceList.getGravityField();
-        Vector3 gravity      = Vector3::Zero();
+        auto* gravityField = forceList.getGravityField();
+        Vector3 gravity    = Vector3::Zero();
         if (gravityField)
         {
             gravity = gravityField->getGravity();
@@ -329,7 +329,7 @@ public:
 
 private:
     OutlierFilterSettingsType m_settings;
-    Filter                    m_filter;
+    Filter m_filter;
 
 public:
     OutlierFilter(const OutlierFilterSettingsType& f) : m_settings(f)
@@ -361,7 +361,7 @@ public:
     {
         // gets modified by filter function
         PointListType input(massPoints.size());
-        unsigned int  i = 0;
+        unsigned int i = 0;
         for (auto& p : massPoints)
         {
             input[i] = &p;
@@ -409,7 +409,7 @@ protected:
 
     /** Messages for sending/receiving bodies and solving extent collaboratively (Binet Tensor) */
     TopologyBuilderMessageWrapperOrientation<GridTopologyBuilderBase> m_messageOrient;
-    TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase>      m_messageBodies;
+    TopologyBuilderMessageWrapperBodies<GridTopologyBuilderBase> m_messageBodies;
 
     /** Scene file currently simulated */
     boost::filesystem::path m_sceneFilePath;  ///< The parsed scene file for the initial topology
@@ -436,8 +436,8 @@ protected:
 
     /** BOTH (master and other ranks) ============================================== */
     std::vector<MassPointType> m_massPoints;  ///< global/local mass points
-    Vector3Vec                 m_predPoints;  /// point cloud of all predicted mass points
-    unsigned int               m_countPoints = 0;
+    Vector3Vec m_predPoints;                  /// point cloud of all predicted mass points
+    unsigned int m_countPoints = 0;
 
     // Accumulators for Binet Tensor
     Vector3 m_r_G;        ///< Local Geometric center of all point masses
@@ -445,8 +445,8 @@ protected:
                           /// intertial frame I
 
     // Final Bounding Box on master
-    bool   m_aligned;  ///< aligned = AABB, otherwise OOBB
-    AABB3d m_aabb;     ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB),
+    bool m_aligned;  ///< aligned = AABB, otherwise OOBB
+    AABB3d m_aabb;   ///< Min/Max of OOBB fit around points in frame K (OOBB) or I (AABB),
     Matrix33
         m_A_IK;  ///< Transformation of OOBB cordinate frame K (oriented bounding box of point cloud) to intertia fram I
 
@@ -457,14 +457,14 @@ protected:
     TimeStepperSettingsType m_timeStepperSettings;
 
     MassPointPrediction m_massPointPrediction;
-    OutlierFilter       m_globalOutlierFilter;
+    OutlierFilter m_globalOutlierFilter;
 
 protected:
     template <typename... T>
-    GridTopologyBuilderBase(const SettingsType&              setting,
+    GridTopologyBuilderBase(const SettingsType& setting,
                             const MassPointPredSettingsType& massSettings,
                             const OutlierFilterSettingsType& globalFilterSettings,
-                            boost::filesystem::path          sceneFile,
+                            boost::filesystem::path sceneFile,
                             T&&... t)
         : TopoBase(std::forward<T>(t)...)
         , m_messageOrient(this)
@@ -519,8 +519,8 @@ protected:
 
     template <bool aligned = false, bool includePoints = true, bool includeState = false>
     void computeExtent(const std::vector<MassPointType>& massPoints,
-                       AABB3d&                           aabb,
-                       const Matrix33&                   A_IK = Matrix33::Identity())
+                       AABB3d& aabb,
+                       const Matrix33& A_IK = Matrix33::Identity())
     {
         LOGTBLEVEL3(m_pSimulationLog, "---> TopoBuilder: Compute extent ..." << std::endl;);
         // Calculate min max
@@ -1066,14 +1066,14 @@ private:
     TopologyBuilderMessageWrapperResults<GridTopologyBuilder> m_messageWrapperResults;
 
 public:
-    GridTopologyBuilder(std::shared_ptr<DynamicsSystemType>      pDynSys,
+    GridTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
                         std::shared_ptr<ProcessCommunicatorType> pProcCommunicator,
-                        const RebuildSettingsType&               rebuildSettings,
-                        const MassPointPredSettingsType&         massPointPredSettings,
-                        const OutlierFilterSettingsType&         globalOutlierFilterSettings,
-                        const SettingsType&                      settings,
-                        boost::filesystem::path                  sceneFilePath,
-                        unsigned int                             nGlobalSimBodies)
+                        const RebuildSettingsType& rebuildSettings,
+                        const MassPointPredSettingsType& massPointPredSettings,
+                        const OutlierFilterSettingsType& globalOutlierFilterSettings,
+                        const SettingsType& settings,
+                        boost::filesystem::path sceneFilePath,
+                        unsigned int nGlobalSimBodies)
         : Base(settings,
                massPointPredSettings,
                globalOutlierFilterSettings,
@@ -1216,7 +1216,7 @@ public:
             // Receive Messages
             // Fill linear array with all ranks except master
             std::vector<RankIdType> ranks;
-            unsigned int            count = 0;
+            unsigned int count = 0;
             std::generate_n(std::back_inserter(ranks), this->m_pProcCommunicator->getNProcesses() - 1, [&]() {
                 if (count == masterRank)
                 {
@@ -1410,7 +1410,7 @@ private:
 
         // Fill linear array with all ranks except master
         std::vector<RankIdType> ranks;
-        unsigned int            count = 0;
+        unsigned int count = 0;
         std::generate_n(std::back_inserter(ranks), this->m_pProcCommunicator->getNProcesses() - 1, [&]() {
             if (count == masterRank)
             {
@@ -1511,7 +1511,7 @@ private:
 
         // Open XML and write structure!
         pugi::xml_document dataXML;
-        std::stringstream  xml(
+        std::stringstream xml(
             "<TopologyBuilder type=\"Grid\" buildMode=\"\" >"
             "<Description>"
             "A_IK is tranformation matrix, which transforms points from frame K to frame I\n"
@@ -1534,9 +1534,9 @@ private:
         // Write data
 
         using XMLNodeType = pugi::xml_node;
-        XMLNodeType       node;
+        XMLNodeType node;
         static const auto nodePCData = pugi::node_pcdata;
-        XMLNodeType       root       = dataXML.child("TopologyBuilder");
+        XMLNodeType root             = dataXML.child("TopologyBuilder");
 
         std::string buildMode = "nothing";
         if (m_settings.m_buildMode == GridBuilderSettings::BuildMode::ALIGNED)
@@ -1608,8 +1608,8 @@ private:
     unsigned int m_nGlobalSimBodies = 0;  ///< Only for a check with MassPoints
 
     /** GLOBAL STUFF ================================================================ */
-    unsigned int                    m_processes;
-    std::unique_ptr<TreeType>       m_kdTree_temp;
+    unsigned int m_processes;
+    std::unique_ptr<TreeType> m_kdTree_temp;
     std::shared_ptr<TreeSimpleType> m_kdTree_glo;
 
     using LeafNeighbourMapType = typename TreeType::LeafNeighbourMapType;
@@ -1619,14 +1619,14 @@ private:
     TopologyBuilderMessageWrapperResults<KdTreeTopologyBuilder> m_messageWrapperResults;
 
 public:
-    KdTreeTopologyBuilder(std::shared_ptr<DynamicsSystemType>                   pDynSys,
-                          std::shared_ptr<ProcessCommunicatorType>              pProcCommunicator,
-                          const TopologyBuilderSettings::RebuildSettings&       rebuildSettings,
+    KdTreeTopologyBuilder(std::shared_ptr<DynamicsSystemType> pDynSys,
+                          std::shared_ptr<ProcessCommunicatorType> pProcCommunicator,
+                          const TopologyBuilderSettings::RebuildSettings& rebuildSettings,
                           const TopologyBuilderSettings::MassPointPredSettings& massPointPredSettings,
-                          const OutlierFilterSettingsType&                      globalOutlierFilterSettings,
-                          const SettingsType&                                   settings,
-                          boost::filesystem::path                               sceneFilePath,
-                          unsigned int                                          nGlobalSimBodies)
+                          const OutlierFilterSettingsType& globalOutlierFilterSettings,
+                          const SettingsType& settings,
+                          boost::filesystem::path sceneFilePath,
+                          unsigned int nGlobalSimBodies)
         : Base(settings,
                massPointPredSettings,
                globalOutlierFilterSettings,
@@ -1759,7 +1759,7 @@ public:
             // Receive Messages
             // Fill linear array with all ranks except master
             std::vector<RankIdType> ranks;
-            unsigned int            count = 0;
+            unsigned int count = 0;
             std::generate_n(std::back_inserter(ranks), this->m_pProcCommunicator->getNProcesses() - 1, [&]() {
                 if (count == masterRank)
                 {
@@ -1896,7 +1896,7 @@ private:
         }
 
         // make pointer list
-        auto           s = m_predPoints.size();
+        auto s = m_predPoints.size();
         PointListType* vec(new PointListType(s));  // will be managed by unique pointer later
         for (std::size_t i = 0; i < s; ++i)
         {
@@ -2064,7 +2064,7 @@ private:
 
         // Fill linear array with all ranks except master
         std::vector<RankIdType> ranks;
-        unsigned int            count = 0;
+        unsigned int count = 0;
         std::generate_n(std::back_inserter(ranks), this->m_pProcCommunicator->getNProcesses() - 1, [&]() {
             if (count == masterRank)
             {
@@ -2165,7 +2165,7 @@ private:
 
         // Open XML and write structure!
         pugi::xml_document dataXML;
-        std::stringstream  xml(
+        std::stringstream xml(
             "<TopologyBuilder type=\"KdTree\" buildMode=\"\" >"
             "<Description>"
             "A_IK is tranformation matrix, which transforms points from frame K to frame I\n"

@@ -34,8 +34,8 @@ private:
 
     using BodyMode = typename DynamicsSystemType::RigidBodyType::BodyMode;
     BodyMode m_mode;
-    using BodyListType              = typename BodyModuleType::BodyListType;
-    BodyListType*   m_bodyListGroup = nullptr;
+    using BodyListType            = typename BodyModuleType::BodyListType;
+    BodyListType* m_bodyListGroup = nullptr;
     RigidBodyIdType m_startIdGroup;
 
     using RigidBodyGraphicsType     = typename DynamicsSystemType::RigidBodyGraphicsType;
@@ -44,17 +44,17 @@ private:
     RigidBodyGraphicsContType* m_pBodies;
 
     Ogre::SceneManager* m_pSceneMgr;
-    Ogre::SceneNode*    m_pBaseNode;
-    Ogre::SceneNode*    m_pBodiesNode;
-    Ogre::SceneNode*    m_pContactFramesNode;
+    Ogre::SceneNode* m_pBaseNode;
+    Ogre::SceneNode* m_pBodiesNode;
+    Ogre::SceneNode* m_pContactFramesNode;
 
     LogType* m_pSimulationLog;
 
     struct RenderSettings
     {
-        bool   attachAxis     = false;
-        double axesSize       = 1;
-        bool   shadowsEnabled = true;
+        bool attachAxis     = false;
+        double axesSize     = 1;
+        bool shadowsEnabled = true;
     };
 
     std::vector<std::string> m_materialList;
@@ -63,7 +63,7 @@ private:
     ScalesList m_scalesGroup;
 
     Vector3 m_currScale;
-    bool    m_currScaleLikeGeom;
+    bool m_currScaleLikeGeom;
 
 public:
     ScalesList* getScalesGroup()
@@ -77,13 +77,13 @@ public:
         m_scalesGroup.clear();
     }
 
-    VisModule(ParserType*                p,
+    VisModule(ParserType* p,
               RigidBodyGraphicsContType* pSimBodies,
               RigidBodyGraphicsContType* pBodies,
-              Ogre::SceneNode*           pBaseNode,
-              Ogre::SceneNode*           pBodiesNode,
-              Ogre::SceneNode*           pContactFramesNode,
-              Ogre::SceneManager*        pSceneMgr)
+              Ogre::SceneNode* pBaseNode,
+              Ogre::SceneNode* pBodiesNode,
+              Ogre::SceneNode* pContactFramesNode,
+              Ogre::SceneManager* pSceneMgr)
         : m_pSimulationLog(p->getSimLog())
         , m_pSimBodies(pSimBodies)
         , m_pBodies(pBodies)
@@ -157,7 +157,7 @@ private:
         GET_XMLATTRIBUTE_CHECK(att, "file", meshNode);
         boost::filesystem::path meshName = att.value();
 
-        XMLNodeType    rendering = meshNode.child("Rendering");
+        XMLNodeType rendering = meshNode.child("Rendering");
         RenderSettings renderSettings;
         if (rendering)
         {
@@ -209,7 +209,7 @@ private:
             if (renderSettings.attachAxis)
             {
                 Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode();
-                Ogre::Entity*    axisEnt       = m_pSceneMgr->createEntity("axes.mesh");
+                Ogre::Entity* axisEnt          = m_pSceneMgr->createEntity("axes.mesh");
                 // Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() +
                 // "Axes",100);
                 sceneNodeAxes->setScale(renderSettings.axesSize, renderSettings.axesSize, renderSettings.axesSize);
@@ -248,7 +248,7 @@ private:
         GET_XMLATTRIBUTE_CHECK(att, "fileCap", capsule);
         boost::filesystem::path fileCap = att.value();
 
-        XMLNodeType    rendering = capsule.child("Rendering");
+        XMLNodeType rendering = capsule.child("Rendering");
         RenderSettings renderSettings;
         if (rendering)
         {
@@ -278,7 +278,7 @@ private:
             entCap1->setCastShadows(renderSettings.shadowsEnabled);
             entCap2->setCastShadows(renderSettings.shadowsEnabled);
 
-            Ogre::SceneNode*      sceneNode = m_pBodiesNode->createChildSceneNode(/*node_name.str()*/);
+            Ogre::SceneNode* sceneNode = m_pBodiesNode->createChildSceneNode(/*node_name.str()*/);
             RigidBodyGraphicsType rigidBodyGraphics(sceneNode, id);
 
             Ogre::SceneNode* sceneNodeZyl = sceneNode->createChildSceneNode();
@@ -314,7 +314,7 @@ private:
             if (renderSettings.attachAxis)
             {
                 Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode();
-                Ogre::Entity*    axisEnt       = m_pSceneMgr->createEntity("axes.mesh");
+                Ogre::Entity* axisEnt          = m_pSceneMgr->createEntity("axes.mesh");
                 // Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() +
                 // "Axes",100);
                 sceneNodeAxes->setScale(renderSettings.axesSize, renderSettings.axesSize, renderSettings.axesSize);
@@ -343,7 +343,7 @@ private:
 
     void parsePointCloud(XMLNodeType pcloudNode)
     {
-        static int        nodeCounter = 0;
+        static int nodeCounter = 0;
         std::stringstream node_name;
 
         XMLAttributeType att;
@@ -367,7 +367,7 @@ private:
             RM_TILES,
             RM_BOXES,
         };
-        std::string                rm;
+        std::string rm;
         OgrePointCloud::RenderMode renderMode;
         att = pcloudNode.attribute("renderMode");
         if (att)
@@ -447,8 +447,8 @@ private:
     void parsePlane(XMLNodeType planeNode)
     {
         XMLAttributeType att;
-        static int       nodeCounter   = 0;
-        static int       entityCounter = 0;
+        static int nodeCounter   = 0;
+        static int entityCounter = 0;
 
         Vector2 subDivs = Vector2::Ones();
         att             = planeNode.attribute("subDivisions");
@@ -495,7 +495,7 @@ private:
             }
         }
 
-        XMLNodeType    rendering = planeNode.child("Rendering");
+        XMLNodeType rendering = planeNode.child("Rendering");
         RenderSettings renderSettings;
         if (rendering)
         {
@@ -512,7 +512,7 @@ private:
         LOGSCLEVEL1(m_pSimulationLog, "---> Add all Ogre: Plane Objects" << std::endl);
 
         unsigned int i;  // linear offset from m_startIdGroup
-        auto         stateIt = m_statesGroup->begin();
+        auto stateIt = m_statesGroup->begin();
         for (auto& b : *m_bodyListGroup)
         {
             i = b.m_id - m_startIdGroup;
@@ -571,7 +571,7 @@ private:
             if (renderSettings.attachAxis)
             {
                 Ogre::SceneNode* sceneNodeAxes = sceneNode->createChildSceneNode(entity_name.str() + "Axes");
-                Ogre::Entity*    axisEnt       = m_pSceneMgr->createEntity(entity_name.str() + "AxesEnt", "axes.mesh");
+                Ogre::Entity* axisEnt          = m_pSceneMgr->createEntity(entity_name.str() + "AxesEnt", "axes.mesh");
                 // Ogre::MovableObject * axisEnt= AxisObject().createAxis(m_pSceneMgr.get(),entity_name.str() +
                 // "Axes",100);
                 sceneNodeAxes->setScale(renderSettings.axesSize, renderSettings.axesSize, renderSettings.axesSize);

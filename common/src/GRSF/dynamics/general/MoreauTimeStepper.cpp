@@ -14,7 +14,7 @@
 #include "GRSF/dynamics/general/MoreauTimeStepper.hpp"
 
 MoreauTimeStepper::MoreauTimeStepper(std::shared_ptr<DynamicsSystemType> pDynSys,
-                                     std::shared_ptr<StatePoolType>      pSysState)
+                                     std::shared_ptr<StatePoolType> pSysState)
     : TimeStepperBase<MoreauTimeStepper, MoreauTimeStepperTraits>(pDynSys)
 {
     m_pCollisionSolver = std::shared_ptr<CollisionSolverType>(new CollisionSolverType(m_pDynSys));

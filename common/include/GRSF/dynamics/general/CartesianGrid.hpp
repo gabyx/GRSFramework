@@ -134,7 +134,7 @@ public:
     };
 
     /** Get cell data  */
-    template <bool                         transformInputToKSystem, typename Derived>
+    template <bool transformInputToKSystem, typename Derived>
     typename CellDataListType::value_type* getCellData(const MatrixBase<Derived>& point)
     {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
@@ -151,7 +151,7 @@ public:
     }
 
     /** Get cell data  */
-    template <bool                         transformInputToKSystem, typename Derived>
+    template <bool transformInputToKSystem, typename Derived>
     typename CellDataListType::value_type* getCellData(const MatrixBase<Derived>& point, IndexType& index)
     {
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
@@ -356,8 +356,8 @@ public:
         }
 
         CartesianGrid* m_grid;
-        IndexType      m_indices;
-        IteratorType   m_it;
+        IndexType m_indices;
+        IteratorType m_it;
     };
 
     using IteratorType      = iterator<typename CellDataListType::iterator>;
@@ -398,12 +398,12 @@ protected:
 
     CellDataListType m_cellData;
 
-    Array3    m_dxyzInv;
-    Array3    m_dxyz;
+    Array3 m_dxyzInv;
+    Array3 m_dxyz;
     IndexType m_dim;
-    AABB3d    m_aabb;  ///< AABB in K coordinate system
-    Matrix33  m_A_KI;  ///< an optional transformation matrix, default to identity! (from I system to the grid system K)
-                       ///( rotation R_IK, from K system to I system)
+    AABB3d m_aabb;    ///< AABB in K coordinate system
+    Matrix33 m_A_KI;  ///< an optional transformation matrix, default to identity! (from I system to the grid system K)
+                      ///( rotation R_IK, from K system to I system)
 
     static char m_nbIndicesOff[26 * 3];
 

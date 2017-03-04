@@ -114,7 +114,7 @@ template <typename PREC>
 bool stringToVector3(typename MyMatrix<PREC>::Vector3& vector3, std::string s)
 {
     unsigned int i = 0, j;
-    PREC         number;
+    PREC number;
 
     if (s.empty())
     {
@@ -222,7 +222,7 @@ template <class PREC>
 bool stringToVector4(typename MyMatrix<PREC>::Vector4& vector4, std::string s)
 {
     unsigned int i = 0, j;
-    PREC         number;
+    PREC number;
     if (s.empty())
     {
         return false;

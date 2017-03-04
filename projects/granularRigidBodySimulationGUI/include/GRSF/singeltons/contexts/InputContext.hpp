@@ -56,7 +56,7 @@ public:
 
     void setWindowExtents(int width, int height);
 
-    OIS::Mouse*    getMouse(void);
+    OIS::Mouse* getMouse(void);
     OIS::Keyboard* getKeyboard(void);
     OIS::JoyStick* getJoystick(unsigned int index);
 
@@ -65,8 +65,8 @@ public:
     OgreBites::InputContext getInputContext();
 
 private:
-    OIS::Mouse*                 m_pMouse    = nullptr;
-    OIS::Keyboard*              m_pKeyboard = nullptr;
+    OIS::Mouse* m_pMouse       = nullptr;
+    OIS::Keyboard* m_pKeyboard = nullptr;
     std::vector<OIS::JoyStick*> m_Joysticks;
 
     OIS::InputManager* mInputSystem = nullptr;
@@ -92,16 +92,16 @@ private:
     std::vector<OIS::JoyStick*>::iterator itJoystick;
     std::vector<OIS::JoyStick*>::iterator itJoystickEnd;
 
-    std::unordered_map<std::string, OIS::KeyListener*>      mKeyListeners;
-    std::unordered_map<std::string, OIS::MouseListener*>    mMouseListeners;
+    std::unordered_map<std::string, OIS::KeyListener*> mKeyListeners;
+    std::unordered_map<std::string, OIS::MouseListener*> mMouseListeners;
     std::unordered_map<std::string, OIS::JoyStickListener*> mJoystickListeners;
 
-    std::unordered_map<std::string, OIS::KeyListener*>::iterator      itKeyListener;
-    std::unordered_map<std::string, OIS::MouseListener*>::iterator    itMouseListener;
+    std::unordered_map<std::string, OIS::KeyListener*>::iterator itKeyListener;
+    std::unordered_map<std::string, OIS::MouseListener*>::iterator itMouseListener;
     std::unordered_map<std::string, OIS::JoyStickListener*>::iterator itJoystickListener;
 
-    std::unordered_map<std::string, OIS::KeyListener*>::iterator      itKeyListenerEnd;
-    std::unordered_map<std::string, OIS::MouseListener*>::iterator    itMouseListenerEnd;
+    std::unordered_map<std::string, OIS::KeyListener*>::iterator itKeyListenerEnd;
+    std::unordered_map<std::string, OIS::MouseListener*>::iterator itMouseListenerEnd;
     std::unordered_map<std::string, OIS::JoyStickListener*>::iterator itJoystickListenerEnd;
 };
 

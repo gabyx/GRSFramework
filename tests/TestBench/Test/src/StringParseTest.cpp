@@ -24,13 +24,13 @@
 
 GRSF_TEST(StringParseTest, Test1)
 {
-    const std::string         s             = "1 2 3 4 5 6 7 8.5 9.2 10";
-    const std::vector<int>    s_checkInt    = {1, 2, 3, 4, 5, 6, 7, 8.5, 9.2, 10};
+    const std::string s                     = "1 2 3 4 5 6 7 8.5 9.2 10";
+    const std::vector<int> s_checkInt       = {1, 2, 3, 4, 5, 6, 7, 8.5, 9.2, 10};
     const std::vector<double> s_checkDouble = {1, 2, 3, 4, 5, 6, 7, 8.5, 9.2, 10};
 
     {
         typename MyMatrix::Vector3<double> v;
-        auto                               succ = Utilities::stringToType(v, s);
+        auto succ = Utilities::stringToType(v, s);
         EXPECT_FALSE(succ);
         EXPECT_DOUBLE_EQ(v[0], s_checkDouble[0]);
         EXPECT_DOUBLE_EQ(v[1], s_checkDouble[1]);
@@ -39,7 +39,7 @@ GRSF_TEST(StringParseTest, Test1)
 
     {
         std::set<int> ss;
-        auto          succ = Utilities::stringToType(ss, s);
+        auto succ = Utilities::stringToType(ss, s);
         EXPECT_FALSE(succ);
         EXPECT_TRUE(ss.size() == 7);
 
@@ -54,9 +54,9 @@ GRSF_TEST(StringParseTest, Test1)
     }
 
     {
-        const std::string                s = "true false true";
+        const std::string s = "true false true";
         typename MyMatrix::Vector3<bool> v;
-        auto                             succ = Utilities::stringToType(v, s);
+        auto succ = Utilities::stringToType(v, s);
         EXPECT_TRUE(succ);
         EXPECT_TRUE(v.size() == 3);
         EXPECT_TRUE(v[0] == true);
@@ -66,7 +66,7 @@ GRSF_TEST(StringParseTest, Test1)
 
     {
         std::vector<double> v;
-        auto                succ = Utilities::stringToType(v, s);
+        auto succ = Utilities::stringToType(v, s);
         EXPECT_TRUE(succ);
         EXPECT_TRUE(v.size() == s_checkDouble.size());
         for (int i = 0; i < v.size(); ++i)
@@ -78,7 +78,7 @@ GRSF_TEST(StringParseTest, Test1)
     {
         const std::string s = "0 1 false true ";
         std::vector<bool> v;
-        auto              succ = Utilities::stringToType(v, s);
+        auto succ = Utilities::stringToType(v, s);
         EXPECT_TRUE(succ);
         EXPECT_TRUE(v.size() == 4);
         EXPECT_TRUE(v[0] == false);
@@ -88,9 +88,9 @@ GRSF_TEST(StringParseTest, Test1)
     }
 
     {
-        const std::string     s = "1,3 0,4 0,7 2,3123";
+        const std::string s = "1,3 0,4 0,7 2,3123";
         std::vector<uint64_t> v;
-        auto                  succ =
+        auto succ =
             Utilities::stringToType<std::vector<uint64_t>, Utilities::CommaSeperatedPairBinShift<uint64_t, uint32_t>>(
                 v, s);
         EXPECT_TRUE(succ);
@@ -102,9 +102,9 @@ GRSF_TEST(StringParseTest, Test1)
     }
 
     {
-        const std::string     s = "1,3 0,4 0,7 1,2,4";
+        const std::string s = "1,3 0,4 0,7 1,2,4";
         std::vector<uint64_t> v;
-        auto                  succ =
+        auto succ =
             Utilities::stringToType<std::vector<uint64_t>, Utilities::CommaSeperatedPairBinShift<uint64_t, uint32_t>>(
                 v, s);
         EXPECT_FALSE(succ);

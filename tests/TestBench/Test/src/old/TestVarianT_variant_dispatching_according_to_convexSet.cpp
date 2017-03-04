@@ -101,7 +101,7 @@ public:
         m_pRef2 = ptr2;
     }
 
-    Ref*  m_pRef;
+    Ref* m_pRef;
     Ref2* m_pRef2;
 };
 
@@ -160,13 +160,13 @@ template <typename T1, typename T2>
 struct IsSame
 {
     typedef ::FalseType Result;
-    static const bool   result = false;
+    static const bool result = false;
 };
 
 template <typename T>
 struct IsSame<T, T>
 {
-    TrueType          Result;
+    TrueType Result;
     static const bool result = true;
 };
 

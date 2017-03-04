@@ -45,7 +45,7 @@ public:
     ~SimulationManagerGUI();
 
     std::shared_ptr<SharedBufferDynSys> m_pSharedBuffer;
-    std::shared_ptr<StateRecorder>      m_pStateRecorder;
+    std::shared_ptr<StateRecorder> m_pStateRecorder;
 
     void setup(boost::filesystem::path sceneFilePath);
     using SceneParserType =
@@ -54,7 +54,7 @@ public:
 
     void updateScene(double timeSinceLastFrame);
     inline void updateSimBodies();
-    void        initBeforeThreads();
+    void initBeforeThreads();
 
     double getSimulationTime();  // used to access the current simulation state time, from the AppState
 
@@ -69,8 +69,8 @@ public:
 
 private:
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
-    Ogre::SceneNode*                    m_pBaseNode;
-    void                                setShadowTechniques();
+    Ogre::SceneNode* m_pBaseNode;
+    void setShadowTechniques();
 
     const DynamicsState* m_pVisBuffer;
 
@@ -81,7 +81,7 @@ private:
 
     CPUTimer m_global_time;
 
-    void             writeAllOutput();
+    void writeAllOutput();
     RecorderSettings m_RecorderSettings;
 
     void threadRunRecord();
@@ -107,19 +107,19 @@ private:
     bool writeInitialState();
 
     // Visualization of ContactFrame
-    bool         m_bShowContactFrames;
+    bool m_bShowContactFrames;
     boost::mutex m_mutexShowContactFrames;
-    void         toggleShowContactFrames();
-    bool         showContactFramesEnabled();
+    void toggleShowContactFrames();
+    bool showContactFramesEnabled();
 
     DynamicCoordinateFrames m_dynCoordFrame;
-    inline void             updateContactFrameVisualization();
+    inline void updateContactFrameVisualization();
     // ==============================
 
     // Timming Variables for updateScene =====
     bool m_bFirstPass;
 
-    double       m_timeFrameToFrameAvgNoWorkload;
+    double m_timeFrameToFrameAvgNoWorkload;
     unsigned int m_counterNoWorkload;
 
     double m_lastTimeWhenChanged;
@@ -129,7 +129,7 @@ private:
     double m_stopTimeAfterUpdate;
 
     double m_diffUpdateAndChangedTime;
-    int    m_passCounter;
+    int m_passCounter;
     // =========================================
 
     // File Paths for one Simulation, always reset ==============================

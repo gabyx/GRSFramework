@@ -27,11 +27,11 @@ class SimFileResampler
 {
 public:
     void resample(const std::vector<boost::filesystem::path>& inputFiles,
-                  boost::filesystem::path                     outputFile,
-                  std::streamsize                             stepSize      = 1,
-                  std::streamsize                             startStateIdx = 0,
-                  std::streamsize                             endStateIdx = std::numeric_limits<std::streamsize>::max(),
-                  bool                                        splitStatesIntoFiles = false)
+                  boost::filesystem::path outputFile,
+                  std::streamsize stepSize      = 1,
+                  std::streamsize startStateIdx = 0,
+                  std::streamsize endStateIdx   = std::numeric_limits<std::streamsize>::max(),
+                  bool splitStatesIntoFiles     = false)
     {
         m_iFiles = inputFiles;
         m_oFile  = outputFile;
@@ -46,10 +46,10 @@ public:
 
 private:
     std::vector<boost::filesystem::path> m_iFiles;
-    boost::filesystem::path              m_oFile;
+    boost::filesystem::path m_oFile;
 
     std::streamsize m_startStateIdx, m_endStateIdx, m_stepSize;
-    bool            m_splitStatesIntoFiles;
+    bool m_splitStatesIntoFiles;
 
     void resample()
     {
@@ -91,8 +91,8 @@ private:
         }
 
         // Make Buffer
-        std::streamsize   size = fromFile.m_nBytesPerState;  // state size
-        std::vector<char> byteBuffer(size);                  // buffer
+        std::streamsize size = fromFile.m_nBytesPerState;  // state size
+        std::vector<char> byteBuffer(size);                // buffer
 
         // Resample loop
         std::cerr << "---> Resample from: [" << m_startStateIdx << "," << m_endStateIdx << "] " << m_oFile << " ";

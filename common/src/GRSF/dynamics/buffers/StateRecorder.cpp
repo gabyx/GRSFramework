@@ -48,7 +48,7 @@ bool StateRecorder::createSimFileCopyFromReference(boost::filesystem::path new_f
                                                    boost::filesystem::path ref_file_path)
 {
     MultiBodySimFile tmpFile;
-    bool             fileOK = tmpFile.openRead(ref_file_path,
+    bool fileOK = tmpFile.openRead(ref_file_path,
                                    false,
                                    LayoutConfigType::LayoutType::NDOFqBody,
                                    LayoutConfigType::LayoutType::NDOFuBody,

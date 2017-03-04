@@ -72,10 +72,10 @@ private:
     void setupParamsPanel();
 
     Ogre::SceneNode* m_pBaseNode;  ///<Everythin in the Scene, gets deleted when scene reloads!
-    void             changeScene();
+    void changeScene();
 
     std::shared_ptr<OrbitCamera> m_pOrbitCamera;
-    std::shared_ptr<MenuMouse>   m_pMenuMouse;
+    std::shared_ptr<MenuMouse> m_pMenuMouse;
 
     void switchToSimulationState();
     enum MouseMode
@@ -96,27 +96,27 @@ private:
     void updateParamsPanelPlayback();
 
     unsigned int m_SceneDetailIndex;
-    void         switchSceneDetailIndex();
-    void         toggleGUI();
+    void switchSceneDetailIndex();
+    void toggleGUI();
 
     std::shared_ptr<Ogre::Timer> m_pTimelineRendering;
 
     double m_lengthScale;
 
     std::shared_ptr<OgreBites::SdkTrayManager> m_pTrayMgr;
-    OgreBites::ParamsPanel*                    m_pPhysicsStatsPanel;
-    Ogre::StringVector                         m_PhysicsStatsParams;
-    Ogre::StringVector                         m_pPhysicsStatsValues;
+    OgreBites::ParamsPanel* m_pPhysicsStatsPanel;
+    Ogre::StringVector m_PhysicsStatsParams;
+    Ogre::StringVector m_pPhysicsStatsValues;
 
     OgreBites::SelectMenu* m_pActiveModeSelectMenu;
     OgreBites::SelectMenu* m_pPlaybackFiles;
-    OgreBites::Button*     m_pPlaybackFilesReload;
-    OgreBites::CheckBox*   m_pCheckBoxVideo;
-    OgreBites::CheckBox*   m_pCheckBoxSimFile;
-    OgreBites::CheckBox*   m_pCheckBoxSimFileInterpolate;
-    OgreBites::Slider*     m_pSliderFPS;
-    OgreBites::Slider*     m_pSliderStartTime;
-    OgreBites::Slider*     m_pSliderEndTime;
+    OgreBites::Button* m_pPlaybackFilesReload;
+    OgreBites::CheckBox* m_pCheckBoxVideo;
+    OgreBites::CheckBox* m_pCheckBoxSimFile;
+    OgreBites::CheckBox* m_pCheckBoxSimFileInterpolate;
+    OgreBites::Slider* m_pSliderFPS;
+    OgreBites::Slider* m_pSliderStartTime;
+    OgreBites::Slider* m_pSliderEndTime;
 
     void itemSelected(OgreBites::SelectMenu* menu);  // Virtual of SdkTrayListner
     void checkBoxToggled(OgreBites::CheckBox* box);  // Virtual of SdkTrayListener

@@ -45,7 +45,7 @@ struct ContactParameter
     DEFINE_LAYOUT_CONFIG_TYPES
 
     ContactModels::Enum m_contactModel;
-    std::vector<PREC>   m_params;
+    std::vector<PREC> m_params;
 
     ContactParameter(ContactModels::Enum e, std::initializer_list<PREC> it) : m_contactModel(e), m_params(it)
     {

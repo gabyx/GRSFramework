@@ -46,7 +46,7 @@ public:
 
     std::set<boost::filesystem::path> getSimFolderList();
     std::set<boost::filesystem::path> getPathsSimFilesOfCurrentSimFolder();
-    boost::filesystem::path           getPathSceneFileOfCurrentSimFolder();
+    boost::filesystem::path getPathSceneFileOfCurrentSimFolder();
 
     boost::filesystem::path getNewSimFolderPath(boost::filesystem::path directory, std::string folder_prefix);
 
@@ -58,12 +58,12 @@ private:
     void init(boost::filesystem::path globalDirPath, boost::filesystem::path localDirPath);
 
     void scanAllSimFolders(const boost::filesystem::path& directory,
-                           const std::string&             prefix,
-                           const bool&                    with_SubDirs);
+                           const std::string& prefix,
+                           const bool& with_SubDirs);
     void updateAllSimDataFiles(const boost::filesystem::path& directory, const bool& with_SubDirs);
 
     std::map<boost::filesystem::path, std::set<boost::filesystem::path>>
-                                      m_SimFilePaths;  ///< [parent folderPath , set of simfiles paths inside folderPath]
+        m_SimFilePaths;  ///< [parent folderPath , set of simfiles paths inside folderPath]
     std::set<boost::filesystem::path> m_SimFolderPaths;  ///< folderPaths , keys into m_SimFilePaths;
 
     unsigned int m_folderIdCounter;

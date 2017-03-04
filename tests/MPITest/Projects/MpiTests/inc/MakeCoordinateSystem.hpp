@@ -29,7 +29,7 @@
 * @param v2 The second orthogonal output 3x1 vector.
 */
 template <typename Derived, typename DerivedOther1, typename DerivedOther2>
-inline void makeCoordinateSystem(Eigen::MatrixBase<Derived>&       v1,
+inline void makeCoordinateSystem(Eigen::MatrixBase<Derived>& v1,
                                  Eigen::MatrixBase<DerivedOther1>& v2,
                                  Eigen::MatrixBase<DerivedOther2>& v3)
 {

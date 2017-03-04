@@ -122,7 +122,7 @@ public:
 
 private:
     template <bool removeUnused>
-    void           resetPercussions()
+    void resetPercussions()
     {
         auto it = m_percussionMap.begin();
         while (it != m_percussionMap.end())
@@ -144,8 +144,8 @@ private:
     }
 
     PercussionPoolSettings m_settings;
-    std::size_t            m_usedPercussions;  ///< Counter for used percussions
-    PercussionMap          m_percussionMap;    ///< The percussion map!
+    std::size_t m_usedPercussions;  ///< Counter for used percussions
+    PercussionMap m_percussionMap;  ///< The percussion map!
 };
 
 /**
@@ -193,7 +193,7 @@ public:
     }
 
 private:
-    unsigned int    m_updatedNodes = 0;
+    unsigned int m_updatedNodes = 0;
     PercussionPool* m_pool;
 };
 

@@ -24,7 +24,7 @@ template <typename T>
 struct Leaf
 {
     static const unsigned int NLeafs = 1;
-    T                         m_t;
+    T m_t;
 
     //	template<unsigned int N>
     //	struct getType{
@@ -56,13 +56,13 @@ struct determineLeafs
 
     // Recursion over all elements in the tuple, each element needs to have a integral NLeafs
     // std::tuple_element<N,T>::type can be a type which computes NLeafs again by a certain function
-    template <unsigned int        N, typename std::enable_if<(N > 0)>::type* = nullptr>
+    template <unsigned int N, typename std::enable_if<(N > 0)>::type* = nullptr>
     static constexpr unsigned int getNLeafs()
     {
         return std::tuple_element<N, T>::type::NLeafs + getNLeafs<N - 1>();
     };
     // Abort if tuple index is 0
-    template <unsigned int        N, typename std::enable_if<(N == 0)>::type* = nullptr>
+    template <unsigned int N, typename std::enable_if<(N == 0)>::type* = nullptr>
     static constexpr unsigned int getNLeafs()
     {
         return std::tuple_element<N, T>::type::NLeafs;
@@ -247,7 +247,7 @@ struct determineLeafs
 {
     // Recursion over all elements in the tuple, each element needs to have a integral NLeafs
     // std::tuple_element<N,T>::type can be a type which computes NLeafs again by a certain function
-    template <unsigned int        N, typename std::enable_if<(N > 0)>::type* = nullptr>
+    template <unsigned int N, typename std::enable_if<(N > 0)>::type* = nullptr>
     static constexpr unsigned int determineLeafs_imp()
     {
         using TupleType = typename std::tuple_element<N, T>::type;
@@ -255,7 +255,7 @@ struct determineLeafs
     };
 
     // Abort if tuple index is 0
-    template <unsigned int        N, typename std::enable_if<(N == 0)>::type* = nullptr>
+    template <unsigned int N, typename std::enable_if<(N == 0)>::type* = nullptr>
     static constexpr unsigned int determineLeafs_imp()
     {
         using TupleType = typename std::tuple_element<N, T>::type;
@@ -443,7 +443,7 @@ struct State
 
     /** Leaf Value Getter for this State (complicated) ============================*/
     template <unsigned int N>
-    auto                   getLeaf() -> decltype(getLeaf_imp<N, State>(*this))
+    auto getLeaf() -> decltype(getLeaf_imp<N, State>(*this))
     {
         return getLeaf_imp<N, State>(*this);
     }

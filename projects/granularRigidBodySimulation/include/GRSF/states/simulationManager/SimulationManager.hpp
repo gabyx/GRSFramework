@@ -37,7 +37,7 @@ public:
     ~SimulationManager();
 
     std::shared_ptr<SharedBufferDynSys> m_pSharedBuffer;
-    std::shared_ptr<StateRecorder>      m_pStateRecorder;
+    std::shared_ptr<StateRecorder> m_pStateRecorder;
 
     void setup();
     void setup(boost::filesystem::path sceneFilePath);
@@ -51,13 +51,13 @@ public:
 private:
     CPUTimer m_global_time;
 
-    void             writeAllOutput();
+    void writeAllOutput();
     RecorderSettings m_RecorderSettings;
 
     // Accessed only by thread ===================
 
     template <bool handleSignals = false>
-    void           threadRunRecord()
+    void threadRunRecord()
     {
         m_pSimulationLog->logMessage("---> SimulationManager: Simulation entering...");
         if (initRecordThread())

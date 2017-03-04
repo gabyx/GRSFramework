@@ -60,7 +60,7 @@ protected:
 
     Logging::Log* m_pSimulationLog;
 
-    unsigned int       m_accessId;
+    unsigned int m_accessId;
     unsigned long long m_bufferSize;
 
     MultiBodySimFilePart m_binarySimFile;
@@ -98,7 +98,7 @@ void StateRecorderProcess::setDirectoryPath(boost::filesystem::path dir_path)
 bool StateRecorderProcess::createSimFile(bool truncate)
 {
     boost::filesystem::path file;
-    std::stringstream       s;
+    std::stringstream s;
 
     file = m_directoryPath;
     getSimFilePartName(s);

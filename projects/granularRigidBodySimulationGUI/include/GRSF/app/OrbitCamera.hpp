@@ -43,12 +43,12 @@ public:
     * @param r_init, phi_init, theta_init The
     */
     OrbitCamera(Ogre::SceneManager* pSceneMgr,
-                Ogre::String        name,
-                double              rotate_speed,
-                double              translate_speed,
-                double              r_init,
-                double              phi_init,
-                double              theta_init);
+                Ogre::String name,
+                double rotate_speed,
+                double translate_speed,
+                double r_init,
+                double phi_init,
+                double theta_init);
     ~OrbitCamera();
 
     /// Activates the camera in the viewport.
@@ -89,17 +89,17 @@ protected:
     Ogre::SceneNode* m_pCamNode;
 
     Ogre::Camera* m_pCamera;  ///< The Ogre camera.
-    Ogre::String  m_Name;     ///< The name of the camera.
+    Ogre::String m_Name;      ///< The name of the camera.
 
     Ogre::SceneManager* m_pSceneMgr;  ///< The scene manager.
 
     /** \name Camera Rotation */
     /* @{ */
-    Ogre::SceneNode* m_pOrbitNode;            ///< A helper node which rotates only around z-axis.
-    Ogre::Real       m_Rotate;                ///< Rotation speed.
-    Ogre::Real       m_Move;                  ///< Translation speed.
-    Ogre::Vector3    m_CamVelocityDirection;  ///< Velocity direction.
-    double           m_phi_init, m_r_init,
+    Ogre::SceneNode* m_pOrbitNode;         ///< A helper node which rotates only around z-axis.
+    Ogre::Real m_Rotate;                   ///< Rotation speed.
+    Ogre::Real m_Move;                     ///< Translation speed.
+    Ogre::Vector3 m_CamVelocityDirection;  ///< Velocity direction.
+    double m_phi_init, m_r_init,
         m_theta_init;  ///< Initial values for the spherical coordinates to position the camera at beginning.
     /* @} */
 

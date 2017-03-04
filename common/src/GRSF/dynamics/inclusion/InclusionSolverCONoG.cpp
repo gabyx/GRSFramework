@@ -15,7 +15,7 @@
 #include "GRSF/dynamics/inclusion/ProxFunctions.hpp"
 
 InclusionSolverCONoG::InclusionSolverCONoG(std::shared_ptr<CollisionSolverType> pCollisionSolver,
-                                           std::shared_ptr<DynamicsSystemType>  pDynSys)
+                                           std::shared_ptr<DynamicsSystemType> pDynSys)
     : m_simBodies(pDynSys->m_simBodies)
     , m_staticBodies(pDynSys->m_staticBodies)
     , m_contactGraph(&(pDynSys->m_ContactParameterMap))
@@ -308,7 +308,7 @@ void InclusionSolverCONoG::doJorProx()
 }
 
 template <bool onlyNotInContactGraph>  // default to false = all bodies
-void           InclusionSolverCONoG::integrateAllBodyVelocities()
+void InclusionSolverCONoG::integrateAllBodyVelocities()
 {
     for (auto* bodyPtr : m_simBodies)
     {

@@ -52,8 +52,8 @@ protected:
     using StateIdxType = std::size_t;
     struct StateIndex
     {
-        StateIdxType            m_idx;
-        StateIdxType            m_mappedIdx;
+        StateIdxType m_idx;
+        StateIdxType m_mappedIdx;
         boost::filesystem::path m_outputFile;
     };
 
@@ -111,7 +111,7 @@ public:
     template <typename TSettings = DefaultSettings, typename... TSimFileStepper>
     void convert(TSimFileStepper&&... simFileStepper)
     {
-        StateIdxType            startIdx, endIdx, mappedStartIdx, increment;
+        StateIdxType startIdx, endIdx, mappedStartIdx, increment;
         boost::filesystem::path perFileOutputFile;
 
         bool stop;
@@ -147,7 +147,7 @@ public:
 
                 for (auto n : node.children("File"))
                 {
-                    std::string             uuid = n.attribute("uuid").value();
+                    std::string uuid             = n.attribute("uuid").value();
                     boost::filesystem::path path = n.attribute("simFile").value();
 
                     if (path.empty())
@@ -224,8 +224,8 @@ public:
                     if (!useRange)
                     {
                         stateIndices.clear();
-                        StateIdxType            idx;
-                        unsigned int            frameIdx;
+                        StateIdxType idx;
+                        unsigned int frameIdx;
                         boost::filesystem::path outputFile;
                         for (auto s : n.children("State"))
                         {
@@ -526,13 +526,13 @@ protected:
     /** \p uuid string is a hash for the file path to identify each frame where it came from!*/
     template <typename TSettings, typename... TSimFileStepper>
     void convertFile(const boost::filesystem::path& f,
-                     const std::string              uuidString,
-                     const StateIndicesType&        stateIndices, /* can be empty*/
-                     const StateIdxType             startIdx,
-                     const StateIdxType             endIdx,
-                     const StateIdxType             increment,
-                     const StateIdxType             mappedStartIdx,
-                     const boost::filesystem::path  perFileOutputFile,
+                     const std::string uuidString,
+                     const StateIndicesType& stateIndices, /* can be empty*/
+                     const StateIdxType startIdx,
+                     const StateIdxType endIdx,
+                     const StateIdxType increment,
+                     const StateIdxType mappedStartIdx,
+                     const boost::filesystem::path perFileOutputFile,
                      TSimFileStepper&&... simFileStepper)
     {
         bool stop = false;
@@ -567,7 +567,7 @@ protected:
         m_bodyCounter = 0;
 
         StateIdxType currentStateIdx = startIdx;
-        auto         itStateIdx      = stateIndices.begin();
+        auto itStateIdx              = stateIndices.begin();
         // if state indices are given, overwrite start!
         if (!stateIndices.empty() && itStateIdx->m_idx > 0)
         {

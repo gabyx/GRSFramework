@@ -54,9 +54,9 @@ public:
     at the same place.
     */
     void addToScene(Ogre::SceneNode* baseFrame,
-                    std::string      xAxisMat = "BaseWhiteNoLighting",
-                    std::string      yAxisMat = "BaseWhiteNoLighting",
-                    std::string      zAxisMat = "BaseWhiteNoLighting")
+                    std::string xAxisMat = "BaseWhiteNoLighting",
+                    std::string yAxisMat = "BaseWhiteNoLighting",
+                    std::string zAxisMat = "BaseWhiteNoLighting")
     {
         boost::mutex::scoped_lock l(m_mutexLock);
 
@@ -115,11 +115,11 @@ public:
     };
 
 private:
-    boost::mutex     m_mutexLock;  // SimThread locks and updates points, vis thread locks and
+    boost::mutex m_mutexLock;  // SimThread locks and updates points, vis thread locks and
     Ogre::SceneNode* m_dynCoordFrameNode;
-    DynamicLines     m_xAxis;
-    DynamicLines     m_yAxis;
-    DynamicLines     m_zAxis;
+    DynamicLines m_xAxis;
+    DynamicLines m_yAxis;
+    DynamicLines m_zAxis;
 };
 
 #endif

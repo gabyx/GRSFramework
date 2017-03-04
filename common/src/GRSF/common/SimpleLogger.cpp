@@ -153,7 +153,7 @@ bool Log::addSink(LogSink* sink)
 
 bool Log::removeSink(std::string sink_name)
 {
-    std::lock_guard<std::mutex>     l(m_busy_mutex);
+    std::lock_guard<std::mutex> l(m_busy_mutex);
     std::vector<LogSink*>::iterator it;
     for (it = m_sinkList.begin(); it != m_sinkList.end(); ++it)
     {
@@ -272,7 +272,7 @@ bool LogManager::destroyLog(Log*& log)
     }
 
     std::lock_guard<std::mutex> l(m_busy_mutex);
-    LogListIteratorType         it;
+    LogListIteratorType it;
     for (it = m_logList.begin(); it != m_logList.end(); it++)
     {
         if (it->second == log)
@@ -307,7 +307,7 @@ void LogManager::registerLog(Log* log, bool useTimer)
 Log* LogManager::getLog(const std::string& name)
 {
     std::lock_guard<std::mutex> l(m_busy_mutex);
-    LogListIteratorType         it = m_logList.find(name);
+    LogListIteratorType it = m_logList.find(name);
     GRSF_ASSERTMSG(it != m_logList.end(), "This Log does not exist!: " << name);
     GRSF_ASSERTMSG(it->second != nullptr, "This Log has Null Pointer!: " << name);
     if (it == m_logList.end())
@@ -320,7 +320,7 @@ Log* LogManager::getLog(const std::string& name)
 bool LogManager::existsLog(const std::string& name)
 {
     std::lock_guard<std::mutex> l(m_busy_mutex);
-    LogListIteratorType         it = m_logList.find(name);
+    LogListIteratorType it = m_logList.find(name);
     if (it == m_logList.end())
     {
         return false;

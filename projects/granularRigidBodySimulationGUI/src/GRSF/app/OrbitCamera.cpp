@@ -18,12 +18,12 @@ using namespace Ogre;
 using namespace std;
 
 OrbitCamera::OrbitCamera(SceneManager* pSceneMgr,
-                         Ogre::String  name,
-                         double        rotate_speed,
-                         double        translate_speed,
-                         double        r_init,
-                         double        phi_init,
-                         double        theta_init)
+                         Ogre::String name,
+                         double rotate_speed,
+                         double translate_speed,
+                         double r_init,
+                         double phi_init,
+                         double theta_init)
 {
     m_pSceneMgr = pSceneMgr;
     m_Name      = name;
@@ -78,7 +78,7 @@ void OrbitCamera::moveOrbitToNode(SceneNode* const Obj)
 {
     bool OrbitNode_attached = false;
 
-    Vector3    I_t_I_Cam;
+    Vector3 I_t_I_Cam;
     Quaternion q_I_Cam;
 
     if (m_pCamNode->getParentSceneNode() != m_pOrbitNode)
@@ -139,14 +139,14 @@ void OrbitCamera::attachDetachOrbitToNode()
         Obj = m_OrbitNodeList[m_OrbitNodeIndex];
 
         // Repositionate Camera
-        Vector3    I_t_I_Orbit = m_pOrbitNode->convertLocalToWorldPosition(Vector3::ZERO);
-        Quaternion q_I_Orbit   = m_pOrbitNode->convertLocalToWorldOrientation(Quaternion::IDENTITY);
+        Vector3 I_t_I_Orbit  = m_pOrbitNode->convertLocalToWorldPosition(Vector3::ZERO);
+        Quaternion q_I_Orbit = m_pOrbitNode->convertLocalToWorldOrientation(Quaternion::IDENTITY);
 
-        Vector3    I_t_I_Obj = Obj->convertLocalToWorldPosition(Vector3::ZERO);
-        Quaternion q_I_Obj   = Obj->convertLocalToWorldOrientation(Quaternion::IDENTITY);
+        Vector3 I_t_I_Obj  = Obj->convertLocalToWorldPosition(Vector3::ZERO);
+        Quaternion q_I_Obj = Obj->convertLocalToWorldOrientation(Quaternion::IDENTITY);
 
-        Quaternion q_Obj_Orbit     = q_I_Obj.Inverse() * q_I_Orbit;
-        Vector3    Obj_t_Obj_Orbit = q_I_Obj.Inverse() * (I_t_I_Orbit - I_t_I_Obj);
+        Quaternion q_Obj_Orbit  = q_I_Obj.Inverse() * q_I_Orbit;
+        Vector3 Obj_t_Obj_Orbit = q_I_Obj.Inverse() * (I_t_I_Orbit - I_t_I_Obj);
 
         m_pSceneMgr->getRootSceneNode()->removeChild(m_pOrbitNode);
         Obj->addChild(m_pOrbitNode);
@@ -161,8 +161,8 @@ void OrbitCamera::attachDetachOrbitToNode()
         SceneNode* ParentNode = m_pOrbitNode->getParentSceneNode();
         // cout << "OrbitNode detaching from "<< ParentNode->getName()<<endl;
 
-        Vector3    I_t_I_Orbit = m_pOrbitNode->convertLocalToWorldPosition(Vector3::ZERO);
-        Quaternion q_I_Orbit   = m_pOrbitNode->convertLocalToWorldOrientation(Quaternion::IDENTITY);
+        Vector3 I_t_I_Orbit  = m_pOrbitNode->convertLocalToWorldPosition(Vector3::ZERO);
+        Quaternion q_I_Orbit = m_pOrbitNode->convertLocalToWorldOrientation(Quaternion::IDENTITY);
 
         ParentNode->removeChild(m_pOrbitNode);
         m_pSceneMgr->getRootSceneNode()->addChild(m_pOrbitNode);

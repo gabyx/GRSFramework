@@ -60,8 +60,8 @@ void SimFileExecutionGraph::initState(boost::filesystem::path outputfilePath, do
 
 void SimFileExecutionGraph::initSimInfo(boost::filesystem::path simFile,
                                         boost::filesystem::path outputfilePath,
-                                        std::size_t             nBodies,
-                                        std::size_t             nStates)
+                                        std::size_t nBodies,
+                                        std::size_t nStates)
 {
     this->reset(NodeGroups::FILE_RESET);
 

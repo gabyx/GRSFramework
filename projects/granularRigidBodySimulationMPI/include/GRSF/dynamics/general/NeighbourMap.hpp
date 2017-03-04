@@ -81,7 +81,7 @@ public:
 
 private:
     RankIdType m_rank;
-    Type       m_nbDataMap;
+    Type m_nbDataMap;
 };
 
 #endif

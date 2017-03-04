@@ -42,8 +42,8 @@ int runLoop2(Iterator s, Iterator e)
 struct Data
 {
     ;
-    int    m_a = 1;
-    int    m_b = 2;
+    int m_a    = 1;
+    int m_b    = 2;
     double m_c = 3;
 };
 
@@ -56,13 +56,13 @@ int runTest()
 {
     INIT_TIMER
 
-    typedef std::vector<Data>         Cont;
-    Cont                              v(10000);
+    typedef std::vector<Data> Cont;
+    Cont v(10000);
     typedef std::function<int(Data&)> Function;
     typedef boost::transform_iterator<Function, typename Cont::iterator> TransformItType;
 
     Function getter = &getA;
-    int      a;
+    int a;
     {
         START_TIMER
         a = runLoop(boost::make_transform_iterator(v.begin(), getter), boost::make_transform_iterator(v.end(), getter));

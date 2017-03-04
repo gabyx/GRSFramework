@@ -38,17 +38,17 @@ public:
     using TypesBodyRange = SimFileJoiner::TypesBodyRange;
 
     std::vector<boost::filesystem::path> m_inputFiles;
-    boost::filesystem::path              m_outputFile;
+    boost::filesystem::path m_outputFile;
 
     // Joiner
     TypesTimeRange::VariantType m_timeRange;
     TypesBodyRange::VariantType m_bodyRange;
 
     // Resampler
-    unsigned int m_increment      = 1;
-    unsigned int m_startStateIdx  = 0;
-    unsigned int m_endStateIdx    = std::numeric_limits<unsigned int>::max();
-    bool         m_splitIntoFiles = false;
+    unsigned int m_increment     = 1;
+    unsigned int m_startStateIdx = 0;
+    unsigned int m_endStateIdx   = std::numeric_limits<unsigned int>::max();
+    bool m_splitIntoFiles        = false;
 
     enum class Task : unsigned int
     {
@@ -304,12 +304,12 @@ private:
 class ApplicationCLOptionsSimInfo : public Utilities::Singleton<ApplicationCLOptionsSimInfo>
 {
 public:
-    bool         m_prettyPrint    = false;
-    bool         m_noTimeList     = false;
-    bool         m_skipFirstState = false;
-    unsigned int m_increment      = 1;
-    unsigned int m_startStateIdx  = 0;
-    unsigned int m_endStateIdx    = std::numeric_limits<unsigned int>::max();
+    bool m_prettyPrint           = false;
+    bool m_noTimeList            = false;
+    bool m_skipFirstState        = false;
+    unsigned int m_increment     = 1;
+    unsigned int m_startStateIdx = 0;
+    unsigned int m_endStateIdx   = std::numeric_limits<unsigned int>::max();
 
     std::vector<boost::filesystem::path> m_inputFiles;
 

@@ -26,9 +26,9 @@ int test1(void)
 {
     const H5std_string FILE_NAME("SDS.h5");
     const H5std_string DATASET_NAME("IntArray");
-    const int          NX   = 5;  // dataset dimensions
-    const int          NY   = 6;
-    const int          RANK = 2;
+    const int NX   = 5;  // dataset dimensions
+    const int NY   = 6;
+    const int RANK = 2;
     /*
     * Data initialization.
     */
@@ -121,20 +121,20 @@ int test2()
     const H5std_string MEMBER1("a");
     const H5std_string MEMBER2("b");
     const H5std_string MEMBER3("c");
-    const int          LENGTH = 2;
-    const int          RANK   = 2;
+    const int LENGTH = 2;
+    const int RANK   = 2;
     /* First structure  and dataset*/
     typedef struct s1_t
     {
-        int    a;
-        float  b;
+        int a;
+        float b;
         double c;
     } s1_t;
     /* Second structure (subset of s1_t)  and dataset*/
     typedef struct s2_t
     {
         double c;
-        int    a;
+        int a;
     } s2_t;
     // Try block to detect exceptions raised by any of the calls inside it
     try
@@ -160,7 +160,7 @@ int test2()
         /*
        * Create the data space.
        */
-        hsize_t   dim[] = {LENGTH, LENGTH}; /* Dataspace dimensions */
+        hsize_t dim[] = {LENGTH, LENGTH}; /* Dataspace dimensions */
         DataSpace space(RANK, dim);
         /*
        * Create the file.
@@ -184,10 +184,10 @@ int test2()
         dataset->write(s1, mtype1);
 
         {
-            hsize_t   dim3d[] = {10, 10, 10, 10}; /* Dataspace dimensions */
+            hsize_t dim3d[] = {10, 10, 10, 10}; /* Dataspace dimensions */
             DataSpace space3d(4, dim3d);
-            auto      d3      = new float[10][10][10][10];
-            auto      dataset = file->createDataSet("3d", PredType::NATIVE_FLOAT, space3d);
+            auto d3      = new float[10][10][10][10];
+            auto dataset = file->createDataSet("3d", PredType::NATIVE_FLOAT, space3d);
             dataset.write(d3, PredType::NATIVE_FLOAT);
         }
 
@@ -206,7 +206,7 @@ int test2()
             }
             dims[r] = 3;
             DataSpace space3d(r + 1, &dims[0]);
-            auto      dataset = file->createDataSet("4dTensor", PredType::NATIVE_DOUBLE, space3d);
+            auto dataset = file->createDataSet("4dTensor", PredType::NATIVE_DOUBLE, space3d);
             dataset.write(t.data(), PredType::NATIVE_DOUBLE);
             auto id = dataset.getId();
             H5DSset_label(id, 0, "GAGADIM");
@@ -228,7 +228,7 @@ int test2()
             }
             dims[r] = 1;
             DataSpace space3d(r + 1, &dims[0]);
-            auto      dataset = file->createDataSet("4dTensor2", PredType::NATIVE_DOUBLE, space3d);
+            auto dataset = file->createDataSet("4dTensor2", PredType::NATIVE_DOUBLE, space3d);
             dataset.write(t.data(), PredType::NATIVE_DOUBLE);
             auto id = dataset.getId();
             H5DSset_label(id, 0, "GAGADIM");
@@ -236,9 +236,9 @@ int test2()
             hobj_ref_t rr[10];
 
             // Make reference data space
-            hsize_t   dd[1] = {10};
+            hsize_t dd[1] = {10};
             DataSpace refs(1, dd);
-            auto      refset = file->createDataSet("References", PredType::STD_REF_OBJ, refs);
+            auto refset = file->createDataSet("References", PredType::STD_REF_OBJ, refs);
             file->reference(&rr[0], "4dTensor2", H5R_OBJECT);
             refset.write(&rr, PredType::STD_REF_OBJ);
         }
@@ -352,15 +352,15 @@ void test3()
 #define DATASET "DS1"
 #define DIM0 2
 
-    hid_t      file, space, dset, obj; /* Handles */
-    herr_t     status;
-    hsize_t    dims[1] = {DIM0};
+    hid_t file, space, dset, obj; /* Handles */
+    herr_t status;
+    hsize_t dims[1] = {DIM0};
     hobj_ref_t wdata[DIM0], /* Write buffer */
         *rdata;             /* Read buffer */
     H5O_type_t objtype;
-    ssize_t    size;
-    char*      name;
-    int        ndims, i;
+    ssize_t size;
+    char* name;
+    int ndims, i;
 
     /*
      * Create a new file using the default properties.

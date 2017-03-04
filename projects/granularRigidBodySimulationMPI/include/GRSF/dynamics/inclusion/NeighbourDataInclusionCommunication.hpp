@@ -42,8 +42,8 @@ struct RemoteData
 struct LocalData
 {
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
-    LocalData(RigidBodyType*       body) : m_pBody(body), m_pSplitBodyNode(nullptr){};
-    RigidBodyType* const           m_pBody;  ///< local body (e.g id=10, neighbour has RemoteData with id=10 as well!)
+    LocalData(RigidBodyType* body) : m_pBody(body), m_pSplitBodyNode(nullptr){};
+    RigidBodyType* const m_pBody;  ///< local body (e.g id=10, neighbour has RemoteData with id=10 as well!)
     ContactGraphNodeDataSplitBody* m_pSplitBodyNode;
 };
 

@@ -44,7 +44,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     InclusionSolverCO(std::shared_ptr<CollisionSolverType> pCollisionSolver,
-                      std::shared_ptr<DynamicsSystemType>  pDynSys);
+                      std::shared_ptr<DynamicsSystemType> pDynSys);
 
     void initializeLog(Logging::Log* pSolverLog, boost::filesystem::path folder_path);
     void reset();
@@ -52,16 +52,16 @@ public:
                                   // reset matrices which are dynamically added to during the iteration! (like, h term)
     void solveInclusionProblem();
 
-    std::string  getIterationStats();
-    std::string  getStatsHeader();
-    PREC         m_G_conditionNumber;
-    PREC         m_G_notDiagDominant;
+    std::string getIterationStats();
+    std::string getStatsHeader();
+    PREC m_G_conditionNumber;
+    PREC m_G_notDiagDominant;
     unsigned int m_globalIterationCounter;
-    bool         m_bConverged;
+    bool m_bConverged;
     unsigned int m_isFinite;
     unsigned int m_nContacts;
-    bool         m_bUsedGPU;
-    double       m_timeProx, m_proxIterationTime;
+    bool m_bUsedGPU;
+    double m_timeProx, m_proxIterationTime;
 
     InclusionSolverSettingsType m_settings;
 
@@ -76,9 +76,9 @@ protected:
 
     unsigned int m_nExpectedContacts;
 
-    std::shared_ptr<CollisionSolverType>                       m_pCollisionSolver;
-    std::shared_ptr<DynamicsSystemType>                        m_pDynSys;
-    typename DynamicsSystemType::RigidBodySimContainerType&    m_simBodies;
+    std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
+    typename DynamicsSystemType::RigidBodySimContainerType& m_simBodies;
     typename DynamicsSystemType::RigidBodyStaticContainerType& m_staticBodies;
 
     using ContactGraphType = ContactGraph;
@@ -96,8 +96,8 @@ protected:
 #define P_back (*m_P_back)
 #define P_front (*m_P_front)
 
-    void      swapPercussionBuffer();
-    void      resetPercussionBuffer();
+    void swapPercussionBuffer();
+    void resetPercussionBuffer();
     VectorDyn m_P_1;
     VectorDyn m_P_2;
     // ==========================
@@ -142,7 +142,7 @@ protected:
     inline void doSorProx();
 
     // Log
-    Logging::Log *    m_pSolverLog, *m_pSimulationLog;
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
     std::stringstream logstream;
 };
 

@@ -57,8 +57,8 @@ struct GridBuilderSettings
     } m_buildMode = BuildMode::MVBB;
 
     // OOBB or AABB
-    AABB3d   m_aabb;  ///< used values for predefined values
-    bool     m_aligned = true;
+    AABB3d m_aabb;  ///< used values for predefined values
+    bool m_aligned = true;
     Matrix33 m_A_IK;
 };
 
@@ -73,9 +73,9 @@ struct KdTreeBuilderSettings
     /** Minimal grid dimension depends basically on the shapes simualated:
     * max_i diam(body_i) <= min gridSize_x, gridSize_y, gridSize_z $
     */
-    PREC         m_minCellSize       = 1e-3;
-    PREC         m_minPointsForSplit = 10;
-    unsigned int m_maxTreeDepth      = 5000;  ///< Huge such that this is not a constraint for stopping
+    PREC m_minCellSize          = 1e-3;
+    PREC m_minPointsForSplit    = 10;
+    unsigned int m_maxTreeDepth = 5000;  ///< Huge such that this is not a constraint for stopping
 
     PREC m_minSplitRatio  = 0.0;
     PREC m_minPointRatio  = 0.0;
@@ -98,8 +98,8 @@ struct KdTreeBuilderSettings
     } m_buildMode = BuildMode::MVBB;
 
     // OOBB or AABB
-    AABB3d   m_aabb;  ///< used values for predefined values
-    bool     m_aligned = true;
+    AABB3d m_aabb;  ///< used values for predefined values
+    bool m_aligned = true;
     Matrix33 m_A_IK;
 };
 
@@ -142,13 +142,13 @@ public:
     struct MassPointPredSettings
     {
         unsigned int m_nPoints = 5;
-        PREC         m_deltaT  = 0.1;
+        PREC m_deltaT          = 0.1;
     };
 
     /** Outlier Filtering of Point Cloud*/
     struct OutlierFilterSettings
     {
-        bool         m_enabled         = false;
+        bool m_enabled                 = false;
         unsigned int m_kNNMean         = 20;
         unsigned int m_stdDevMult      = 4;
         unsigned int m_allowSplitAbove = 10;  // kdTree settings
@@ -157,7 +157,7 @@ public:
 public:
     TopologyBuilderEnumType m_type;
 
-    GridBuilderSettings   m_gridBuilderSettings;
+    GridBuilderSettings m_gridBuilderSettings;
     KdTreeBuilderSettings m_kdTreeBuilderSettings;
 
     RebuildSettings m_rebuildSettings;

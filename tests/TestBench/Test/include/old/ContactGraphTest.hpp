@@ -116,7 +116,7 @@ public:
 
 private:
     EdgeDataType m_data;
-    std::size_t  m_counter;
+    std::size_t m_counter;
 
     NodeBase* m_startNode = nullptr;
     NodeBase* m_endNode   = nullptr;
@@ -146,7 +146,7 @@ public:
 
 private:
     NodeDataType m_data;
-    std::size_t  m_counter;
+    std::size_t m_counter;
 
     std::vector<EdgeBase*> m_edges;
 };
@@ -159,7 +159,7 @@ public:
     {
     }
     static const EdgeDataTypesEnum enumType;
-    int                            a;
+    int a;
 };
 const EdgeDataTypesEnum EdgeDataAA::enumType = EdgeDataTypesEnum::EDGE_AA;
 
@@ -170,7 +170,7 @@ public:
     {
     }
     static const EdgeDataTypesEnum enumType;
-    float                          a;
+    float a;
 };
 const EdgeDataTypesEnum EdgeDataAB::enumType = EdgeDataTypesEnum::EDGE_AB;
 
@@ -181,7 +181,7 @@ public:
     {
     }
     static const EdgeDataTypesEnum enumType;
-    double                         a;
+    double a;
 };
 const EdgeDataTypesEnum EdgeDataBB::enumType = EdgeDataTypesEnum::EDGE_BB;
 
@@ -190,9 +190,9 @@ class NodeDataA
 {
 public:
     NodeDataA(){};
-    NodeDataA(int                  _a) : a(_a){};
+    NodeDataA(int _a) : a(_a){};
     static const NodeDataTypesEnum enumType;
-    int                            a;
+    int a;
 };
 const NodeDataTypesEnum NodeDataA::enumType = NodeDataTypesEnum::NODE_A;
 
@@ -200,9 +200,9 @@ class NodeDataB
 {
 public:
     NodeDataB(){};
-    NodeDataB(double               _a) : a(_a){};
+    NodeDataB(double _a) : a(_a){};
     static const NodeDataTypesEnum enumType;
-    double                         a;
+    double a;
 };
 const NodeDataTypesEnum NodeDataB::enumType = NodeDataTypesEnum::NODE_B;
 
@@ -221,7 +221,7 @@ public:
     std::pair<NodeType*, bool> insert(T&&... t)
     {
         NodeType* p;
-        bool      inserted = false;
+        bool inserted = false;
 
         if (m_insertIdx < m_storage.size())
         {
@@ -767,9 +767,9 @@ void contactGraphTest()
     typename GraphType::Traits::template nodeTypeByNodeData<NodeDataA>::type aaa(1);
 
     GraphType g;
-    int       a    = 3;
-    double    b    = 3.4;
-    int       size = 1000000;
+    int a    = 3;
+    double b = 3.4;
+    int size = 1000000;
 
     //    g.reserveNodes<NodeA>(size);
     //    g.reserveNodes<NodeB>(size);
@@ -835,7 +835,7 @@ void contactGraphTest()
     // Example: Connect nodeB 1 with nodeB 1
     auto* n1 = g.getNode<NodeA>(0);
     auto* n2 = g.getNode<NodeB>(0);
-    auto  ep = g.insertEdge<typename Traits::edgeDataByNodeData<NodeA, NodeB>::type>(a);
+    auto ep  = g.insertEdge<typename Traits::edgeDataByNodeData<NodeA, NodeB>::type>(a);
     std::cout << n1->getData().a << std::endl;
     std::cout << n2->getData().a << std::endl;
     ep.first->setStart(n1);  // not type safe;

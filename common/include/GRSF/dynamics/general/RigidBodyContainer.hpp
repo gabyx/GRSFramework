@@ -71,7 +71,7 @@ private:
     using MapByInsertionType = typename MapType::index<by_insertion>::type;
     using MapByHashedIdType  = typename MapType::index<by_hashed_id>::type;
     using MapByOrderedIdType = typename MapType::index<by_ordered_id>::type;
-    MapByHashedIdType&  m_mapByHashedId;
+    MapByHashedIdType& m_mapByHashedId;
     MapByInsertionType& m_mapByInsertion;
     MapByOrderedIdType& m_mapByOrderedId;
 

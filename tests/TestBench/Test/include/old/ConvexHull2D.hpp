@@ -181,7 +181,7 @@ public:
     }
 
 private:
-    std::vector<unsigned int>         m_indicesCH;
+    std::vector<unsigned int> m_indicesCH;
     const MatrixRef<const Matrix2Dyn> m_p;
 };
 

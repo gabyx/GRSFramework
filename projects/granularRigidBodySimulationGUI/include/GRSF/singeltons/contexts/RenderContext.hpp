@@ -50,12 +50,12 @@ public:
         return m_bShutDownOgre;
     }
 
-    std::shared_ptr<Ogre::Root>          m_pRoot;
+    std::shared_ptr<Ogre::Root> m_pRoot;
     std::shared_ptr<Ogre::OverlaySystem> m_pOverlaySystem;
-    Ogre::RenderWindow*          m_pRenderWnd = nullptr;  // no shared pointer because class has no deconstructor!
-    Ogre::Viewport*              m_pViewport  = nullptr;
-    Ogre::Log*                   m_pOgreLog   = nullptr;
-    Ogre::Log*                   m_pAppLog    = nullptr;
+    Ogre::RenderWindow* m_pRenderWnd = nullptr;  // no shared pointer because class has no deconstructor!
+    Ogre::Viewport* m_pViewport      = nullptr;
+    Ogre::Log* m_pOgreLog            = nullptr;
+    Ogre::Log* m_pAppLog             = nullptr;
     std::shared_ptr<Ogre::Timer> m_pTimer;
 
     bool m_bShutDownOgre;  // <debug>	better private, but InputContext needs access

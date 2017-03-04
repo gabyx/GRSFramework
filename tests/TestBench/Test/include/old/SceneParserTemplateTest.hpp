@@ -198,8 +198,8 @@ private:
     using TimeStepperSettingsType     = typename DynamicsSystemType::TimeStepperSettingsType;
     using InclusionSolverSettingsType = typename DynamicsSystemType::InclusionSolverSettingsType;
 
-    RecorderSettingsType*        m_recorderSettings;
-    TimeStepperSettingsType*     m_timestepperSettings;
+    RecorderSettingsType* m_recorderSettings;
+    TimeStepperSettingsType* m_timestepperSettings;
     InclusionSolverSettingsType* m_inclusionSettings;
 
     ParserType* m_parser;
@@ -218,7 +218,7 @@ public:
         LOGSCLEVEL1(m_parser->m_pSimulationLog,
                     "==== SettingsModule: parsing ======================================" << std::endl;)
 
-        XMLNodeType      node;
+        XMLNodeType node;
         XMLAttributeType att;
 
         XMLNodeType timestepNode = sceneSettings.child("TimeStepperSettings");
@@ -475,8 +475,8 @@ private:
 
     using BodyListType = typename BodyModuleType::BodyListType;
 
-    BodyListType*   m_bodyListGroup    = nullptr;
-    bool            m_addToGlobalGeoms = false;
+    BodyListType* m_bodyListGroup = nullptr;
+    bool m_addToGlobalGeoms       = false;
     RigidBodyIdType m_startIdGroup;
 
     GlobalGeometryMapType* m_globalGeometries;
@@ -643,7 +643,7 @@ private:
                 GRSF_THROWEXCEPTION("---> String conversion in parseSphereGeometry: seed failed");
             }
 
-            RandomGenType         gen(seed);
+            RandomGenType gen(seed);
             UniformDistType<PREC> uni(minRadius, maxRadius);
 
             if (m_addToGlobalGeoms)
@@ -678,8 +678,8 @@ private:
             else
             {
                 RigidBodyIdType diffId = m_startIdGroup;  // id to generate to correct amount of random values!
-                double          radius = uni(gen);        // generate first value
-                auto            endIt  = m_bodyListGroup->end();
+                double radius          = uni(gen);        // generate first value
+                auto endIt             = m_bodyListGroup->end();
                 for (auto bodyIt = m_bodyListGroup->begin(); bodyIt != endIt; ++bodyIt)
                 {
                     // Generate the intermediate random values if there are any
@@ -1060,7 +1060,7 @@ private:
                 GRSF_THROWEXCEPTION("---> String conversion in parseGlobalGeomId: seed failed");
             }
 
-            RandomGenType                               gen(seed);
+            RandomGenType gen(seed);
             std::uniform_int_distribution<unsigned int> uni(startId, endId);
 
             RigidBodyIdType diffId = m_startIdGroup;  // id to generate the correct amount of random values!
@@ -1166,7 +1166,7 @@ private:
         std::string type = contactParam.attribute("type").value();
         if (type == "UCF" || type == "UCFD" || type == "UCFDD")
         {
-            PREC             mu, epsilonN, epsilonT;
+            PREC mu, epsilonN, epsilonT;
             ContactParameter contactParameter;
 
             if (!Utilities::stringToType(mu, contactParam.attribute("mu").value()))
@@ -1233,9 +1233,9 @@ private:
             }
             else
             {
-                LOGSCLEVEL2(m_parser->m_pSimulationLog,
-                            "---> Add ContactParameter standart of id=" << material1 << " to id=" << material2
-                                                                        << std::endl;);
+                LOGSCLEVEL2(
+                    m_parser->m_pSimulationLog,
+                    "---> Add ContactParameter standart of id=" << material1 << " to id=" << material2 << std::endl;);
                 if (!m_contactParams->addContactParameter(material1, material2, contactParameter))
                 {
                     GRSF_THROWEXCEPTION("---> Add ContactParameter failed");
@@ -1432,10 +1432,10 @@ private:
     RigidBodyStatesContainerType* m_initStates;
 
     SettingsModuleType* m_settings;
-    ParserType*         m_parser;
+    ParserType* m_parser;
 
     using BodyListType = typename BodyModuleType::BodyListType;
-    BodyListType*   m_bodyListGroup;
+    BodyListType* m_bodyListGroup;
     RigidBodyIdType m_startIdGroup;
 
 public:
@@ -1459,9 +1459,9 @@ public:
             }
             if (enabled)
             {
-                double      time  = -1;
-                short       which = 2;
-                std::string str   = initCond.attribute("whichState").value();
+                double time     = -1;
+                short which     = 2;
+                std::string str = initCond.attribute("whichState").value();
                 if (str == "end" || str == "END" || str == "End")
                 {
                     which = 2;
@@ -1504,11 +1504,11 @@ public:
                     "===================================================================" << std::endl;)
     }
 
-    void parseInitialCondition(XMLNodeType     initCondNode,
-                               BodyListType*   bodyList,
+    void parseInitialCondition(XMLNodeType initCondNode,
+                               BodyListType* bodyList,
                                RigidBodyIdType startId,
-                               bool            parseVelocity = true,
-                               bool            addToInitList = true)
+                               bool parseVelocity = true,
+                               bool addToInitList = true)
     {
         LOGSCLEVEL1(m_parser->m_pSimulationLog, "---> InitStatesModule: parsing (BodyInitState)" << std::endl;)
         GRSF_ASSERTMSG(bodyList, "Should not be null!")
@@ -1724,9 +1724,9 @@ private:
     void parseInitialPositionPosAxisAngle(XMLNodeType initCond)
     {
         unsigned int consumedValues = 0;
-        Vector3      pos;
-        Vector3      axis;
-        PREC         angle;
+        Vector3 pos;
+        Vector3 axis;
+        PREC angle;
 
         auto bodyIt = m_bodyListGroup->begin();
         GRSF_ASSERTMSG(bodyIt != m_bodyListGroup->end(), "no bodies in list");
@@ -1816,8 +1816,8 @@ private:
         GRSF_ASSERTMSG(bodyIt != m_bodyListGroup->end(), "no bodies in list");
 
         Quaternion q_KI, q_BK;
-        Vector3    I_r_IK, K_r_KB;
-        Matrix33   Rot_KI;  // Temp
+        Vector3 I_r_IK, K_r_KB;
+        Matrix33 Rot_KI;  // Temp
 
         // Iterate over all values in the list
         for (XMLNodeType& node : initCond.children("Value"))
@@ -1918,8 +1918,8 @@ private:
     void parseInitialVelocityTransRot(XMLNodeType initCond)
     {
         unsigned int consumedValues = 0;
-        Vector3      transDir, rotDir;
-        PREC         rot, vel;
+        Vector3 transDir, rotDir;
+        PREC rot, vel;
 
         auto bodyIt = m_bodyListGroup->begin();
         GRSF_ASSERTMSG(bodyIt != m_bodyListGroup->end(), "no bodies in list");
@@ -2015,19 +2015,19 @@ private:
     using RigidBodySimContainerType    = typename DynamicsSystemType::RigidBodySimContainerType;
     using RigidBodyStaticContainerType = typename DynamicsSystemType::RigidBodyStaticContainerType;
 
-    RigidBodySimContainerType*    m_pSimBodies = nullptr;
-    RigidBodyStaticContainerType* m_pBodies    = nullptr;
+    RigidBodySimContainerType* m_pSimBodies = nullptr;
+    RigidBodyStaticContainerType* m_pBodies = nullptr;
 
     ParserType* m_parser;
 
 public:
     using OptionsType = BodyModuleOptions;
 
-    BodyModule(ParserType*                   p,
-               GeometryModuleType*           g,
-               InitStatesModuleType*         is,
-               VisModuleType*                i,
-               RigidBodySimContainerType*    simBodies,
+    BodyModule(ParserType* p,
+               GeometryModuleType* g,
+               InitStatesModuleType* is,
+               VisModuleType* i,
+               RigidBodySimContainerType* simBodies,
                RigidBodyStaticContainerType* bodies)
         : m_parser(p), m_pGeomMod(g), m_pVisMod(i), m_pInitStatesMod(is), m_pSimBodies(simBodies), m_pBodies(bodies)
     {
@@ -2138,9 +2138,9 @@ private:
         }
 
         // Get the latest body id for this group id
-        unsigned int                            startBodyNr = 0;
+        unsigned int startBodyNr = 0;
         typename GroupToNBodyType::mapped_type* currGroupIdToNBodies;
-        auto                                    it = m_groupIdToNBodies.find(groupId);
+        auto it = m_groupIdToNBodies.find(groupId);
         if (it == m_groupIdToNBodies.end())
         {
             currGroupIdToNBodies  = &m_groupIdToNBodies[groupId];
@@ -2176,7 +2176,7 @@ private:
                                           << std::endl;)
 
         typename BodyRangeType::iterator bodyIdIt;
-        bool                             updateStartRange = false;
+        bool updateStartRange = false;
 
         if (m_parseSelectiveBodyIds && hasSelectiveFlag)
         {
@@ -2190,9 +2190,9 @@ private:
                 LOGSCLEVEL2(m_parser->m_pSimulationLog, "---> No ids in range: skip" << std::endl;)
                 return;
             }
-            LOGSCLEVEL2(m_parser->m_pSimulationLog,
-                        "---> Selective range startId: " << RigidBodyId::getBodyIdString(*m_startRangeIdIt)
-                                                         << std::endl;)
+            LOGSCLEVEL2(
+                m_parser->m_pSimulationLog,
+                "---> Selective range startId: " << RigidBodyId::getBodyIdString(*m_startRangeIdIt) << std::endl;)
             updateStartRange = true;
         }
         else
@@ -2457,16 +2457,16 @@ private:
     /// Parsing helpers
     BodyRangeType m_bodyIdRangeTmp;  ///< Range of bodies, temporary for load of all bodies
     typename BodyRangeType::iterator
-                   m_startRangeIdIt;  ///< Current iterator which marks the start for the current group in m_bodyIdRange
+        m_startRangeIdIt;             ///< Current iterator which marks the start for the current group in m_bodyIdRange
     BodyRangeType* m_bodyIdRangePtr;  ///< Switches between m_bodyIdRangeTmp/m_bodyIdRange, depending on parsing state
 
-    unsigned int    m_parsedInstancesGroup;  ///< Number of instances generated in the current group
-    RigidBodyIdType m_startIdGroup;          ///< Start id of the current group smaller or equal to *m_startRangeIdIt
+    unsigned int m_parsedInstancesGroup;  ///< Number of instances generated in the current group
+    RigidBodyIdType m_startIdGroup;       ///< Start id of the current group smaller or equal to *m_startRangeIdIt
 
     unsigned int m_nSimBodies, m_nBodies;
     typedef std::unordered_map<unsigned int, unsigned int> GroupToNBodyType;
     GroupToNBodyType m_groupIdToNBodies;
-    unsigned int     m_globalMaxGroupId;  // Group Id used to build a unique id!
+    unsigned int m_globalMaxGroupId;  // Group Id used to build a unique id!
 
     /// Temprary structures for each sublist (groupid=?) of rigid bodies
     typename RigidBodyType::BodyMode m_eBodiesState;  ///< Used to parse a RigidBody Node
@@ -2482,7 +2482,7 @@ private:
         }
 
         RigidBodyType* m_body;  // might be also zero (if we dont need the whole body for visualization only)
-        Vector3        m_scale;
+        Vector3 m_scale;
         RigidBodyState m_initState;
     };
 
@@ -2493,9 +2493,9 @@ private:
     BodyListType m_bodyListGroup;  ///< Used to parse a RigidBody Node
 
     /// Other Modules
-    GeometryModuleType*   m_pGeomMod;
+    GeometryModuleType* m_pGeomMod;
     InitStatesModuleType* m_pInitStatesMod;
-    VisModuleType*        m_pVisMod;
+    VisModuleType* m_pVisMod;
 
     RigidBodySimContainerType* pSimBodies;
 };
@@ -2572,8 +2572,8 @@ public:
     */
     template <typename TParserOptions = SceneParserOptions, typename TBodyParserOptions = BodyModuleOptionsType>
     bool parseScene(const boost::filesystem::path& file,
-                    TParserOptions&&               opt     = TParserOptions(),
-                    TBodyParserOptions&&           optBody = TBodyParserOptions())
+                    TParserOptions&& opt         = TParserOptions(),
+                    TBodyParserOptions&& optBody = TBodyParserOptions())
     {
         //        // Forward all settings
         //        m_parsingOptions = std::forward<TParserOptions>(opt);
@@ -2722,19 +2722,19 @@ protected:
 
     /** XML Declarations */
     pugi::xml_document m_xmlDoc;
-    pugi::xml_node     m_xmlRootNode;
+    pugi::xml_node m_xmlRootNode;
 
     /** Log */
-    Logging::Log*     m_pSimulationLog;
+    Logging::Log* m_pSimulationLog;
     std::stringstream logstream;
 
     /** Modules */
-    std::unique_ptr<SettingsModuleType>       m_pSettingsModule;
-    std::unique_ptr<GeometryModuleType>       m_pGeometryModule;
+    std::unique_ptr<SettingsModuleType> m_pSettingsModule;
+    std::unique_ptr<GeometryModuleType> m_pGeometryModule;
     std::unique_ptr<ExternalForcesModuleType> m_pExternalForcesModule;
-    std::unique_ptr<ContactParamModuleType>   m_pContactParamModule;
+    std::unique_ptr<ContactParamModuleType> m_pContactParamModule;
 
-    std::unique_ptr<BodyModuleType>       m_pBodyModule;
+    std::unique_ptr<BodyModuleType> m_pBodyModule;
     std::unique_ptr<InitStatesModuleType> m_pInitStatesModule;
 
     std::unique_ptr<VisModuleType> m_pVisModule;

@@ -27,7 +27,6 @@
 #endif
 
 #include "TypeDefs.hpp"
-#include "TypeDefs.hpp"
 
 #include "MeshData.hpp"
 
@@ -150,7 +149,7 @@ public:
 #endif
 
 #if USE_OZCOLLIDE == 1
-    ozcollide::AABBTreePoly*        m_pTreePoly;
+    ozcollide::AABBTreePoly* m_pTreePoly;
     std::vector<ozcollide::Polygon> m_ozPolys;  ///< A set of polygons used in ozcollide, only referenced!
 #endif
 

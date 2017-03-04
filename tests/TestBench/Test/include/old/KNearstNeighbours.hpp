@@ -20,10 +20,10 @@
 
 void kNearstNeighboursTest()
 {
-    double                                 lower_bound = 0;
-    double                                 upper_bound = 10000;
+    double lower_bound = 0;
+    double upper_bound = 10000;
     std::uniform_real_distribution<double> unif(lower_bound, upper_bound);
-    std::default_random_engine             re;
+    std::default_random_engine re;
 
     int maxI  = 10000;
     int k     = 30;    // k-smallest

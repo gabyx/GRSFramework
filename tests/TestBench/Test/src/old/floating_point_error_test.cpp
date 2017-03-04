@@ -55,7 +55,7 @@ struct A
     }
 
     template <int Id>
-    static void   foo();
+    static void foo();
 
     template <>
     static void foo<1>()
@@ -74,10 +74,10 @@ template <typename _PREC, int _VariantId, int _alignMatrix, bool _bAbortIfConver
 struct JorProxGPUVariantSettingsWrapper
 {
     typedef typename _PREC PREC;
-    static const int       VariantId           = _VariantId;
-    static const int       alignMatrix         = _alignMatrix;
-    static const bool      bAbortIfConverged   = _bAbortIfConverged;
-    static const bool      nCheckConvergedFlag = _nCheckConvergedFlag;
+    static const int VariantId            = _VariantId;
+    static const int alignMatrix          = _alignMatrix;
+    static const bool bAbortIfConverged   = _bAbortIfConverged;
+    static const bool nCheckConvergedFlag = _nCheckConvergedFlag;
 };
 
 template <typename T>
@@ -160,7 +160,7 @@ public:
         m_pRef2 = ptr2;
     }
 
-    Ref*  m_pRef;
+    Ref* m_pRef;
     Ref2* m_pRef2;
 };
 

@@ -269,14 +269,14 @@ T& LogicSocket<T>::getValueRef()
 
 /** SOCKET DECLARATION MACROS */
 #define DECLARE_ISOCKET_TYPE(name, type)         \
-    typedef type              IType##name;       \
+    typedef type IType##name;                    \
     inline LogicSocket<type>* getIn_##name()     \
     {                                            \
         return getISocket<type>((Inputs::name)); \
     }
 
 #define DECLARE_OSOCKET_TYPE(name, type)          \
-    typedef type              OType##name;        \
+    typedef type OType##name;                     \
     inline LogicSocket<type>* getOut_##name()     \
     {                                             \
         return getOSocket<type>((Outputs::name)); \

@@ -38,11 +38,11 @@ std::pair<bool, Ogre::Vector3> RaycastEntity(Ogre::Ray& ray, Ogre::Entity* penti
 * @param A_IK The transformation matrix from frame of the entitiy to a frame I. Each point is transformed with this
 * matrix.
 */
-void getMeshInformation(Ogre::Entity*        entity,
-                        size_t&              vertex_count,
-                        Ogre::Vector3*&      vertices,
-                        size_t&              index_count,
-                        unsigned long*&      indices,
+void getMeshInformation(Ogre::Entity* entity,
+                        size_t& vertex_count,
+                        Ogre::Vector3*& vertices,
+                        size_t& index_count,
+                        unsigned long*& indices,
                         const Ogre::Matrix4& A_IK);
 
 /** @brief This function extracts mesh information of en Ogre::Entity object.
@@ -64,13 +64,13 @@ void getMeshInformation(
 * @param
 */
 template <typename PREC>
-void extractMesh(MeshData<PREC>&             myMeshInfo,
+void extractMesh(MeshData<PREC>& myMeshInfo,
                  std::vector<Ogre::Entity*>& CollisionEntities,
-                 Ogre::SceneNode*            referenceFrame)
+                 Ogre::SceneNode* referenceFrame)
 {
     // mesh data to retrieve
-    size_t         vertex_count;
-    size_t         index_count;
+    size_t vertex_count;
+    size_t index_count;
     Ogre::Vector3* vertices;
     unsigned long* indices;
 

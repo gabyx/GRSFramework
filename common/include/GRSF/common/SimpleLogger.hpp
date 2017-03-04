@@ -34,7 +34,7 @@ namespace Logging
 class LogSink
 {
 protected:
-    std::string   m_sinkName;
+    std::string m_sinkName;
     std::ostream* m_pOutStream;
 
 public:
@@ -56,12 +56,12 @@ class LogSinkFile : public LogSink
 private:
     static const std::streamsize defaultRollSize = 5 << 20;
 
-    std::ofstream   m_fileStream;
+    std::ofstream m_fileStream;
     std::streamsize m_rollSize = 0;  ///< maximum size of file when the file should be rolled
 public:
-    LogSinkFile(const std::string&      sink_name,
+    LogSinkFile(const std::string& sink_name,
                 boost::filesystem::path filePath = "",
-                std::streamsize         rollSize = defaultRollSize);
+                std::streamsize rollSize         = defaultRollSize);
 
     /** Rolls to the start of the file if limit rollSize or internal m_rollSize is reached */
     void doRollToStart(std::streamsize rollSize = 0);
@@ -85,7 +85,7 @@ protected:
     CPUTimer* m_time = nullptr;  ///< A timer which can be set from outside!
 
     std::string m_logName;
-    std::mutex  m_busy_mutex;
+    std::mutex m_busy_mutex;
 
     // Can have multiple streams!
     std::vector<LogSink*> m_sinkList;
@@ -94,7 +94,7 @@ protected:
 
     void writeOut(std::stringstream& s)
     {
-        std::lock_guard<std::mutex>     l(m_busy_mutex);
+        std::lock_guard<std::mutex> l(m_busy_mutex);
         std::vector<LogSink*>::iterator it;
         for (it = m_sinkList.begin(); it != m_sinkList.end(); ++it)
         {
@@ -115,7 +115,7 @@ public:
     template <typename T>
     void logMessage(const T& str)
     {
-        std::lock_guard<std::mutex>     l(m_busy_mutex);
+        std::lock_guard<std::mutex> l(m_busy_mutex);
         std::vector<LogSink*>::iterator it;
         for (it = m_sinkList.begin(); it != m_sinkList.end(); ++it)
         {
@@ -201,8 +201,8 @@ public:
 
     private:
         std::stringstream& m_s;
-        bool               m_lastWasEndl;
-        Log&               m_log;
+        bool m_lastWasEndl;
+        Log& m_log;
     };
 };
 
@@ -212,12 +212,12 @@ public:
 class LogManager : public Utilities::Singleton<LogManager>
 {
 private:
-    typedef std::unordered_map<std::string, Log*>           LogListType;
+    typedef std::unordered_map<std::string, Log*> LogListType;
     typedef std::unordered_map<std::string, Log*>::iterator LogListIteratorType;
     LogListType m_logList;
 
     std::mutex m_busy_mutex;
-    CPUTimer   m_globalClock;
+    CPUTimer m_globalClock;
 
 public:
     LogManager();

@@ -39,8 +39,8 @@ public:
     using Base = SimFileConverter;
 
     GridderConverter(const std::vector<boost::filesystem::path>& inputFiles,
-                     boost::filesystem::path                     sceneFile,
-                     boost::filesystem::path                     logicFile);
+                     boost::filesystem::path sceneFile,
+                     boost::filesystem::path logicFile);
 
     void convert();
 

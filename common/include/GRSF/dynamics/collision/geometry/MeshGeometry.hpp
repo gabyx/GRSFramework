@@ -138,14 +138,14 @@ public:
     }
 
     boost::filesystem::path m_filePath;
-    MeshData*               m_pMeshData = nullptr;
+    MeshData* m_pMeshData = nullptr;
 
 #if USE_OPCODE == 1
     Opcode::Model* m_pOpcodeModel = nullptr;
 #endif
 
 #if USE_OZCOLLIDE == 1
-    ozcollide::AABBTreePoly*        m_pTreePoly = nullptr;
+    ozcollide::AABBTreePoly* m_pTreePoly = nullptr;
     std::vector<ozcollide::Polygon> m_ozPolys;  ///< A set of polygons used in ozcollide, only referenced!
 #endif
 

@@ -40,9 +40,9 @@ public:
 
     /** Data storage from the SceneFile (not yet needed) */
     GlobalGeometryMapType m_globalGeometries;
-    GeometryMapType       m_geometryMap;
-    ScalesMap             m_scales;
-    VisMeshMap            m_visMeshs;
+    GeometryMapType m_geometryMap;
+    ScalesMap m_scales;
+    VisMeshMap m_visMeshs;
 };
 
 #endif

@@ -45,7 +45,7 @@ public:
     DEFINE_DYNAMICSSYTEM_CONFIG_TYPES
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    StateRecorderMPI(unsigned int                                                             nSimBodies,
+    StateRecorderMPI(unsigned int nSimBodies,
                      std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo);
     ~StateRecorderMPI();
 
@@ -61,7 +61,7 @@ public:
     bool closeAll();
 
 protected:
-    unsigned int        m_nSimBodies;
+    unsigned int m_nSimBodies;
     MultiBodySimFileMPI m_fh;
 
     std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> m_pProcInfo;
@@ -82,7 +82,7 @@ protected:
 
 /** @} */
 
-StateRecorderMPI::StateRecorderMPI(unsigned int                                                             nSimBodies,
+StateRecorderMPI::StateRecorderMPI(unsigned int nSimBodies,
                                    std::shared_ptr<typename MPILayer::ProcessCommunicator::ProcessInfoType> pProcInfo)
     : m_nSimBodies(nSimBodies), m_pProcInfo(pProcInfo)
 //    ,m_ins(m_writebuffer),
@@ -114,7 +114,7 @@ void StateRecorderMPI::setDirectoryPath(boost::filesystem::path dir_path)
 bool StateRecorderMPI::createSimFile(bool truncate)
 {
     boost::filesystem::path file;
-    std::stringstream       s;
+    std::stringstream s;
 
     file = m_directoryPath;
     getSimBodyFileName(s);

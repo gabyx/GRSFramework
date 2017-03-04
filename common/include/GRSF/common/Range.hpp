@@ -224,7 +224,7 @@ public:
     }
 
 private:
-    bool      m_linear;
+    bool m_linear;
     RangeType m_v;
 
     inline void init()

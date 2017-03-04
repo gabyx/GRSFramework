@@ -40,13 +40,13 @@ public:
 
     typedef Eigen::Matrix<unsigned int, 3, 1> MeshIndices;
     typedef std::vector<MeshIndices> Faces;
-    typedef std::vector<Vector3>     Vertices;
-    typedef std::vector<Vector3>     Normals;
+    typedef std::vector<Vector3> Vertices;
+    typedef std::vector<Vector3> Normals;
 
     // Mesh Information in 3D Coordinates in [m] --> scaled!
     Vertices m_Vertices;
-    Faces    m_Faces;
-    Normals  m_Normals;
+    Faces m_Faces;
+    Normals m_Normals;
 
     void print()
     {

@@ -25,8 +25,8 @@ namespace MatrixHelpers
 {
 template <typename PREC, typename PREC2>
 void setHomogeneousTransform(const typename MyMatrix::Matrix33<PREC>& A_IK,
-                             const typename MyMatrix::Vector3<PREC>&  I_t_IK,
-                             typename MyMatrix::Matrix44<PREC2>&      H_IK)
+                             const typename MyMatrix::Vector3<PREC>& I_t_IK,
+                             typename MyMatrix::Matrix44<PREC2>& H_IK)
 {
     // Sets the matrix H_IK, ==> I_r_P = H_IK * K_r_p;
     H_IK.setIdentity();

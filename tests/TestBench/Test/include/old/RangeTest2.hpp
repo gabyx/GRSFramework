@@ -109,7 +109,7 @@ struct RangeTypes
 
     private:
         RangeType* m_rangePtr;
-        Type       m_currVal;
+        Type m_currVal;
     };
 
     class ContainerType : public RangeType
@@ -162,7 +162,7 @@ struct ComboTypes
             {
                 case (0):
                 {
-                    auto  ptr   = static_cast<typename Get<0>::type*>(m_comboRangePtr);
+                    auto ptr    = static_cast<typename Get<0>::type*>(m_comboRangePtr);
                     auto* itPtr = new typename Get<0>::type::iterator();
                     if (atEnd)
                     {
@@ -177,7 +177,7 @@ struct ComboTypes
                 }
                 case (1):
                 {
-                    auto  ptr   = static_cast<typename Get<1>::type*>(m_comboRangePtr);
+                    auto ptr    = static_cast<typename Get<1>::type*>(m_comboRangePtr);
                     auto* itPtr = new typename Get<1>::type::iterator();
                     if (atEnd)
                     {
@@ -359,10 +359,10 @@ struct ComboTypes
         }
 
     private:
-        void*        m_comboRangePtr   = nullptr;
-        void*        m_comboRangeItPtr = nullptr;
-        unsigned int m_which           = 0;
-        bool         m_atEnd           = false;
+        void* m_comboRangePtr   = nullptr;
+        void* m_comboRangeItPtr = nullptr;
+        unsigned int m_which    = 0;
+        bool m_atEnd            = false;
     };
 
     class ContainerType : public ComboType
@@ -411,9 +411,9 @@ void doTest()
     using namespace ListOrRangeTypes;
 
     typedef unsigned int Type;
-    std::set<Type>       s;
-    unsigned int         max = MAXEL;
-    std::vector<Type>    vec(max);
+    std::set<Type> s;
+    unsigned int max = MAXEL;
+    std::vector<Type> vec(max);
     for (int j = 0; j < vec.size(); j++)
     {
         vec[j] = j * j;
@@ -742,9 +742,9 @@ public:
         }
 
     private:
-        Range*                 m_r;
+        Range* m_r;
         typename Set::iterator m_it;
-        Type                   m_cur;
+        Type m_cur;
     };
 
     iterator begin()
@@ -759,7 +759,7 @@ public:
 
 private:
     unsigned int m_which = 0;
-    void*        m_ptr   = nullptr;
+    void* m_ptr          = nullptr;
 };
 
 #define INIT_TIMER auto start = std::chrono::high_resolution_clock::now();
@@ -772,9 +772,9 @@ private:
 int doAsserts()
 {
     std::cout << "Assert Test ============================" << std::endl;
-    unsigned int       max = 100;
+    unsigned int max = 100;
     typedef Range<int> T;
-    std::set<int>      s;
+    std::set<int> s;
     while (s.size() < max)
     {
         s.insert(rand());
@@ -792,9 +792,9 @@ int doTest2()
 
     std::cout << "Test2 ============================" << std::endl;
     typedef unsigned int Type;
-    std::set<Type>       s;
-    unsigned int         max = MAXEL;
-    std::vector<Type>    vec(max);
+    std::set<Type> s;
+    unsigned int max = MAXEL;
+    std::vector<Type> vec(max);
     for (int j = 0; j < vec.size(); j++)
     {
         vec[j] = j * j;

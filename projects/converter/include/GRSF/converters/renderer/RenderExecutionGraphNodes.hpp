@@ -76,7 +76,7 @@ public:
         ADD_ISOCK(Index, 0);
         ADD_OSOCK(Color, Vector3(0.5, 0.5, 0.5));
 
-        RandomGenType                          gen(seed);
+        RandomGenType gen(seed);
         std::uniform_real_distribution<double> uni(0.0, amplitude);
 
         if (nColors == 0)
@@ -336,20 +336,20 @@ public:
 
     DECLARE_OSOCKET_TYPE(Material, RenderMaterialPtr);
 
-    BxdfDisneyMaterial(unsigned int   id,
+    BxdfDisneyMaterial(unsigned int id,
                        const Vector3& baseColor       = Vector3(0.5, 0.5, 0.5),
                        const Vector3& emitColor       = Vector3(0.0, 0.0, 0.0),
                        const Vector3& subsurfaceColor = Vector3(0.0, 0.0, 0.0),
-                       double         subsurface      = 0.0,
-                       double         metallic        = 0.0,
-                       double         specular        = 0.5,
-                       double         specularTint    = 0.0,
-                       double         roughness       = 0.25,
-                       double         anisotropic     = 0.0,
-                       double         sheen           = 0.0,
-                       double         sheenTint       = 0.5,
-                       double         clearcoat       = 0.0,
-                       double         clearcoatGloss  = 1.0)
+                       double subsurface              = 0.0,
+                       double metallic                = 0.0,
+                       double specular                = 0.5,
+                       double specularTint            = 0.0,
+                       double roughness               = 0.25,
+                       double anisotropic             = 0.0,
+                       double sheen                   = 0.0,
+                       double sheenTint               = 0.5,
+                       double clearcoat               = 0.0,
+                       double clearcoatGloss          = 1.0)
         : LogicNode(id)
     {
         ADD_ISOCK(Enable, true);
@@ -546,8 +546,8 @@ public:
         // Write position and quaternion
         writePosQuat(m_s);
         // First get the id of the body then
-        RigidBodyIdType& id     = GET_ISOCKET_REF_VALUE(BodyId);
-        auto             geomIt = m_geomMap->find(id);
+        RigidBodyIdType& id = GET_ISOCKET_REF_VALUE(BodyId);
+        auto geomIt         = m_geomMap->find(id);
         if (geomIt == m_geomMap->end())
         {
             GRSF_ERRORMSG("Geometry for body id: " << RigidBodyId::getBodyIdString(id) << " not found!")
@@ -711,11 +711,11 @@ protected:
     GeometryMapType* m_geomMap = nullptr;
 
     std::stringstream m_s;
-    std::fstream      m_frameFile;
+    std::fstream m_frameFile;
 
-    bool        m_pipeToSubProcess;
+    bool m_pipeToSubProcess;
     std::string m_command;
-    FILE*       m_subprocess = nullptr;
+    FILE* m_subprocess = nullptr;
 
     RendermanGeometryWriter m_geomWriter;
 

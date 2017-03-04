@@ -74,7 +74,7 @@ public:
     {
         m_buffer.clear();  // Clear serializable string, no allocation if we push less or equal as much into the string
                            // next time!
-        boost::iostreams::back_insert_device<std::vector<char>>                           inserter(m_buffer);
+        boost::iostreams::back_insert_device<std::vector<char>> inserter(m_buffer);
         boost::iostreams::stream<boost::iostreams::back_insert_device<std::vector<char>>> s(inserter);
         boost::archive::binary_oarchive oa(s, boost::archive::no_codecvt | boost::archive::no_header);
         oa << t;
@@ -87,7 +87,7 @@ public:
     template <typename T>
     MessageBinarySerializer& operator>>(T& t)
     {
-        boost::iostreams::basic_array_source<char>                           device(data(), size());
+        boost::iostreams::basic_array_source<char> device(data(), size());
         boost::iostreams::stream<boost::iostreams::basic_array_source<char>> s(device);
         boost::archive::binary_iarchive ia(s, boost::archive::no_codecvt | boost::archive::no_header);
         ia >> t;
@@ -126,7 +126,7 @@ private:
 struct SendMessageAndRequest
 {
     MessageBinarySerializer m_message;
-    MPI_Request             m_req;
+    MPI_Request m_req;
 
     SendMessageAndRequest() : m_message(1024 * 1024)
     {
@@ -336,7 +336,7 @@ public:
         // clear the buffer
 
         MessageBinarySerializer& message = std::get<0>(it->second);
-        MPI_Request*             req     = std::get<1>(it->second);  // Get copy of the pointer (double pointer)
+        MPI_Request* req                 = std::get<1>(it->second);  // Get copy of the pointer (double pointer)
 
         message.clear();
         // Serialize the message into the buffer
@@ -433,10 +433,10 @@ public:
     /** Send Message to Rank NonBlocking
      * ========================================================================================*/
     template <typename T>
-    std::unique_ptr<SendMessageAndRequest> sendMessageToRank_async(const T&      t,
-                                                                   RankIdType    rank,
+    std::unique_ptr<SendMessageAndRequest> sendMessageToRank_async(const T& t,
+                                                                   RankIdType rank,
                                                                    MPIMessageTag tag,
-                                                                   MPI_Comm      comm)
+                                                                   MPI_Comm comm)
     {
         // Make new binary_message
         std::unique_ptr<SendMessageAndRequest> send_message(new SendMessageAndRequest());
@@ -458,8 +458,8 @@ public:
     }
 
     template <typename T>
-    inline std::unique_ptr<SendMessageAndRequest> sendMessageToRank_async(const T&      t,
-                                                                          RankIdType    rank,
+    inline std::unique_ptr<SendMessageAndRequest> sendMessageToRank_async(const T& t,
+                                                                          RankIdType rank,
                                                                           MPIMessageTag tag)
     {
         return sendMessageToRank_async(t, rank, tag, this->m_comm);
@@ -535,13 +535,13 @@ public:
         };
 
         typename List::const_iterator ranksIt;
-        std::vector<bool>             receivedRanks(ranks.size(), false);
+        std::vector<bool> receivedRanks(ranks.size(), false);
 
         // has an entry if a message has already been received for this rank.
         MPI_Status status;
 
         unsigned int received_messages = 0;
-        int          flag;
+        int flag;
         LOGPC(m_pSimulationLog, "--->\t\t Receiving message from neighbours (spin loop)..." << std::endl;)
         while (received_messages != ranks.size())
         {
@@ -678,7 +678,7 @@ private:
      * problem) */
     typedef std::tuple<MessageBinarySerializer, MPI_Request*> SendTupleType;
     using BufferMapType = std::unordered_map<RankIdType, SendTupleType>;
-    BufferMapType            m_sendMessageBuffers;
+    BufferMapType m_sendMessageBuffers;
     std::vector<MPI_Request> m_sendRequests;  ///< these are the requests,
     ///< these are pointers, MPI deallocates the requests when MPI_Wait or similar is called,
     ///< do not call MPI_Request_free

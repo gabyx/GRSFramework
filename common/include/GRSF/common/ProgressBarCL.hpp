@@ -44,8 +44,8 @@ public:
 
     void update(unsigned int counter)
     {
-        double       c = counter - m_start;
-        double       i = (double)(m_end - m_start) / (double)(m_length);
+        double c = counter - m_start;
+        double i = (double)(m_end - m_start) / (double)(m_length);
         unsigned int idx;
         if (i <= 0.0)
         {
@@ -73,7 +73,7 @@ public:
 private:
     std::string m_title;
 
-    T            m_start, m_end;
+    T m_start, m_end;
     unsigned int m_length, m_current;
 
     std::ostream& m_oStream;

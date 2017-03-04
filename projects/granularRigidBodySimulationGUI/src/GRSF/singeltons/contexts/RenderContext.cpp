@@ -89,15 +89,15 @@ bool RenderContext::initOgre(Ogre::String wndTitle)
 
     m_pAppLog->logMessage("RenderContext::Resources initializing...");
     // Resources initializing ==================================================================
-    Ogre::String     secName, typeName, archName;
+    Ogre::String secName, typeName, archName;
     Ogre::ConfigFile cf;
     cf.load("resources.cfg");
 
     Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
     while (seci.hasMoreElements())
     {
-        secName                                               = seci.peekNextKey();
-        Ogre::ConfigFile::SettingsMultiMap*          settings = seci.getNext();
+        secName                                      = seci.peekNextKey();
+        Ogre::ConfigFile::SettingsMultiMap* settings = seci.getNext();
         Ogre::ConfigFile::SettingsMultiMap::iterator i;
         for (i = settings->begin(); i != settings->end(); ++i)
         {

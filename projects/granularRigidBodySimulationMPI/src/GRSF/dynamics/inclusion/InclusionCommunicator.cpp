@@ -15,8 +15,8 @@
 #include "GRSF/dynamics/inclusion/ContactGraphVisitorsMPI.hpp"
 
 template <typename Combo>
-InclusionCommunicator<Combo>::InclusionCommunicator<Combo>(std::shared_ptr<BodyCommunicator>        pBodyComm,
-                                                           std::shared_ptr<DynamicsSystemType>      pDynSys,
+InclusionCommunicator<Combo>::InclusionCommunicator<Combo>(std::shared_ptr<BodyCommunicator> pBodyComm,
+                                                           std::shared_ptr<DynamicsSystemType> pDynSys,
                                                            std::shared_ptr<ProcessCommunicatorType> pProcCom)
     :
 

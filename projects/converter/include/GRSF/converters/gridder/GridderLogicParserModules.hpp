@@ -122,9 +122,9 @@ public:
 
         m_extractorNames.clear();
 
-        auto         nodes     = gridExt.children("Extract");
-        unsigned int extrs     = 0;
-        auto         itNodeEnd = nodes.end();
+        auto nodes         = gridExt.children("Extract");
+        unsigned int extrs = 0;
+        auto itNodeEnd     = nodes.end();
         for (auto itNode = nodes.begin(); itNode != itNodeEnd; ++itNode)
         {
             parseExtrationTypes(*itNode, settings);
@@ -180,7 +180,7 @@ public:
         }
 
         Quaternion q_KI;
-        Vector3    I_r_IK;
+        Vector3 I_r_IK;
         ParserFunctions::parseTransformSequence(grid, q_KI, I_r_IK);
 
         settings.m_R_KI = q_KI.toRotationMatrix();
@@ -308,7 +308,7 @@ public:
     }
 
 private:
-    LogType*                 m_pLog;
+    LogType* m_pLog;
     GridExtSettingsListType* m_gridSettingsList;
 
     std::unordered_set<std::string> m_extractorNames;

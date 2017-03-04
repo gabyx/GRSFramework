@@ -26,8 +26,8 @@ public:
 
     /*Vector3 m_pos;*/  ///< position vector in K frame of the center of the capsule (not needed so far)
     Vector3 m_normal;   ///< normal of the capsule direction in K frame
-    PREC    m_length;   ///< length of the capsule
-    PREC    m_radius;   ///< radius of the capsule rounding on top and bottom
+    PREC m_length;      ///< length of the capsule
+    PREC m_radius;      ///< radius of the capsule rounding on top and bottom
 private:
     friend class boost::serialization::access;
 };

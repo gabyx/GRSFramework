@@ -82,7 +82,7 @@ public:
     virtual void initialize(){};
 
 private:
-    TMap*  m_map;
+    TMap* m_map;
     TValue m_default;
 };
 };

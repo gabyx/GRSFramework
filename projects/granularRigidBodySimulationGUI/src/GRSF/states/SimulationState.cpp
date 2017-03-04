@@ -205,7 +205,7 @@ void SimulationState::switchSimulationMode()
 void SimulationState::setupScene()
 {
     // World Axes
-    Entity*    ent       = m_pSceneMgr->createEntity("WorldAxes", "axes.mesh");
+    Entity* ent          = m_pSceneMgr->createEntity("WorldAxes", "axes.mesh");
     SceneNode* WorldAxes = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("WorldAxes");
     WorldAxes->attachObject(ent);
 

@@ -78,16 +78,16 @@ void setRotFromQuaternion(const Eigen::MatrixBase<Derived>& quat, Eigen::MatrixB
 }
 
 template <class Derived, class DerivedOther>
-void setQuaternion(const Eigen::MatrixBase<Derived>&      nc_quat,
+void setQuaternion(const Eigen::MatrixBase<Derived>& nc_quat,
                    const Eigen::MatrixBase<DerivedOther>& nc_n,
-                   const typename Derived::Scalar         angleRadian)
+                   const typename Derived::Scalar angleRadian)
 {
     typedef typename Derived::Scalar PREC;
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 4);
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(DerivedOther, 3);
 
-    Eigen::MatrixBase<Derived>&      quat = const_cast<Eigen::MatrixBase<Derived>&>(nc_quat);
-    Eigen::MatrixBase<DerivedOther>& n    = const_cast<Eigen::MatrixBase<DerivedOther>&>(nc_n);
+    Eigen::MatrixBase<Derived>& quat   = const_cast<Eigen::MatrixBase<Derived>&>(nc_quat);
+    Eigen::MatrixBase<DerivedOther>& n = const_cast<Eigen::MatrixBase<DerivedOther>&>(nc_n);
 
     n.normalize();
 

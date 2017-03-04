@@ -47,7 +47,7 @@ public:
     static const int NDOFFriction = 3;
 
     InclusionSolverNT(std::shared_ptr<CollisionSolverType> pCollisionSolver,
-                      std::shared_ptr<DynamicsSystemType>  pDynSys);
+                      std::shared_ptr<DynamicsSystemType> pDynSys);
 
     void initializeLog(Logging::Log* pSolverLog);
     void reset();
@@ -61,11 +61,11 @@ public:
     VectorU m_h_const;    // constant terms (gravity)
     VectorU m_delta_u_E;  // the delta which adds to the final u_E
 
-    std::string  getIterationStats();
-    PREC         m_G_conditionNumber;
-    PREC         m_G_notDiagDominant;
+    std::string getIterationStats();
+    PREC m_G_conditionNumber;
+    PREC m_G_notDiagDominant;
     unsigned int m_globalIterationCounter;
-    bool         m_bConverged;
+    bool m_bConverged;
     unsigned int m_nContacts;
 
     ContactParameterMap<RigidBodyType> m_ContactParameterMap;
@@ -86,12 +86,12 @@ protected:
     unsigned int m_nExpectedContacts;
 
     std::shared_ptr<CollisionSolverType> m_pCollisionSolver;
-    std::shared_ptr<DynamicsSystemType>  m_pDynSys;
-    std::vector<RigidBodyType*>&         m_simBodies;
-    std::vector<RigidBodyType*>&         m_staticBodies;
+    std::shared_ptr<DynamicsSystemType> m_pDynSys;
+    std::vector<RigidBodyType*>& m_simBodies;
+    std::vector<RigidBodyType*>& m_staticBodies;
 
     // Matrices for solving the inclusion ===========================
-    PREC       m_nLambdas;
+    PREC m_nLambdas;
     MatrixUDyn m_W_N;
     MatrixUDyn m_W_T;
 
@@ -118,8 +118,8 @@ protected:
 #define P_T_back (*m_P_T_back)
 #define P_N_front (*m_P_N_front)
 #define P_T_front (*m_P_T_front)
-    void      swapPercussionBuffer();
-    void      resetPercussionBuffer();
+    void swapPercussionBuffer();
+    void resetPercussionBuffer();
     VectorDyn m_P_N_1;
     VectorDyn m_P_T_1;
     VectorDyn m_P_N_2;
@@ -141,13 +141,13 @@ protected:
     inline void doSorProx();
 
     // Log
-    Logging::Log *    m_pSolverLog, *m_pSimulationLog;
+    Logging::Log *m_pSolverLog, *m_pSimulationLog;
     std::stringstream logstream;
 };
 
 template <typename TInclusionSolverConfig>
 InclusionSolverNT<TInclusionSolverConfig>::InclusionSolverNT(std::shared_ptr<CollisionSolverType> pCollisionSolver,
-                                                             std::shared_ptr<DynamicsSystemType>  pDynSys)
+                                                             std::shared_ptr<DynamicsSystemType> pDynSys)
     : m_simBodies(pCollisionSolver->m_simBodies), m_staticBodies(pCollisionSolver->m_staticBodies)
 {
     if (Logging::LogManager::getSingleton().existsLog("SimulationLog"))
@@ -239,7 +239,7 @@ void InclusionSolverNT<TInclusionSolverConfig>::reservePercussionPoolSpace(unsig
 template <typename TInclusionSolverConfig>
 void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const DynamicsState* state_s,
                                                                       const DynamicsState* state_m,
-                                                                      DynamicsState*       state_e)
+                                                                      DynamicsState* state_e)
 {
     LOGSLLEVEL1_CONTACT(m_pSolverLog, "---> solveInclusionProblem(): " << std::endl;);
 
@@ -315,8 +315,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::solveInclusionProblem(const Dyna
         m_WT_uS.setZero();
 
         // Assemble W_N and W_T and xi_N and xi_T =====================================================
-        static Matrix33    I_r_SiCi_hat = Matrix33::Zero();
-        static Matrix33    I_Jacobi_2;  // this is the second part of the Jacobi;
+        static Matrix33 I_r_SiCi_hat = Matrix33::Zero();
+        static Matrix33 I_Jacobi_2;  // this is the second part of the Jacobi;
         static VectorUBody w_N_part, w_T_part;
         for (unsigned int contactIdx = 0; contactIdx < m_nContacts; contactIdx++)
         {
@@ -708,8 +708,8 @@ void InclusionSolverNT<TInclusionSolverConfig>::updatePercussionPool(const Vecto
 
 template <typename TInclusionSolverConfig>
 void InclusionSolverNT<TInclusionSolverConfig>::readFromPercussionPool(unsigned int index,
-                                                                       VectorDyn&   P_Nold,
-                                                                       VectorDyn&   P_Told)
+                                                                       VectorDyn& P_Nold,
+                                                                       VectorDyn& P_Told)
 {
     static VectorDyn P_contact(NDOFFriction + 1);
     m_percussionPool.getPercussion(m_pCollisionSolver->m_collisionSet[index].m_contactTag, P_contact);

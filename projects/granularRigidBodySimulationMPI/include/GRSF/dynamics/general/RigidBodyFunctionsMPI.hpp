@@ -25,8 +25,8 @@ void remoteToLocalBodyInitialization(TRigidBody* body)
 }
 
 template <typename TRigidBody>
-void changeBodyToSplitWeighting(TRigidBody*                      body,
-                                const unsigned int&              multiplicity,
+void changeBodyToSplitWeighting(TRigidBody* body,
+                                const unsigned int& multiplicity,
                                 const typename TRigidBody::PREC& multiplicityWeight)
 {
     GRSF_ASSERTMSG(body->m_pSolverData, "Body id: " << RigidBodyId::getBodyIdString(body->m_id) << "no solver data!");

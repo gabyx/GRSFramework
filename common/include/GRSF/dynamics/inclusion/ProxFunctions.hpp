@@ -103,7 +103,7 @@ struct ProxFunction<ConvexSets::RPlus>
     * @param y Output which is proxed on to \f$ C_1\f$ .
     */
     template <typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>&      x,
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>& x,
                                                 const Eigen::MatrixBase<DerivedOther>& y)
     {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
@@ -152,8 +152,8 @@ struct ProxFunction<ConvexSets::Disk>
     * @param y Output which is proxed on to \f$ C_1 \f$.
     */
     template <typename PREC, typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxSingle(const PREC&                            radius,
-                                                 const Eigen::MatrixBase<Derived>&      x,
+    static INLINE_PROX_KEYWORD void doProxSingle(const PREC& radius,
+                                                 const Eigen::MatrixBase<Derived>& x,
                                                  const Eigen::MatrixBase<DerivedOther>& y)
     {
         // Solve the set (disc with radius mu_P_N), one r is used for the prox!
@@ -177,7 +177,7 @@ struct ProxFunction<ConvexSets::Disk>
     * @param y Input/output vector which is proxed onto a scaled unit disk \f$ C_1 \f$.
     */
     template <typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>&      radius,
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>& radius,
                                                 const Eigen::MatrixBase<DerivedOther>& y)
     {
         using PREC = typename Derived::Scalar;
@@ -206,7 +206,7 @@ struct ProxFunction<ConvexSets::Disk>
     * @param y Output which is proxed on to \f$ C_1 \f$.
     */
     template <typename Derived, typename DerivedOther1, typename DerivedOther2>
-    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>&       radius,
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>& radius,
                                                 const Eigen::MatrixBase<DerivedOther1>& x,
                                                 const Eigen::MatrixBase<DerivedOther2>& y)
     {
@@ -274,9 +274,9 @@ struct ProxFunction<ConvexSets::RPlusAndDisk>
     * and the second 2 values onto the unit disk which is scaled by the first proxed value times scale_factor.
     */
     template <typename PREC, typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxSingle(const PREC&                       scale_factor,
+    static INLINE_PROX_KEYWORD void doProxSingle(const PREC& scale_factor,
                                                  const Eigen::MatrixBase<Derived>& x,
-                                                 Eigen::MatrixBase<DerivedOther>&  y)
+                                                 Eigen::MatrixBase<DerivedOther>& y)
     {
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
         EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -303,7 +303,7 @@ struct ProxFunction<ConvexSets::RPlusAndDisk>
     * and the second 2 values onto the unit disk which is scaled by the first proxed value times scale_factor.
     */
     template <typename Derived, typename DerivedOther>
-    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>&      scale_factor,
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>& scale_factor,
                                                 const Eigen::MatrixBase<DerivedOther>& y)
     {
         using PREC = typename Derived::Scalar;
@@ -337,7 +337,7 @@ struct ProxFunction<ConvexSets::RPlusAndDisk>
     *  and the second 2 values onto the unit disk which is scaled by the first proxed value time scale_factor.
     */
     template <typename Derived, typename DerivedOther1, typename DerivedOther2>
-    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>&       scale_factor,
+    static INLINE_PROX_KEYWORD void doProxMulti(const Eigen::MatrixBase<Derived>& scale_factor,
                                                 const Eigen::MatrixBase<DerivedOther1>& x,
                                                 const Eigen::MatrixBase<DerivedOther2>& y)
     {
@@ -430,8 +430,8 @@ INLINE_PROX_KEYWORD bool cancelCriteriaVector(const Eigen::MatrixBase<Derived>& 
                                               const Eigen::MatrixBase<Derived>& P_N_new,
                                               const Eigen::MatrixBase<Derived>& P_T_old,
                                               const Eigen::MatrixBase<Derived>& P_T_new,
-                                              double                            AbsTol,
-                                              double                            RelTol)
+                                              double AbsTol,
+                                              double RelTol)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     using PREC = typename Derived::Scalar;
@@ -473,8 +473,8 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>& P
                                              const Eigen::MatrixBase<Derived>& P_N_new,
                                              const Eigen::MatrixBase<Derived>& P_T_old,
                                              const Eigen::MatrixBase<Derived>& P_T_new,
-                                             double                            AbsTol,
-                                             double                            RelTol)
+                                             double AbsTol,
+                                             double RelTol)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
 
@@ -499,11 +499,11 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>& P
 }
 
 template <typename PREC, typename Derived, typename DerivedOther>
-INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>&      P_old,
+INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>& P_old,
                                              const Eigen::MatrixBase<DerivedOther>& P_new,
-                                             PREC                                   AbsTol,
-                                             PREC                                   RelTol,
-                                             PREC&                                  residual)
+                                             PREC AbsTol,
+                                             PREC RelTol,
+                                             PREC& residual)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -529,10 +529,10 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>&  
 }
 
 template <typename PREC, typename Derived, typename DerivedOther>
-INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>&      P_old,
+INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>& P_old,
                                              const Eigen::MatrixBase<DerivedOther>& P_new,
-                                             PREC                                   AbsTol,
-                                             PREC                                   RelTol)
+                                             PREC AbsTol,
+                                             PREC RelTol)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -550,12 +550,12 @@ INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>&  
 }
 
 template <typename PREC, typename Derived, typename DerivedOther, typename DerivedOther2>
-INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(const Eigen::MatrixBase<Derived>&       P_old,
-                                                  const Eigen::MatrixBase<DerivedOther>&  P_new,
+INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(const Eigen::MatrixBase<Derived>& P_old,
+                                                  const Eigen::MatrixBase<DerivedOther>& P_new,
                                                   const Eigen::MatrixBase<DerivedOther2>& NormMatrix_diag,
-                                                  PREC                                    AbsTol,
-                                                  PREC                                    RelTol,
-                                                  PREC&                                   residual)
+                                                  PREC AbsTol,
+                                                  PREC RelTol,
+                                                  PREC& residual)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -585,12 +585,12 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(const Eigen::MatrixBase<Derive
 }
 
 template <typename Derived, typename DerivedOther, typename DerivedOther2>
-INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(const Eigen::MatrixBase<Derived>&       P_old,
-                                                    const Eigen::MatrixBase<DerivedOther>&  P_new,
+INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(const Eigen::MatrixBase<Derived>& P_old,
+                                                    const Eigen::MatrixBase<DerivedOther>& P_new,
                                                     const Eigen::MatrixBase<DerivedOther2>& NormMatrix_diag,
-                                                    double                                  AbsTol,
-                                                    double                                  RelTol,
-                                                    double&                                 residual)
+                                                    double AbsTol,
+                                                    double RelTol,
+                                                    double& residual)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -618,11 +618,11 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(const Eigen::MatrixBase<Deri
 }
 
 template <typename Derived, typename DerivedOther, typename DerivedOther2>
-INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(const Eigen::MatrixBase<Derived>&       P_old,
-                                                    const Eigen::MatrixBase<DerivedOther>&  P_new,
+INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(const Eigen::MatrixBase<Derived>& P_old,
+                                                    const Eigen::MatrixBase<DerivedOther>& P_new,
                                                     const Eigen::MatrixBase<DerivedOther2>& NormMatrix_diag,
-                                                    double                                  AbsTol,
-                                                    double                                  RelTol)
+                                                    double AbsTol,
+                                                    double RelTol)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -646,13 +646,13 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNormSq(const Eigen::MatrixBase<Deri
 }
 
 template <typename PREC, typename Derived, typename DerivedOther, typename DerivedOther2, typename DerivedOther3>
-INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(const Eigen::MatrixBase<Derived>&       u_old,
+INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(const Eigen::MatrixBase<Derived>& u_old,
                                                   const Eigen::MatrixBase<DerivedOther2>& NormMatrix1_diag,
-                                                  const Eigen::MatrixBase<DerivedOther>&  P_old,
-                                                  const Eigen::MatrixBase<DerivedOther>&  P_new,
+                                                  const Eigen::MatrixBase<DerivedOther>& P_old,
+                                                  const Eigen::MatrixBase<DerivedOther>& P_new,
                                                   const Eigen::MatrixBase<DerivedOther3>& NormMatrix2,
-                                                  PREC                                    AbsTol,
-                                                  PREC                                    RelTol)
+                                                  PREC AbsTol,
+                                                  PREC RelTol)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);
@@ -676,11 +676,11 @@ INLINE_PROX_KEYWORD bool cancelCriteriaMatrixNorm(const Eigen::MatrixBase<Derive
 }
 
 template <typename PREC, typename Derived, typename DerivedOther>
-INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>&      P_old,
+INLINE_PROX_KEYWORD bool cancelCriteriaValue(const Eigen::MatrixBase<Derived>& P_old,
                                              const Eigen::MatrixBase<DerivedOther>& P_new,
-                                             PREC                                   AbsTol,
-                                             PREC                                   RelTol,
-                                             unsigned int&                          counter)
+                                             PREC AbsTol,
+                                             PREC RelTol,
+                                             unsigned int& counter)
 {
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(DerivedOther);

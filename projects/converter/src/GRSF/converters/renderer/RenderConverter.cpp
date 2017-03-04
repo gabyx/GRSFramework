@@ -16,9 +16,9 @@
 #include "GRSF/converters/renderer/RenderLogicParserGenerators.hpp"
 
 RenderConverter::RenderConverter(const std::vector<boost::filesystem::path>& inputFiles,
-                                 boost::filesystem::path                     sceneFile,
-                                 boost::filesystem::path                     logicFile,
-                                 Renderer                                    renderer)
+                                 boost::filesystem::path sceneFile,
+                                 boost::filesystem::path logicFile,
+                                 Renderer renderer)
     : Base(inputFiles)
 {
     m_renderer  = renderer;

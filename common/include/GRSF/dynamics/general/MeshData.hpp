@@ -45,8 +45,8 @@ public:
 
     // Mesh Information in 3D Coordinates in [m] --> scaled!
     Vertices m_Vertices;
-    Faces    m_Faces;
-    Normals  m_Normals;
+    Faces m_Faces;
+    Normals m_Normals;
 
     void print()
     {

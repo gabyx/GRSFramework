@@ -62,7 +62,7 @@ public:
     }
 
     std::string m_dataName;  /// Data extraction name
-    TensorType  m_tensor;
+    TensorType m_tensor;
 
 private:
     template <typename IndexType, std::size_t... Is>
@@ -83,7 +83,7 @@ private:
     }
 
     template <std::size_t I>
-    constexpr int         getZero()
+    constexpr int getZero()
     {
         return 0;
     }
@@ -391,8 +391,8 @@ public:
     Vector3 m_maxPointOrig;
 
     /** 3D Grid */
-    AABB3d     m_aabb;  ///< Coordinates in K frame which is located at Origin
-    Matrix33   m_R_KI;
+    AABB3d m_aabb;  ///< Coordinates in K frame which is located at Origin
+    Matrix33 m_R_KI;
     Array3UInt m_dimension;
 
     /** Data Extractors */
@@ -401,10 +401,10 @@ public:
     using ExtractorTransVelProj1DType = Extractors::ExtractorTransVelocityProj1D<3>;
     using ExtractorTransVelProj2DType = Extractors::ExtractorTransVelocityProj2D<3>;
 
-    std::vector<ExtractorTransVelType>       m_transVelExtractor;  /// only one makes sense!
+    std::vector<ExtractorTransVelType> m_transVelExtractor;  /// only one makes sense!
     std::vector<ExtractorTransVelProj1DType> m_transVelProj1DExtractors;
     std::vector<ExtractorTransVelProj2DType> m_transVelProj2DExtractors;
-    std::vector<ExtractorBodyMaskType>       m_bodyMaskExtractors;
+    std::vector<ExtractorBodyMaskType> m_bodyMaskExtractors;
 
     /** Returns the total bytes which is needed for all extractors and initializes all buffers */
     std::size_t resizeBuffer()
@@ -487,7 +487,7 @@ public:
         }
 
     private:
-        GridType*            m_grid;
+        GridType* m_grid;
         GridExtSettingsType* m_settings;
     };
 

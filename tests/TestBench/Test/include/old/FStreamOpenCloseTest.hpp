@@ -23,7 +23,7 @@ void fstreamOpenCloseTest()
 
     const unsigned int nFiles = 1000;
 
-    std::string  add = "100Files.txt";
+    std::string add = "100Files.txt";
     unsigned int loops, restBytes;
 
     std::ofstream output1("FStreamTest-AllOpenCloseTest-" + add);
@@ -32,17 +32,17 @@ void fstreamOpenCloseTest()
     std::ofstream output2("FStreamTest-LeaveOpen-" + add);
     output2 << "#WriteLength \tTimeToWrite \tWriteSpeedPerFile [mb/s]" << std::endl;
 
-    typedef std::chrono::duration<double>      fsec;
+    typedef std::chrono::duration<double> fsec;
     typedef std::chrono::high_resolution_clock Clock;
 
     // Test Data for the Buffer
-    char  value    = 1;
+    char value     = 1;
     char* testData = new char[increment];  // Just Garbage
     std::memset(testData, value, increment);
 
     // Make all files:
     std::vector<std::string> vecFiles;
-    std::stringstream        s;
+    std::stringstream s;
     for (int i = 0; i < nFiles; i++)
     {
         s.str("");
@@ -79,7 +79,7 @@ void fstreamOpenCloseTest()
     {
         // open all files
         std::vector<std::fstream*> vecStream;
-        std::stringstream          s;
+        std::stringstream s;
         for (int i = 0; i < nFiles; i++)
         {
             s.str("");

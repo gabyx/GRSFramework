@@ -72,9 +72,9 @@ private:
     std::shared_ptr<StateRecorderType> m_pStateRecorder;
     void gracefullyExit(int signal);
 
-    std::shared_ptr<TimeStepperType>    m_pTimestepper;
+    std::shared_ptr<TimeStepperType> m_pTimestepper;
     std::shared_ptr<DynamicsSystemType> m_pDynSys;
-    std::shared_ptr<BodyCommunicator>   m_pBodyCommunicator;
+    std::shared_ptr<BodyCommunicator> m_pBodyCommunicator;
 
     using ProcessCommunicatorType = MPILayer::ProcessCommunicator;
     using ProcessInfoType         = typename ProcessCommunicatorType::ProcessInfoType;

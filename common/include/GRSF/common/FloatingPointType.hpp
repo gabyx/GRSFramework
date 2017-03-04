@@ -120,7 +120,7 @@ private:
     union
     {
         RawType value_;
-        Bits    bits_;
+        Bits bits_;
     };
 };
 

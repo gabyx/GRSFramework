@@ -75,8 +75,8 @@ protected:
 
     // open files to log the writes!
     typedef std::unordered_map<RigidBodyIdType, std::ofstream*> FileMapLog;
-    FileMapLog   m_LogSimFiles;
-    bool         m_logWriteAccess;
+    FileMapLog m_LogSimFiles;
+    bool m_logWriteAccess;
     unsigned int m_accessId;
 
     unsigned int m_nSimBodies;
@@ -125,7 +125,7 @@ void StateRecorderBody::setDirectoryPath(boost::filesystem::path dir_path)
 bool StateRecorderBody::createSimFile(RigidBodyType* body, bool truncate)
 {
     boost::filesystem::path file;
-    std::stringstream       s;
+    std::stringstream s;
 
     file = m_directoryPath;
     getSimBodyFileName(body, s);
@@ -210,7 +210,7 @@ bool StateRecorderBody::createSimFile(RigidBodyType* body, bool truncate)
 }
 
 bool StateRecorderBody::createSimFiles(const typename DynamicsSystemType::RigidBodySimContainerType& body_list,
-                                       bool                                                          truncate)
+                                       bool truncate)
 {
     // For every body add a Sim File!
     typename DynamicsSystemType::RigidBodySimContainerType::const_iterator it;

@@ -38,8 +38,8 @@ void fstreamBufferTest()
 
     const unsigned int writeNTimes = 1;        // Averaging over some many times!
     const unsigned int fileLength  = 1 << 30;  // 104857600=100mb,  314572800=300mb , 1<< 30 =1GB
-    std::string        add         = "1000.txt";
-    unsigned int       loops, restBytes;
+    std::string add                = "1000.txt";
+    unsigned int loops, restBytes;
 
     std::streambuf* buf;
 
@@ -65,13 +65,13 @@ void fstreamBufferTest()
 
     // To Cout
 
-    typedef std::chrono::duration<double>      fsec;
+    typedef std::chrono::duration<double> fsec;
     typedef std::chrono::high_resolution_clock Clock;
 
     // Test Data for the Buffer
-    bool  removeFile = true;
-    char  value      = 1;
-    char* testData   = new char[fileLength];  // Just Garbage 1GB!!
+    bool removeFile = true;
+    char value      = 1;
+    char* testData  = new char[fileLength];  // Just Garbage 1GB!!
     std::memset(testData, value, fileLength);
 
     // Preallocate file;

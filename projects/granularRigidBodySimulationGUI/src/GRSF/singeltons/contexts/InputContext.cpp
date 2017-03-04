@@ -76,8 +76,8 @@ bool InputContext::initialise()
     if (!mInputSystem)
     {
         // Setup basic variables
-        OIS::ParamList     paramList;
-        std::size_t        windowHnd = 0;
+        OIS::ParamList paramList;
+        std::size_t windowHnd = 0;
         std::ostringstream windowHndStr;
 
         // Get window handle
@@ -133,7 +133,7 @@ bool InputContext::initialise()
 
             // Get window size
             unsigned int width, height, depth;
-            int          left, top;
+            int left, top;
             RenderContext::getSingleton().m_pRenderWnd->getMetrics(width, height, depth, left, top);
 
             // Set mouse region

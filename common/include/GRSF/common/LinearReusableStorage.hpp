@@ -364,8 +364,8 @@ public:
         // (they have not been constructed yet)
 
         // find the first junk j after m_insertIdx which is fully not used
-        auto        j        = m_junkSizes.begin();  // if end() -> m_insertIdx == 0
-        auto        e        = m_junkSizes.end();
+        auto j               = m_junkSizes.begin();  // if end() -> m_insertIdx == 0
+        auto e               = m_junkSizes.end();
         std::size_t accumIdx = 0;
         while (accumIdx < m_insertIdx && j != m_junkSizes.end())
         {
@@ -483,7 +483,7 @@ public:
     void shuffleUniformly()
     {
         static RandomEngine g;
-        Dist<std::size_t>   r(0, m_insertIdx - 1);
+        Dist<std::size_t> r(0, m_insertIdx - 1);
 
         for (std::size_t i = 0; i < m_insertIdx; ++i)
         {

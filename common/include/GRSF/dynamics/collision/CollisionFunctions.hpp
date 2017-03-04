@@ -31,7 +31,7 @@ DEFINE_MATRIX_TYPES
 template <typename Derived1, typename Derived2>
 inline bool collideHalfspacePointAndProx(const MatrixBase<Derived1>& I_pos,
                                          const MatrixBase<Derived2>& I_normal,
-                                         Vector3&                    I_p)
+                                         Vector3& I_p)
 {
     // t = n * r_PS ( P=point, S=center of plane ), if t>=0 intersect!
     PREC t = I_normal.dot(I_pos - I_p) /*+  halfspace->m_normal.dot(halfspace->m_pos)*/;
@@ -52,7 +52,7 @@ inline bool collideSpherePointAndProx(const MatrixBase<Derived>& I_center, PREC 
     // p = d - d/norm(d) * radius + p -->  is the projection onto the sphere
 
     Vector3 dist = (I_center - I_p);
-    PREC    dsqr = dist.squaredNorm();
+    PREC dsqr    = dist.squaredNorm();
 
     if (dsqr <= radius * radius)
     {
@@ -101,14 +101,14 @@ bool collideCapsulePointAndProx(
 using ClosestPoint    = boost::tuple<double, Vector3, unsigned int, unsigned int>;
 using ClosestPointSet = std::vector<ClosestPoint>;
 
-inline Vector3 getClosestPoint_PointTriangle(const Vector3&                        I_r_S,
-                                             const Vector3&                        vertex0,
-                                             const Vector3&                        vertex1,
-                                             const Vector3&                        vertex2,
+inline Vector3 getClosestPoint_PointTriangle(const Vector3& I_r_S,
+                                             const Vector3& vertex0,
+                                             const Vector3& vertex1,
+                                             const Vector3& vertex2,
                                              const typename MeshData::MeshIndices& indices,
-                                             const unsigned int&                   indexFace,
-                                             unsigned int&                         type,
-                                             unsigned int&                         id)
+                                             const unsigned int& indexFace,
+                                             unsigned int& type,
+                                             unsigned int& id)
 {
     //      ab * ( I_r_0S - I_n(I_n *(I_r_S - I_r_0)) ) == ab *  I_r_0S
 
@@ -141,9 +141,9 @@ inline Vector3 getClosestPoint_PointTriangle(const Vector3&                     
         return vertex2;
 
     // ==============================================
-    type       = 2;
-    Vector3 n  = ab.cross(ac);
-    double  vc = n.dot((vertex0 - I_r_S).cross(vertex1 - I_r_S));
+    type      = 2;
+    Vector3 n = ab.cross(ac);
+    double vc = n.dot((vertex0 - I_r_S).cross(vertex1 - I_r_S));
 
     id = indices(0);
     // Check if point lies behind ab! (normale mit vc muss negativ sein)
@@ -172,13 +172,13 @@ inline Vector3 getClosestPoint_PointTriangle(const Vector3&                     
     return u * vertex0 + v * vertex1 + w * vertex2;
 };
 
-inline Vector3 getClosestPoint_PointTriangle(const Vector3&      I_r_S,
-                                             const MeshData&     mesh,
-                                             const Vector3&      I_r_M,
-                                             const Matrix33&     A_IM,
+inline Vector3 getClosestPoint_PointTriangle(const Vector3& I_r_S,
+                                             const MeshData& mesh,
+                                             const Vector3& I_r_M,
+                                             const Matrix33& A_IM,
                                              const unsigned int& indexFace,
-                                             unsigned int&       type,
-                                             unsigned int&       id)
+                                             unsigned int& type,
+                                             unsigned int& id)
 {
     // Assumes everything in the same frame!
     // Search the closest point to the sphere on the triangle A,B,C with vertex0,1,2 -->
@@ -186,7 +186,7 @@ inline Vector3 getClosestPoint_PointTriangle(const Vector3&      I_r_S,
     // To understand this -> draw a triangle on the paper, and imagina a point in above the paper
     // somewhere in the space, this point is the center of the sphere...
 
-    static Vector3               vertex0, vertex1, vertex2, M_r_MS;
+    static Vector3 vertex0, vertex1, vertex2, M_r_MS;
     const MeshData::MeshIndices& indices = mesh.m_Faces[indexFace];
     vertex0                              = mesh.m_Vertices[indices(0)];
     vertex1                              = mesh.m_Vertices[indices(1)];
@@ -196,21 +196,21 @@ inline Vector3 getClosestPoint_PointTriangle(const Vector3&      I_r_S,
     return A_IM * getClosestPoint_PointTriangle(M_r_MS, vertex0, vertex1, vertex2, indices, indexFace, type, id);
 };
 
-inline void getClosestPointsInRadius_PointMesh(const Vector3&   I_r_S,
-                                               const PREC&      radius,
-                                               const MeshData&  mesh,
-                                               const Vector3&   I_r_M,
-                                               const Matrix33&  A_IM,
+inline void getClosestPointsInRadius_PointMesh(const Vector3& I_r_S,
+                                               const PREC& radius,
+                                               const MeshData& mesh,
+                                               const Vector3& I_r_M,
+                                               const Matrix33& A_IM,
                                                ClosestPointSet& pointSet)
 {
     // Iterate over all faces
     MeshData::Faces::const_iterator faceIt;
 
     static Vector3 vertex0, vertex1, vertex2, M_r_MS, I_r_SC;
-    unsigned int   type;
-    unsigned int   id;
-    bool           validContact;
-    int            faceNr = 0;
+    unsigned int type;
+    unsigned int id;
+    bool validContact;
+    int faceNr = 0;
 
     for (faceIt = mesh.m_Faces.begin(); faceIt != mesh.m_Faces.end(); ++faceIt)
     {
@@ -258,20 +258,20 @@ inline void getClosestPointsInRadius_PointMesh(const Vector3&   I_r_S,
 };
 
 /* Finds the point with the maximum overlap */
-inline void getClosestPointInRadius_PointMesh(const Vector3&   I_r_S,
-                                              const PREC&      radius,
-                                              const MeshData&  mesh,
-                                              const Vector3&   I_r_M,
-                                              const Matrix33&  A_IM,
+inline void getClosestPointInRadius_PointMesh(const Vector3& I_r_S,
+                                              const PREC& radius,
+                                              const MeshData& mesh,
+                                              const Vector3& I_r_M,
+                                              const Matrix33& A_IM,
                                               ClosestPointSet& pointSet)
 {
     // Iterate over all faces
     MeshData::Faces::const_iterator faceIt;
 
     static Vector3 vertex0, vertex1, vertex2, M_r_MS, I_r_SC;
-    unsigned int   type;
-    unsigned int   id;
-    int            faceNr = 0;
+    unsigned int type;
+    unsigned int id;
+    int faceNr = 0;
 
     static ClosestPoint cp;
     cp.get<0>() = 0;  // set overlap to zero

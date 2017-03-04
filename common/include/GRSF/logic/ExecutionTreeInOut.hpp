@@ -313,8 +313,8 @@ protected:
 
             return node->getPriority();
         }
-        bool       m_inputReachable = false;
-        LogicNode* m_reachNode      = nullptr;
+        bool m_inputReachable  = false;
+        LogicNode* m_reachNode = nullptr;
     };
 
     // Only for directed graphs, does not detect cycles -> endless loop!
@@ -375,8 +375,8 @@ protected:
             }
         }
 
-        bool       m_reached = false;
-        LogicNode* m_start   = nullptr;
+        bool m_reached     = false;
+        LogicNode* m_start = nullptr;
     };
 
     template <bool input>
@@ -398,7 +398,7 @@ protected:
         }
     }
 
-    NodeSetT       m_inputNodes;   ///< the input nodes
+    NodeSetT m_inputNodes;         ///< the input nodes
     OutputNodeMapT m_outputNodes;  ///< all output nodes in the tree
 
     NodeMapT m_nodeMap;  ///< all nodes in the tree

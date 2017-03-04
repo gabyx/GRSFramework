@@ -55,5 +55,5 @@ int main()
     int a = 4;
 
     const int& b = a;
-    int        c = int();
+    int c        = int();
 }

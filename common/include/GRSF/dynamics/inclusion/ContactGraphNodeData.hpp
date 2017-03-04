@@ -33,13 +33,13 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // not required
 
         MatrixUBody3 m_W_body[2];
-    Vector3          m_chi;
+    Vector3 m_chi;
 
     Vector3 m_eps;
 
-    unsigned int         m_nodeColor;
+    unsigned int m_nodeColor;
     const CollisionData* m_pCollData = nullptr;
-    ContactParameter     m_contactParameter;
+    ContactParameter m_contactParameter;
 
     ContactPercussion* m_cache = nullptr;
 };
@@ -68,8 +68,8 @@ public:
     //    MatrixMap<Vector3> m_LambdaBack; // Uncomment for faster swap with MatrixMap
     //    MatrixMap<Vector3> m_LambdaFront;
 
-    Vector3  m_R_i_inv_diag;  // Build over G_ii
-    Matrix33 m_G_ii;          // just for R_ii, and maybee later for better solvers!
+    Vector3 m_R_i_inv_diag;  // Build over G_ii
+    Matrix33 m_G_ii;         // just for R_ii, and maybee later for better solvers!
 
     Vector3 m_b;
 
@@ -117,7 +117,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // not required
 
         VectorUBody m_W_body[2];
-    PREC            m_chi;
+    PREC m_chi;
 
     const CollisionData* m_pCollData = nullptr;
 };

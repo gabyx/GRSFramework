@@ -27,9 +27,9 @@ class ApplicationCLOptions : public Utilities::Singleton<ApplicationCLOptions>
 {
 private:
     std::vector<boost::filesystem::path> m_localDirs;
-    boost::filesystem::path              m_globalDir = "./";
-    boost::filesystem::path              m_mediaDir  = "./";
-    boost::filesystem::path              m_sceneFile;
+    boost::filesystem::path m_globalDir = "./";
+    boost::filesystem::path m_mediaDir  = "./";
+    boost::filesystem::path m_sceneFile;
 
 public:
     class PostProcessTask
@@ -163,9 +163,9 @@ public:
                 std::vector<std::string> svec;
                 ops >> Option('p', "post-process", svec);
 
-                unsigned int     currentArgIdx = 0;
-                unsigned int     nextArgIdx    = 0;
-                PostProcessTask* p             = nullptr;
+                unsigned int currentArgIdx = 0;
+                unsigned int nextArgIdx    = 0;
+                PostProcessTask* p         = nullptr;
                 for (unsigned int i = 0; i < svec.size(); i++)
                 {
                     if (svec[i] == "bash")

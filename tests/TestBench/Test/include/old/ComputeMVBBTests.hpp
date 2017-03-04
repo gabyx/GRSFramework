@@ -44,7 +44,7 @@ PointFunctions::Vector3List getPointsFromFile3D(std::string filePath)
         GRSF_ERRORMSG("Could not open file: " << filePath)
     }
 
-    PREC        a, b, c;
+    PREC a, b, c;
     Vector3List v;
     while (file.good())
     {
@@ -65,7 +65,7 @@ Vector2List getPointsFromFile2D(std::string filePath)
     {  // check file is open, quit if not
         GRSF_ERRORMSG("Could not open file: " << filePath)
     }
-    PREC        a, b;
+    PREC a, b;
     Vector2List v;
     while (file.good())
     {
@@ -132,10 +132,10 @@ bool checkPointsInOOBB(const MatrixBase<Derived>& points, OOBB oobb)
     Matrix33 A_KI = oobb.m_q_KI.matrix();
     A_KI.transposeInPlace();
 
-    Vector3        p;
-    bool           allInside = true;
-    auto           size      = points.cols();
-    decltype(size) i         = 0;
+    Vector3 p;
+    bool allInside   = true;
+    auto size        = points.cols();
+    decltype(size) i = 0;
     while (i < size && allInside)
     {
         p = A_KI * points.col(i);
@@ -173,8 +173,8 @@ public:
             std::cerr << "ConvexHull Test " + std::to_string(N) + " not ok!" << std::endl;
         }
 
-        auto                    ind = c.getIndices();
-        unsigned int            j   = 0;
+        auto ind       = c.getIndices();
+        unsigned int j = 0;
         ComputeMVBB::Matrix2Dyn qHull(2, ind.size());
         for (auto& i : ind)
         {
@@ -275,7 +275,7 @@ public:
 
         {
             // generate points  on circle
-            unsigned int            max = 10000;
+            unsigned int max = 10000;
             ComputeMVBB::Matrix2Dyn t(2, max);
             for (unsigned int i = 0; i < max; i++)
             {
@@ -287,7 +287,7 @@ public:
 
         {
             // generate points
-            auto                    t = getPointsFromFile2D("./PointsSimulation2DRectFail.txt");
+            auto t = getPointsFromFile2D("./PointsSimulation2DRectFail.txt");
             ComputeMVBB::Matrix2Dyn v(2, t.size());
             for (unsigned int i = 0; i < t.size(); ++i)
             {
@@ -426,7 +426,7 @@ public:
         {
             // generate points  on circle
             unsigned int max = 100000;
-            Vector2List  v(max);
+            Vector2List v(max);
             for (unsigned int i = 0; i < max; i++)
             {
                 v[i] = Vector2(std::cos(0.0001 / max * i), std::sin(0.0001 / max * i));
@@ -488,7 +488,7 @@ public:
 
         {
             // generate points
-            auto                    v = getPointsFromFile2D("./PointsSimulation2DRectFail.txt");
+            auto v = getPointsFromFile2D("./PointsSimulation2DRectFail.txt");
             ComputeMVBB::Matrix2Dyn t(2, v.size());
             for (unsigned int i = 0; i < v.size(); ++i)
             {
@@ -594,7 +594,7 @@ public:
 
         {
             // generate points
-            auto                    v = getPointsFromFile3D("./PointsSimulationFailMVBB.txt");
+            auto v = getPointsFromFile3D("./PointsSimulationFailMVBB.txt");
             ComputeMVBB::Matrix3Dyn t(3, v.size());
             for (unsigned int i = 0; i < v.size(); ++i)
             {
@@ -646,14 +646,14 @@ public:
     DEFINE_MATRIX_TYPES
 
     template <typename TMatrix>
-    void mvbbTest(unsigned int   N,
+    void mvbbTest(unsigned int N,
                   const TMatrix& v,
-                  bool           dumpPoints         = true,
-                  PREC           eps                = 0.001,
-                  unsigned int   nPoints            = 400,
-                  unsigned int   gridSize           = 5,
-                  unsigned int   mvbbDiamOptLoops   = 2,
-                  unsigned int   gridSearchOptLoops = 10)
+                  bool dumpPoints                 = true,
+                  PREC eps                        = 0.001,
+                  unsigned int nPoints            = 400,
+                  unsigned int gridSize           = 5,
+                  unsigned int mvbbDiamOptLoops   = 2,
+                  unsigned int gridSearchOptLoops = 10)
     {
         using namespace PointFunctions;
         using namespace TestFunctions;

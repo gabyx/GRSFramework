@@ -28,7 +28,7 @@ void calcualteExpectedMassBin()
         std::cerr << "Could not open file!" << std::endl;
     }
     std::vector<PREC> masses;
-    PREC              d;
+    PREC d;
     std::cout << sizeof(PREC) << std::endl;
     while (1)
     {
@@ -49,7 +49,7 @@ void calcualteExpectedMassBin()
 
     // Do reduction (to sum up more accurately)
     unsigned int stride = 1;
-    auto         s      = masses.size();
+    auto s              = masses.size();
     while (stride < s)
     {
         for (unsigned int i = 0; i < n; i += 2 * stride)
@@ -87,9 +87,9 @@ void calculateExpectedMass()
 
     std::piecewise_constant_distribution<PREC> distribution(intervals.begin(), intervals.end(), weights.begin());
 
-    PREC              mass = 0;
+    PREC mass = 0;
     std::vector<PREC> masses(n);
-    std::ofstream     f("numbersCpp.bin", std::ios::binary);
+    std::ofstream f("numbersCpp.bin", std::ios::binary);
     for (unsigned int i = 0; i < n; i++)
     {
         auto r = distribution(gen);

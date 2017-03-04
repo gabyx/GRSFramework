@@ -31,7 +31,7 @@ void parseTransformSequence(XMLNodeType& node, Quaternion& q_KI, Vector3& I_r_IK
     // Iterate over all transforms an successfully applying the total trasnformation!
     Vector3 trans;
     Vector3 axis;
-    PREC    angle;
+    PREC angle;
     for (XMLNodeType& transf : node.children("Trafo"))
     {
         if (!Utilities::stringToType(trans, transf.attribute("trans").value()))

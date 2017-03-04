@@ -46,15 +46,15 @@ public:
     using Renderer = typename ApplicationCLOptionsRenderer::Renderer;
 
     RenderConverter(const std::vector<boost::filesystem::path>& inputFiles,
-                    boost::filesystem::path                     sceneFile,
-                    boost::filesystem::path                     logicFile,
-                    Renderer                                    renderer);
+                    boost::filesystem::path sceneFile,
+                    boost::filesystem::path logicFile,
+                    Renderer renderer);
     void convert();
 
 private:
     RenderExecutionGraph m_executionGraph;
-    RenderData           m_renderData;
-    Renderer             m_renderer;
+    RenderData m_renderData;
+    Renderer m_renderer;
 
     void setupExecutionGraph();
 

@@ -37,8 +37,8 @@ public:
 
 private:
     std::shared_ptr<OgreBites::SdkTrayManager> m_pTrayMgr;
-    Ogre::FrameEvent                           m_FrameEvent;
-    Ogre::OverlaySystem*                       m_overlaySystem = nullptr;
+    Ogre::FrameEvent m_FrameEvent;
+    Ogre::OverlaySystem* m_overlaySystem = nullptr;
 };
 
 #endif

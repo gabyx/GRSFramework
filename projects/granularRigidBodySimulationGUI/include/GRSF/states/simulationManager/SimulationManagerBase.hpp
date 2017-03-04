@@ -27,8 +27,8 @@ public:
     ~SimulationManagerBase();
 
     double getTimelineSimulation();
-    void   resetTimelineSimulation();
-    void   stopTimelineSimulation();
+    void resetTimelineSimulation();
+    void stopTimelineSimulation();
 
     // Used by vis thread
     void setThreadToBeStopped(
@@ -45,7 +45,7 @@ public:
     enum Threads m_eSimThreadRunning;
 
     double getTimeScale();
-    bool   isSimulationPaused();
+    bool isSimulationPaused();
     // Information to visualize by GUI
     void getIterationTime(double& averageIterationTime, double& maxIterationTime);
     void setIterationTime(double averageIterationTime, double maxIterationTime);
@@ -59,24 +59,24 @@ protected:
     boost::thread* m_pThread;
 
     boost::mutex m_mutexIterationtime;
-    double       m_averageIterationTime;
-    double       m_maxIterationTime;
+    double m_averageIterationTime;
+    double m_maxIterationTime;
 
     boost::mutex m_nCurrentContacts_mutex;
     unsigned int m_nCurrentContacts;
 
     boost::mutex m_bThreadToBeStopped_mutex;
-    bool         m_bThreadToBeStopped;
+    bool m_bThreadToBeStopped;
 
     boost::mutex m_bSimThreadRunning_mutex;
-    bool         m_bSimThreadRunning;
+    bool m_bSimThreadRunning;
 
     // Used by sim thread
     bool isSimThreadToBeStopped();        /**	\brief Checks if the sim thread should be stopped. */
     void setSimThreadRunning(bool value); /**	\brief Sets the variable which is used in the vis thread to check if
                                              the thread is still alive. */
 
-    boost::mutex              m_mutexTimelineSimulation;
+    boost::mutex m_mutexTimelineSimulation;
     std::shared_ptr<CPUTimer> m_pTimelineSimulation;
     double m_lastTime;  // This is used to stop the timer, set m_lastTime, increase/decrease timeScale, startTimer again
 
@@ -84,7 +84,7 @@ protected:
     double m_timeScaleSave;
 
     std::vector<double> m_timeScaleList;
-    int                 m_timeScaleListIdx;
+    int m_timeScaleListIdx;
     void addToTimeScale(double step);
 
     void togglePauseSimulation();

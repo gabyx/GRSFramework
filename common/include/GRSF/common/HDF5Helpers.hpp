@@ -199,7 +199,7 @@ template <typename TFileGroupData, typename T>
 inline void saveAttribute(const TFileGroupData& fg, const T& attr, std::string name)
 {
     GRSF_STATIC_ASSERTM((!std::is_same<T, std::string>::value), "string should not be saved with this function")
-    hsize_t       dims = 1;
+    hsize_t dims = 1;
     H5::DataSpace d(1, &dims /*dimension*/);
     H5::Attribute a = fg.createAttribute(name, Hdf5Helpers::mapNativeTypeToLE<T>(), d);
     a.write(Hdf5Helpers::getNativeType<T>(), &attr);
@@ -212,7 +212,7 @@ inline void saveAttribute(const TFileGroupData& fg, const std::string& s, std::s
     H5::StrType sT(Hdf5Helpers::getNativeType<std::string>());
     sT.setSize(s.size() + 1);  // nulltermination character as well
 
-    hsize_t       dims = 1;
+    hsize_t dims = 1;
     H5::DataSpace d(1, &dims /*dimension*/);            // one string
     H5::Attribute a = fg.createAttribute(name, sT, d);  // data type as c string
     a.write(sT, s.c_str());                             // write as c string
@@ -221,7 +221,7 @@ inline void saveAttribute(const TFileGroupData& fg, const std::string& s, std::s
 template <typename TFileGroupData>
 void saveRefAttribute(const TFileGroupData& fg, const hobj_ref_t& ref, std::string name = "StateRefs")
 {
-    hsize_t       s = 1;
+    hsize_t s = 1;
     H5::DataSpace ds(1, &s);
     H5::Attribute a = fg.createAttribute(name, H5::PredType::STD_REF_OBJ, ds);
     a.write(H5::PredType::STD_REF_OBJ, &ref);
@@ -369,9 +369,9 @@ H5::Group saveData(const TFileGroup& fg, const T& aabb, std::string name = "AABB
 template <typename TFileGroup>
 void saveRefData(const TFileGroup& fg, const std::vector<hobj_ref_t>& refs, std::string name = "StateRefs")
 {
-    hsize_t       s = refs.size();
+    hsize_t s = refs.size();
     H5::DataSpace ds(1, &s);
-    auto          refset = fg.createDataSet(name, H5::PredType::STD_REF_OBJ, ds);
+    auto refset = fg.createDataSet(name, H5::PredType::STD_REF_OBJ, ds);
     refset.write(&refs[0], H5::PredType::STD_REF_OBJ);
 }
 }

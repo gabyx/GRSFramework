@@ -34,9 +34,9 @@ public:
     using CommonEdgeDataType = typename ContactGraphType::CommonEdgeDataType;
 
     SorProxStepNodeVisitor(const InclusionSolverSettingsType& settings,
-                           bool&                              globalConverged,
-                           const unsigned int&                globalIterationNeeded,
-                           ContactGraphType*                  graph)
+                           bool& globalConverged,
+                           const unsigned int& globalIterationNeeded,
+                           ContactGraphType* graph)
         : m_settings(settings)
         , m_bConverged(globalConverged)
         , m_globalIterationCounter(globalIterationNeeded)
@@ -141,11 +141,11 @@ public:
     }
 
 protected:
-    Logging::Log*                      m_pSolverLog = nullptr;
-    PREC                               m_alpha;
+    Logging::Log* m_pSolverLog = nullptr;
+    PREC m_alpha;
     const InclusionSolverSettingsType& m_settings;
-    bool&                              m_bConverged;              ///< Access to global flag for cancelation criteria
-    const unsigned int&                m_globalIterationCounter;  ///< Access to global iteration counter
+    bool& m_bConverged;                            ///< Access to global flag for cancelation criteria
+    const unsigned int& m_globalIterationCounter;  ///< Access to global iteration counter
 
     ContactGraphType* m_pGraph = nullptr;
 };
@@ -174,9 +174,9 @@ public:
     DEFINE_SORPROXSTEPNODE_BASE
 
     ContactSorProxStepNodeVisitor(const InclusionSolverSettingsType& settings,
-                                  bool&                              globalConverged,
-                                  const unsigned int&                globalIterationNeeded,
-                                  ContactGraphType*                  graph)
+                                  bool& globalConverged,
+                                  const unsigned int& globalIterationNeeded,
+                                  ContactGraphType* graph)
         : Base(settings, globalConverged, globalIterationNeeded, graph)
     {
     }
@@ -187,9 +187,9 @@ public:
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        auto&              nodeData = node.getData();
+        auto& nodeData = node.getData();
         static VectorUBody uCache1, uCache2;
-        PREC               residual;
+        PREC residual;
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog,
                             "---> SorProx, Node: " << node.getId() << "=====================" << std::endl);
@@ -330,9 +330,9 @@ public:
                     // Sepcial update (no differences)
                     // doVelocityUpdate<1>(nodeData);
 
-                    LOGSLLEVEL3_CONTACT(m_pSolverLog,
-                                        "\t---> nd.u1Front: " << nodeData.m_uBufferPtr[i]->m_front.transpose()
-                                                              << std::endl);
+                    LOGSLLEVEL3_CONTACT(
+                        m_pSolverLog,
+                        "\t---> nd.u1Front: " << nodeData.m_uBufferPtr[i]->m_front.transpose() << std::endl);
 
                     if (m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal)
                     {
@@ -429,9 +429,9 @@ public:
     DEFINE_SORPROXSTEPNODE_BASE
 
     FullSorProxStepNodeVisitor(const InclusionSolverSettingsType& settings,
-                               bool&                              globalConverged,
-                               const unsigned int&                globalIterationNeeded,
-                               ContactGraphType*                  graph)
+                               bool& globalConverged,
+                               const unsigned int& globalIterationNeeded,
+                               ContactGraphType* graph)
         : Base(settings, globalConverged, globalIterationNeeded, graph)
     {
     }
@@ -442,9 +442,9 @@ public:
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        auto&              nodeData = node.getData();
+        auto& nodeData = node.getData();
         static VectorUBody uCache1, uCache2;
-        PREC               residual;
+        PREC residual;
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog,
                             "---> SorProx, Node: " << node.getId() << "=====================" << std::endl);
@@ -540,9 +540,9 @@ public:
                         nodeData.m_pCollData->m_pBody[i]->m_MassMatrixInv_diag.asDiagonal() *
                         nodeData.m_W_body[i].template rightCols<2>() * lambda_T;
 
-                    LOGSLLEVEL3_CONTACT(m_pSolverLog,
-                                        "\t---> nd.u1Front: " << nodeData.m_uBufferPtr[i]->m_front.transpose()
-                                                              << std::endl);
+                    LOGSLLEVEL3_CONTACT(
+                        m_pSolverLog,
+                        "\t---> nd.u1Front: " << nodeData.m_uBufferPtr[i]->m_front.transpose() << std::endl);
 
                     if (m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal)
                     {
@@ -645,9 +645,9 @@ public:
     DEFINE_SORPROXSTEPNODE_BASE
 
     NormalSorProxStepNodeVisitor(const InclusionSolverSettingsType& settings,
-                                 bool&                              globalConverged,
-                                 const unsigned int&                globalIterationNeeded,
-                                 ContactGraphType*                  graph)
+                                 bool& globalConverged,
+                                 const unsigned int& globalIterationNeeded,
+                                 ContactGraphType* graph)
         : Base(settings, globalConverged, globalIterationNeeded, graph)
     {
     }
@@ -663,9 +663,9 @@ public:
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        auto&              nodeData = node.getData();
+        auto& nodeData = node.getData();
         static VectorUBody uCache1, uCache2;
-        PREC               residual;
+        PREC residual;
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog,
                             "---> SorProx, Node: " << node.getId() << "=====================" << std::endl);
@@ -750,9 +750,9 @@ public:
     DEFINE_SORPROXSTEPNODE_BASE
 
     TangentialSorProxStepNodeVisitor(const InclusionSolverSettingsType& settings,
-                                     bool&                              globalConverged,
-                                     const unsigned int&                globalIterationNeeded,
-                                     ContactGraphType*                  graph)
+                                     bool& globalConverged,
+                                     const unsigned int& globalIterationNeeded,
+                                     ContactGraphType* graph)
         : Base(settings, globalConverged, globalIterationNeeded, graph)
     {
     }
@@ -763,9 +763,9 @@ public:
         /* Convergence Criterias are no more checked if the m_bConverged (gloablConverged) flag is already false
            Then the iteration is not converged somewhere, and we need to wait till the next iteration!
         */
-        auto&              nodeData = node.getData();
+        auto& nodeData = node.getData();
         static VectorUBody uCache1, uCache2;
-        PREC               residual;
+        PREC residual;
 
         LOGSLLEVEL3_CONTACT(m_pSolverLog,
                             "---> SorProx, Node: " << node.getId() << "=====================" << std::endl);
@@ -819,9 +819,9 @@ public:
                         nodeData.m_pCollData->m_pBody[i]->m_MassMatrixInv_diag.asDiagonal() *
                         nodeData.m_W_body[i].template rightCols<2>() * lambda_T;
 
-                    LOGSLLEVEL3_CONTACT(m_pSolverLog,
-                                        "\t---> nd.u1Front: " << nodeData.m_uBufferPtr[i]->m_front.transpose()
-                                                              << std::endl);
+                    LOGSLLEVEL3_CONTACT(
+                        m_pSolverLog,
+                        "\t---> nd.u1Front: " << nodeData.m_uBufferPtr[i]->m_front.transpose() << std::endl);
 
                     if (m_settings.m_eConvergenceMethod == InclusionSolverSettingsType::InVelocityLocal)
                     {
@@ -1087,8 +1087,8 @@ public:
 
     private:
         const CollisionData* m_pCollData = nullptr;
-        UCFNodeDataType*     m_pNodeData = nullptr;
-        GetRotJacobi&        m_rotJacobi;
+        UCFNodeDataType* m_pNodeData     = nullptr;
+        GetRotJacobi& m_rotJacobi;
     };
 
     template <typename TNode>
@@ -1286,11 +1286,11 @@ private:
         }
     }
 
-    Logging::Log*               m_pSolverLog;
-    PREC                        m_alpha;
+    Logging::Log* m_pSolverLog;
+    PREC m_alpha;
     InclusionSolverSettingsType m_settings;
 
-    GetRotJacobi    m_rotJacobi;
+    GetRotJacobi m_rotJacobi;
     ComputeW_UCF<1> m_compW_body1;
     ComputeW_UCF<2> m_compW_body2;
 

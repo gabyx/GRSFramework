@@ -41,9 +41,9 @@ void MultiBodySimFilePart::setByteLengths()
 }
 
 bool MultiBodySimFilePart::openWrite(const boost::filesystem::path& file_path,
-                                     unsigned int                   nDOFqBody,
-                                     unsigned int                   nDOFuBody,
-                                     bool                           truncate)
+                                     unsigned int nDOFqBody,
+                                     unsigned int nDOFuBody,
+                                     bool truncate)
 {
     if (nDOFqBody == 0 || nDOFuBody == 0)
     {

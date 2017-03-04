@@ -92,10 +92,10 @@ public:
     * @detail if nSimBodies = 0, the sim file does not need to match nSimBodies
     */
     bool openRead(const boost::filesystem::path& file_path,
-                  bool                           readVelocities = true,
-                  unsigned int                   nDOFqBody      = 0,
-                  unsigned int                   nDOFuBody      = 0,
-                  unsigned int                   nSimBodies     = 0);
+                  bool readVelocities     = true,
+                  unsigned int nDOFqBody  = 0,
+                  unsigned int nDOFuBody  = 0,
+                  unsigned int nSimBodies = 0);
     /**
     * @brief Opens a .sim file for write only.
     * @param file_path The path to the file to open.
@@ -103,10 +103,10 @@ public:
     * @return true if the file is successfully opened and writable and false if not.
     */
     bool openWrite(const boost::filesystem::path& file_path,
-                   unsigned int                   nDOFqBody,
-                   unsigned int                   nDOFuBody,
-                   unsigned int                   nSimBodies,
-                   bool                           truncate = true);
+                   unsigned int nDOFqBody,
+                   unsigned int nDOFuBody,
+                   unsigned int nSimBodies,
+                   bool truncate = true);
 
     /**
     * @brief Closes the .sim file which was opened by an openWrite or openRead command.
@@ -144,11 +144,11 @@ public:
     */
     template <typename BodyStateContainer>
     inline bool readSpecific(BodyStateContainer& states,
-                             double&             stateTime,
-                             bool                readPos    = true,
-                             bool                readVel    = true,
-                             short               which      = 2,
-                             bool                onlyUpdate = true)
+                             double& stateTime,
+                             bool readPos    = true,
+                             bool readVel    = true,
+                             short which     = 2,
+                             bool onlyUpdate = true)
     {
         return readSpecific_impl(states, stateTime, readPos, readVel, which, onlyUpdate);
     }
@@ -237,20 +237,20 @@ public:
     /** Simple structure to return from getDetails() */
     struct Details
     {
-        std::streamsize                       m_nBytes;
-        std::streamsize                       m_nStates;
-        boost::filesystem::path               m_filePath;
-        std::streamsize                       m_headerLength;
-        std::streamsize                       m_nBytesPerState;
-        unsigned int                          m_nSimBodies;
-        unsigned int                          m_nDOFuBody, m_nDOFqBody;
-        std::streamsize                       m_nBytesPerQBody;
-        std::streamsize                       m_nBytesPerUBody;
-        std::streamsize                       m_nBytesPerBody;
+        std::streamsize m_nBytes;
+        std::streamsize m_nStates;
+        boost::filesystem::path m_filePath;
+        std::streamsize m_headerLength;
+        std::streamsize m_nBytesPerState;
+        unsigned int m_nSimBodies;
+        unsigned int m_nDOFuBody, m_nDOFqBody;
+        std::streamsize m_nBytesPerQBody;
+        std::streamsize m_nBytesPerUBody;
+        std::streamsize m_nBytesPerBody;
         typename AdditionalBodyData::TypeEnum m_additionalBytesPerBodyType;
-        std::streamsize                       m_nAdditionalBytesPerBody;
-        bool                                  m_readVelocities;
-        TimeListType                          m_times;
+        std::streamsize m_nAdditionalBytesPerBody;
+        bool m_readVelocities;
+        TimeListType m_times;
 
         inline std::string getString(std::string linePrefix = "\t")
         {
@@ -306,7 +306,7 @@ public:
             s.append_attribute("nAdditionalBytesPerBody").set_value((long long int)m_nAdditionalBytesPerBody);
             s.append_attribute("readVelocities").set_value(m_readVelocities);
 
-            auto              t = s.append_attribute("timeList");
+            auto t = s.append_attribute("timeList");
             std::stringstream ss;
             if (!m_times.empty())
             {
@@ -348,12 +348,12 @@ public:
 
 private:
     bool openWrite_impl(const boost::filesystem::path& file_path,
-                        unsigned int                   nDOFqBody,
-                        unsigned int                   nDOFuBody,
-                        unsigned int                   nSimBodies,
-                        bool                           truncate            = true,
-                        AdditionalBodyData::TypeEnum   additionalBytesType = AdditionalBodyData::TypeEnum::NOTHING,
-                        std::streamsize                additionalBytesPerBody =
+                        unsigned int nDOFqBody,
+                        unsigned int nDOFuBody,
+                        unsigned int nSimBodies,
+                        bool truncate                                    = true,
+                        AdditionalBodyData::TypeEnum additionalBytesType = AdditionalBodyData::TypeEnum::NOTHING,
+                        std::streamsize additionalBytesPerBody =
                             AdditionalBodyData::getAdditionalBytesPerBody(AdditionalBodyData::TypeEnum::NOTHING));
 
     template <typename C,
@@ -384,7 +384,7 @@ private:
 
     std::fstream m_file_stream;  ///< The file stream which represents the binary data.
     unsigned int m_buf_size;     ///< The internal buffer size.
-    char*        m_Buffer;       ///< The buffer.
+    char* m_Buffer;              ///< The buffer.
 
     static const char m_simFileSignature[SIM_FILE_SIGNATURE_LENGTH];  ///< The .sim file header.
 
@@ -401,7 +401,7 @@ private:
     * @brief Reads in all the length of the .sim file.
     * @{
     */
-    bool            readLength();
+    bool readLength();
     std::streamsize m_nBytes  = 0;
     std::streamsize m_nStates = 0;
     /** @}*/
@@ -416,14 +416,14 @@ private:
                                    /// rank, etc.), additionalBytesPerBody
 
     /** @brief Determined from number of bodies! @{*/
-    void            setByteLengths();
+    void setByteLengths();
     std::streamsize m_nBytesPerState = 0;  ///< m_nSimBodies*(q,u) + time
-    unsigned int    m_nSimBodies     = 0;
+    unsigned int m_nSimBodies        = 0;
     /** @}*/
 
     std::streampos m_beginOfStates = 0;
 
-    unsigned int    m_nDOFuBody = 0, m_nDOFqBody = 0;
+    unsigned int m_nDOFuBody = 0, m_nDOFqBody = 0;
     std::streamsize m_nBytesPerQBody = 0;
     std::streamsize m_nBytesPerUBody = 0;
     std::streamsize m_nBytesPerBody  = 0;
@@ -513,9 +513,9 @@ MultiBodySimFile& MultiBodySimFile::operator<<(const DynamicsState* state)
 MultiBodySimFile& MultiBodySimFile::operator>>(DynamicsState* state)
 {
     auto nSimBodies = state->getNSimBodies();
-    GRSF_ASSERTMSG(m_nSimBodies == nSimBodies,
-                   "You try to read " << m_nSimBodies << "bodies into a state which was instanced to hold "
-                                      << nSimBodies);
+    GRSF_ASSERTMSG(
+        m_nSimBodies == nSimBodies,
+        "You try to read " << m_nSimBodies << "bodies into a state which was instanced to hold " << nSimBodies);
 
     // write time
     *this >> (double&)state->m_t;
@@ -552,12 +552,12 @@ bool MultiBodySimFile::readSpecific_impl(
     m_errorString.str("");
 
     std::set<RigidBodyIdType> updatedStates;
-    double                    currentTime = 0;
-    double                    lastTime    = -1;
+    double currentTime = 0;
+    double lastTime    = -1;
 
     RigidBodyState* pState = nullptr;
     RigidBodyIdType id;
-    bool            timeFound = false;
+    bool timeFound = false;
 
     m_file_stream.seekg(m_beginOfStates);
 

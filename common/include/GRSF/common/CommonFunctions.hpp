@@ -106,14 +106,14 @@ template <int N, typename PREC, typename Functor, typename TypeConverter, bool f
 bool stringToTypeFunctorImpl(Functor& f, const std::string& s)
 {
     unsigned int i = 0, j;
-    PREC         number;
+    PREC number;
     if (s.empty())
     {
         return false;
     }
 
-    unsigned int l      = s.size();
-    int          extVal = 0;
+    unsigned int l = s.size();
+    int extVal     = 0;
     while (extVal < N || N == -1)
     {
         if (i >= l)
@@ -245,7 +245,7 @@ struct CommaSeperatedPairBinShift
             return false;
         }
         t = 0;
-        THalf        temp;
+        THalf temp;
         unsigned int l = s.size();
 
         // search the comma
@@ -326,9 +326,9 @@ inline PREC genRandomValues(PREC value, Functor& f, Integral count)
 */
 template <typename PREC, typename Generator, typename Distribution, typename Integral>
 inline typename MyMatrix::Vector3<PREC> genRandomVec(typename MyMatrix::Vector3<PREC> value,
-                                                     Generator&                       g,
-                                                     Distribution&                    d,
-                                                     Integral                         count)
+                                                     Generator& g,
+                                                     Distribution& d,
+                                                     Integral count)
 {
     GRSF_STATIC_ASSERT(std::is_unsigned<Integral>::value)
     for (unsigned int i = 0; i < count; ++i)

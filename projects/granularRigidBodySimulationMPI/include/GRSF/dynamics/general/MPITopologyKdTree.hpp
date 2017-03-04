@@ -44,15 +44,15 @@ public:
     using BoundaryInfoType     = typename NodeType::BoundaryInfoType;
     using LeafNeighbourMapType = typename TreeType::LeafNeighbourMapType;
 
-    ProcessTopologyKdTree(NeighbourRanksListType&        nbRanks,
+    ProcessTopologyKdTree(NeighbourRanksListType& nbRanks,
                           AdjacentNeighbourRanksMapType& adjNbRanks,
-                          RankIdType                     processRank,
-                          RankIdType                     masterRank,
-                          std::shared_ptr<TreeType>      tree,
-                          const LeafNeighbourMapType&    neighbours,
-                          const AABB3d&                  aabb,
-                          bool                           aligned,
-                          const Matrix33&                A_IK = Matrix33::Identity())
+                          RankIdType processRank,
+                          RankIdType masterRank,
+                          std::shared_ptr<TreeType> tree,
+                          const LeafNeighbourMapType& neighbours,
+                          const AABB3d& aabb,
+                          bool aligned,
+                          const Matrix33& A_IK = Matrix33::Identity())
         : m_rank(processRank)
         , m_axisAligned(aligned)
         , m_A_KI(A_IK.transpose())
@@ -161,9 +161,9 @@ public:
         }
     };
 
-    bool checkOverlap(const RigidBodyType*    body,
+    bool checkOverlap(const RigidBodyType* body,
                       NeighbourRanksListType& neighbourProcessRanks,
-                      bool&                   overlapsOwnRank) const
+                      bool& overlapsOwnRank) const
     {
         neighbourProcessRanks.clear();
         if (m_axisAligned)
@@ -212,7 +212,7 @@ private:
     Matrix33
         m_A_KI;  ///< The grid can be rotated, this is the transformation matrix from grid frame K to intertia frame I
 
-    TreeType*       m_kdTree      = nullptr;  ///< The kdTree
+    TreeType* m_kdTree            = nullptr;  ///< The kdTree
     const NodeType* m_leaf        = nullptr;  ///< This ranks leaf pointer
     const NodeType* m_lcaBoundary = nullptr;
 

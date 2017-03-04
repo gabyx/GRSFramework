@@ -139,9 +139,9 @@ public:
         return m_q_KI * d;  // A_IK* d;
     }
 
-    Quaternion m_q_KI;      ///< Rotation of frame I to frame K, corresponds to a transformation A_IK;
-    Vector3    m_minPoint;  ///< in K Frame
-    Vector3    m_maxPoint;  ///< in K Frame
+    Quaternion m_q_KI;   ///< Rotation of frame I to frame K, corresponds to a transformation A_IK;
+    Vector3 m_minPoint;  ///< in K Frame
+    Vector3 m_maxPoint;  ///< in K Frame
 };
 
 #endif  // OOBB_hpp

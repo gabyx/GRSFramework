@@ -80,14 +80,14 @@ public:
         serialize_imp<0>(ar, version);
     }
 
-    template <std::size_t                              N, class Archive>
+    template <std::size_t N, class Archive>
     typename std::enable_if<(N < TupleSize - 1)>::type serialize_imp(Archive& ar, const unsigned int version)
     {
         ar& std::get<N>(m_data);
         serialize_imp<N + 1, Archive>(ar, version);
     }
 
-    template <std::size_t                             N, class Archive>
+    template <std::size_t N, class Archive>
     typename std::enable_if<N == TupleSize - 1>::type serialize_imp(Archive& ar, const unsigned int version)
     {
         ar& std::get<N>(m_data);
@@ -128,7 +128,7 @@ private:
     bool m_hasNoSimBodies;
 
     mutable NeighbourDataType* m_neighbourData = nullptr;
-    mutable BodyInfoType*      m_bodyInfo      = nullptr;
+    mutable BodyInfoType* m_bodyInfo           = nullptr;
 
     mutable bool m_initialized = false;
 
@@ -240,7 +240,7 @@ public:
                                                                              << "!");
 
             std::size_t size = m_neighbourData->sizeLocal();
-            ar&         size;
+            ar& size;
 
             // if(size>0) {
             LOGBC_SZ(m_pSerializerLog,
@@ -303,7 +303,7 @@ public:
 
         // Simulation Time:
         PREC simulationTime;
-        ar&  simulationTime;
+        ar& simulationTime;
         LOGASSERTMSG(m_nc->m_currentSimTime == simulationTime,
                      m_pSerializerLog,
                      "The message from rank: " << m_neighbourRank << " has timeStamp: " << simulationTime
@@ -315,7 +315,7 @@ public:
 
         // All flags
         bool hasNoSimBodies;
-        ar&  hasNoSimBodies;
+        ar& hasNoSimBodies;
 
         if (hasNoSimBodies)
         {
@@ -326,7 +326,7 @@ public:
         {
             // Number of submessages
             std::size_t size;
-            ar&         size;
+            ar& size;
 
             if (size > 0)
             {
@@ -352,7 +352,7 @@ public:
             for (unsigned int i = 0; i < size; i++)
             {
                 SubMessageFlag flag;
-                ar&            flag;
+                ar& flag;
                 if (flag == SubMessageFlag::NOTIFICATION)
                 {
                     LOGBC_SZ(m_pSerializerLog, "---> NotifactionSTART: " << i << std::endl;);
@@ -564,12 +564,12 @@ private:
     {
         // deserialize
         typename RigidBodyType::RigidBodyIdType id;
-        ar&                                     id;
+        ar& id;
         LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
         // ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
 
         RankIdType owningRank;
-        ar&        owningRank;
+        ar& owningRank;
         LOGBC_SZ(m_pSerializerLog, "-----> owning rank: " << owningRank << std::endl;);
 
         // normal update
@@ -620,10 +620,10 @@ private:
             // (needs to be in the neighbour structure with rank m_neighbourRank, otherwise this update is somewhat
             // stupid?
             bool res = m_neighbourData->eraseRemoteBodyData(body);
-            LOGASSERTMSG(res,
-                         m_pSerializerLog,
-                         "Body with id: " << RigidBodyId::getBodyIdString(id)
-                                          << "not deleted in neighbour structure (?)");
+            LOGASSERTMSG(
+                res,
+                m_pSerializerLog,
+                "Body with id: " << RigidBodyId::getBodyIdString(id) << "not deleted in neighbour structure (?)");
 
             // Change the body info
             body->m_pBodyInfo->m_isRemote         = false;
@@ -649,10 +649,10 @@ private:
                 }
 
                 auto pairlocalData = m_nc->m_nbDataMap.getNeighbourData(*it)->addLocalBodyData(body);
-                LOGASSERTMSG(pairlocalData.second,
-                             m_pSerializerLog,
-                             "Insert to neighbour data rank: " << *it << " in process rank: " << m_nc->m_rank
-                                                               << " failed!");
+                LOGASSERTMSG(
+                    pairlocalData.second,
+                    m_pSerializerLog,
+                    "Insert to neighbour data rank: " << *it << " in process rank: " << m_nc->m_rank << " failed!");
                 // Change comm status!
                 pairlocalData.first->m_commStatus = NeighbourDataType::LocalDataType::SEND_UPDATE;
             }
@@ -676,10 +676,10 @@ private:
 
             // Move the remote out of the neighbour structure
             bool res = m_neighbourData->eraseRemoteBodyData(body);
-            LOGASSERTMSG(res,
-                         m_pSerializerLog,
-                         "Body with id: " << RigidBodyId::getBodyIdString(id)
-                                          << "not deleted in neighbour structure (?)");
+            LOGASSERTMSG(
+                res,
+                m_pSerializerLog,
+                "Body with id: " << RigidBodyId::getBodyIdString(id) << "not deleted in neighbour structure (?)");
 
             auto pairRes = m_nc->m_nbDataMap.getNeighbourData(owningRank)->addRemoteBodyData(body);
             LOGASSERTMSG(pairRes.second,
@@ -704,12 +704,12 @@ private:
     {
         // id
         typename RigidBodyType::RigidBodyIdType id;
-        ar&                                     id;
+        ar& id;
         LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
         // ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // owner rankk
         RankIdType owningRank;
-        ar&        owningRank;
+        ar& owningRank;
         LOGBC_SZ(m_pSerializerLog, "-----> owning rank: " << owningRank << std::endl;);
 
         // normal update (make a new body!)
@@ -765,10 +765,10 @@ private:
                 }
                 // Change comm status!
                 auto pairlocalData = m_nc->m_nbDataMap.getNeighbourData(*it)->addLocalBodyData(body);
-                LOGASSERTMSG(pairlocalData.second,
-                             m_pSerializerLog,
-                             "Insert to neighbour data rank: " << *it << " in process rank: " << m_nc->m_rank
-                                                               << " failed!");
+                LOGASSERTMSG(
+                    pairlocalData.second,
+                    m_pSerializerLog,
+                    "Insert to neighbour data rank: " << *it << " in process rank: " << m_nc->m_rank << " failed!");
                 pairlocalData.first->m_commStatus = NeighbourDataType::LocalDataType::SEND_UPDATE;
             }
 
@@ -810,7 +810,7 @@ private:
     {
         // deserialize (ONLY REMOTE BODIES)
         typename RigidBodyType::RigidBodyIdType id;
-        ar&                                     id;
+        ar& id;
         LOGBC_SZ(m_pSerializerLog, "-----> body id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
         // ASSERTMSG(id != RigidBodyIdType(0)," ID zero!");
         // Go into the neighbour data structure and remove the remote body
@@ -825,10 +825,10 @@ private:
         // Remove and delete from global list, deletes also the body info data
         LOGBC_SZ(m_pSerializerLog, "--->\t Deleting body with id: " << RigidBodyId::getBodyIdString(id) << std::endl;)
         res = m_nc->m_globalRemote.deleteBody(id);
-        LOGASSERTMSG(res == true,
-                     m_pSerializerLog,
-                     "Remote Body with id: " << RigidBodyId::getBodyIdString(id)
-                                             << " could not be deleted in m_globalRemote!");
+        LOGASSERTMSG(
+            res == true,
+            m_pSerializerLog,
+            "Remote Body with id: " << RigidBodyId::getBodyIdString(id) << " could not be deleted in m_globalRemote!");
     }
 
     template <class Archive>
@@ -938,10 +938,10 @@ private:
                     GRSF_ERRORMSG("There is a SolverData already present in body with id: " << body->m_id);
                 }
             }
-            LOGASSERTMSG(body->m_pSolverData,
-                         m_pSerializerLog,
-                         "There is no SolverData present in body with id: " << RigidBodyId::getBodyIdString(body)
-                                                                            << "! ?");
+            LOGASSERTMSG(
+                body->m_pSolverData,
+                m_pSerializerLog,
+                "There is no SolverData present in body with id: " << RigidBodyId::getBodyIdString(body) << "! ?");
 
             // Velocity back
             serializeEigen(ar, body->m_pSolverData->m_uBuffer.m_back);
@@ -1017,7 +1017,7 @@ private:
         // take care this serialization replaces any shared_ptr if body->m_geometry is already filled!
         LOGBC_SZ(m_pSerializerLog, "-----> Serializing full geometry!" << std::endl;)
         GeomSerialization gs(body->m_geometry);
-        ar&               gs;
+        ar& gs;
     }
 };
 
@@ -1174,7 +1174,7 @@ public:
                      "The NeighbourMessageWrapperInclusion is not correctly initialized, Rank not set!")
 
         RigidBodyType::PREC time;
-        ar&                 time;
+        ar& time;
         LOGASSERTMSG(time == this->m_time,
                      this->m_pSerializerLog,
                      "Wrong message received! message time: " << time << ", current time: " << this->m_time)
@@ -1183,7 +1183,7 @@ public:
         // for each received body , if no node in the bilateral set in ContactGraph exists , add one bilateral node
         // with this participating rank;
         unsigned int size;
-        ar&          size;
+        ar& size;
 
         if (size > 0)
         {
@@ -1204,7 +1204,7 @@ public:
             for (unsigned int i = 0; i < size; i++)
             {
                 RigidBodyIdType id;
-                ar&             id;  // get all unique ids!
+                ar& id;  // get all unique ids!
                 LOGIC_SZ(this->m_pSerializerLog, "----> id: " << RigidBodyId::getBodyIdString(id) << std::endl;);
 
                 auto* localData = this->m_nc->m_pBodyComm->getNeighbourMap()
@@ -1323,13 +1323,13 @@ public:
             auto itEnd = m_neighbourData->localEnd();
             for (auto it = m_neighbourData->localBegin(); it != itEnd; ++it)
             {
-                LOGASSERTMSG(it->second.m_pSplitBodyNode,
-                             this->m_pSerializerLog,
-                             "m_pSplitBodyNode is null for body id: " << RigidBodyId::getBodyIdString(it->first)
-                                                                      << std::endl)
+                LOGASSERTMSG(
+                    it->second.m_pSplitBodyNode,
+                    this->m_pSerializerLog,
+                    "m_pSplitBodyNode is null for body id: " << RigidBodyId::getBodyIdString(it->first) << std::endl)
 
                 unsigned int multiplicity;
-                PREC         multiplicityWeight;
+                PREC multiplicityWeight;
                 it->second.m_pSplitBodyNode->getMultiplicityAndWeight(
                     this->m_neighbourRank, multiplicity, multiplicityWeight);
 
@@ -1371,12 +1371,12 @@ public:
                      "The NeighbourMessageWrapperInclusionMultiplicity is not correctly initialized, Rank not set!")
 
         RigidBodyType::PREC time;
-        ar&                 time;
+        ar& time;
         LOGASSERTMSG(time == this->m_time, this->m_pSerializerLog, "Wrong message received!")
 
         // REMOTE BODIES
         unsigned int size;
-        ar&          size;
+        ar& size;
 
         if (size > 0)
         {
@@ -1398,9 +1398,9 @@ public:
                                                                              << this->m_nc->m_rank
                                                                              << "!");
 
-            unsigned int       multiplicity;
-            PREC               multiplicityWeight;
-            RigidBodyIdType    id;
+            unsigned int multiplicity;
+            PREC multiplicityWeight;
+            RigidBodyIdType id;
             static VectorUBody h_term;
             for (unsigned int i = 0; i < size; i++)
             {
@@ -1530,7 +1530,7 @@ public:
 
         // Serialize all velocities of all remote SplitBodies
         unsigned int size = m_neighbourData->sizeRemote();
-        ar&          size;
+        ar& size;
 
         if (size > 0)
         {
@@ -1585,14 +1585,14 @@ public:
                                                                          << this->m_nc->m_rank
                                                                          << "!");
 
-        unsigned int        step;
+        unsigned int step;
         RigidBodyType::PREC time;
-        ar&                 time;
-        ar&                 step;
+        ar& time;
+        ar& step;
         LOGASSERTMSG(time == this->m_time && step == m_step, this->m_pSerializerLog, "Wrong message received!")
 
         unsigned int size;
-        ar&          size;
+        ar& size;
 
         if (size > 0)
         {
@@ -1606,7 +1606,7 @@ public:
             LOGIC_SZ(this->m_pSerializerLog, "---> # Local SplitBody Updates: " << size << std::endl;);
 
             RigidBodyIdType id;
-            VectorUBody     u;
+            VectorUBody u;
             for (unsigned int i = 0; i < size; i++)
             {
                 ar& id;
@@ -1640,7 +1640,7 @@ public:
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
 private:
-    mutable unsigned int       m_step;
+    mutable unsigned int m_step;
     mutable NeighbourDataType* m_neighbourData;
 };
 
@@ -1760,14 +1760,14 @@ public:
                                                                          << this->m_nc->m_rank
                                                                          << "!");
 
-        unsigned int        step;
+        unsigned int step;
         RigidBodyType::PREC time;
-        ar&                 time;
-        ar&                 step;
+        ar& time;
+        ar& step;
         LOGASSERTMSG(time == this->m_time && step == m_step, this->m_pSerializerLog, "Wrong message received!")
 
         unsigned int size;
-        ar&          size;
+        ar& size;
 
         if (size > 0)
         {
@@ -1781,7 +1781,7 @@ public:
             LOGIC_SZ(this->m_pSerializerLog, "---> # Remote SplitBodies Solutions: " << size << std::endl;);
 
             RigidBodyIdType id;
-            VectorUBody     u;
+            VectorUBody u;
             for (unsigned int i = 0; i < size; i++)
             {
                 ar& id;
@@ -1821,7 +1821,7 @@ public:
     BOOST_SERIALIZATION_SPLIT_MEMBER();
 
 private:
-    mutable unsigned int       m_step;
+    mutable unsigned int m_step;
     mutable NeighbourDataType* m_neighbourData;
 };
 
@@ -1847,7 +1847,7 @@ public:
     void save(Archive& ar, const unsigned int version) const
     {
         unsigned int size = m_pTopoBuilder->m_initStates.size();
-        ar&          size;
+        ar& size;
 
         // send all bodies state to master rank which build the topology
         for (auto& state : m_pTopoBuilder->m_initStates)
@@ -1895,7 +1895,7 @@ public:
 
         // Size
         unsigned int size;
-        ar&          size;
+        ar& size;
         // States
         RigidBodyIdType id;
         for (unsigned int i = 0; i < size; ++i)
@@ -1925,7 +1925,7 @@ public:
                 m_pTopoBuilder->m_I_theta_G += theta;
 
                 unsigned int countPoints;
-                ar&          countPoints;  // get number of local pred. points
+                ar& countPoints;  // get number of local pred. points
                 // add to global predicted points
                 m_pTopoBuilder->m_countPoints += countPoints;
 
@@ -1961,7 +1961,7 @@ public:
 
 private:
     TTopologyBuilder* m_pTopoBuilder;
-    RankIdType        m_rank;
+    RankIdType m_rank;
 };
 
 template <typename TTopologyBuilder>
@@ -1989,7 +1989,7 @@ public:
 
 private:
     TTopologyBuilder* m_pTopoBuilder;
-    RankIdType        m_rank;
+    RankIdType m_rank;
 };
 
 };  // MPILayer
@@ -2147,15 +2147,15 @@ public:
         ar & m_pTopoBuilder->m_timeStepperSettings.m_startTime;
 
         // Load states
-        unsigned int    nStates;
-        ar&             nStates;
+        unsigned int nStates;
+        ar& nStates;
         RigidBodyIdType id;
 
         // this does only add the states to the dynamic system, this class is not responsible for clearing it!
         auto& bodiesInitStates = m_pTopoBuilder->m_pDynSys->m_bodiesInitStates;
         for (unsigned int i = 0; i < nStates; i++)
         {
-            ar&  id;
+            ar& id;
             auto res = bodiesInitStates.emplace(id, id);
             GRSF_ASSERTMSG(res.second, "Body with id: " << id << " has already been added in list!?");
             serializeEigen(ar, res.first->second.m_q);
@@ -2172,7 +2172,7 @@ public:
 
 private:
     TTopologyBuilder* m_pTopoBuilder;
-    RankIdType        m_rank;
+    RankIdType m_rank;
 };
 
 };  // MPILayer

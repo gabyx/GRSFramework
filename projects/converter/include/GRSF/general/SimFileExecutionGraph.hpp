@@ -67,8 +67,8 @@ public:
 
     void initSimInfo(boost::filesystem::path simFile,
                      boost::filesystem::path outputFilePath,
-                     std::size_t             nBodies,
-                     std::size_t             nStates);
+                     std::size_t nBodies,
+                     std::size_t nStates);
 
     void initState(boost::filesystem::path outputFilePath, double time, unsigned int stateNr);
 
@@ -120,9 +120,9 @@ public:
 private:
     bool checkStop(unsigned int groupId);
 
-    LogicNodes::BodyData*    m_bodyDataNode = nullptr;
-    LogicNodes::StateData*   m_stateData    = nullptr;
-    LogicNodes::SimFileInfo* m_simFileInfo  = nullptr;
+    LogicNodes::BodyData* m_bodyDataNode   = nullptr;
+    LogicNodes::StateData* m_stateData     = nullptr;
+    LogicNodes::SimFileInfo* m_simFileInfo = nullptr;
 
     /** Stop nodes for Body and Frame group, FILE_EXEC, FRAME_EXEC, BODY_EXEC */
     std::array<LogicNodes::StopNode*, 3> m_stopNodes = {{nullptr, nullptr, nullptr}};

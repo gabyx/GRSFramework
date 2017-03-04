@@ -54,8 +54,8 @@ public:
 
     friend void Interpolate::lerp<PREC>(const DynamicsStateBase& A,
                                         const DynamicsStateBase& B,
-                                        DynamicsStateBase&       X,
-                                        PREC                     factor);
+                                        DynamicsStateBase& X,
+                                        PREC factor);
 
     /** Bodies (ids) sorted according to their insertion order!
      *   We use here a linear continous memory since this class acts as a buffer which get written by the simulation and
@@ -313,7 +313,7 @@ private:
     * if it is true however we can directly access m_SimBodyStates[bodyNr]
     */
     std::unordered_map<RigidBodyIdType, RigidBodyState*> m_pIdToState;
-    bool         m_randomAccess;
+    bool m_randomAccess;
     unsigned int m_startIdx;  // needed to acces state with operator[z=3] --> 3-m_startIdx = 0 idx
 };
 

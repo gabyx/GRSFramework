@@ -40,8 +40,8 @@ void samplePointsGrid(Matrix3Dyn& newPoints, const MatrixBase<Derived>& points, 
 
     newPoints.resize(3, nPoints);
 
-    std::random_device                          rd;
-    std::mt19937                                gen(rd());
+    std::random_device rd;
+    std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned int> dis(0, points.cols() - 1);
 
     // total points = bottomPoints=gridSize^2  + topPoints=gridSize^2
@@ -52,14 +52,14 @@ void samplePointsGrid(Matrix3Dyn& newPoints, const MatrixBase<Derived>& points, 
 
     Vector3 dirZ = oobb.getDirection(2);  // in I Frame
 
-    unsigned int              halfSampleSize = gridSize * gridSize;
+    unsigned int halfSampleSize = gridSize * gridSize;
     std::vector<unsigned int> topPoints(halfSampleSize, 0);     // grid of indices of the top points (1-indexed)
     std::vector<unsigned int> bottomPoints(halfSampleSize, 0);  // grid of indices of the bottom points (1-indexed)
 
     using LongInt = long long int;
-    MyMatrix<LongInt>::Array2 idx;                                                             // Normalized P
-    Array2                    dxdyInv = Array2(gridSize, gridSize) / oobb.extent().head<2>();  // in K Frame;
-    Vector3                   K_p;
+    MyMatrix<LongInt>::Array2 idx;                                          // Normalized P
+    Array2 dxdyInv = Array2(gridSize, gridSize) / oobb.extent().head<2>();  // in K Frame;
+    Vector3 K_p;
 
     Matrix33 A_KI(oobb.m_q_KI.matrix().transpose());
 
@@ -140,11 +140,11 @@ OOBB optimizeMVBB(const MatrixBase<Derived>& points, OOBB oobb, unsigned int tim
         return oobb;
     }
 
-    bool         sameAsCache = true;
-    unsigned int cacheIdx    = 0;  // current write Idx into the cache
-    Vector3      dirCache[3];      // save the last three directions (avoiding cycling in choosen axis)
+    bool sameAsCache      = true;
+    unsigned int cacheIdx = 0;  // current write Idx into the cache
+    Vector3 dirCache[3];        // save the last three directions (avoiding cycling in choosen axis)
 
-    Vector3           dir;
+    Vector3 dir;
     ProjectedPointSet proj;
     for (unsigned int loop = 0; loop < times; ++loop)
     {
@@ -191,10 +191,10 @@ OOBB optimizeMVBB(const MatrixBase<Derived>& points, OOBB oobb, unsigned int tim
 */
 template <typename Derived>
 OOBB approximateMVBBGridSearch(const MatrixBase<Derived>& points,
-                               OOBB                       oobb,
-                               PREC                       epsilon,
-                               const unsigned int         gridSize = 5,
-                               const unsigned int         optLoops = 6)
+                               OOBB oobb,
+                               PREC epsilon,
+                               const unsigned int gridSize = 5,
+                               const unsigned int optLoops = 6)
 {
     EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived, 3, Eigen::Dynamic)
     // Get the direction of the input OOBB in I frame:
@@ -284,11 +284,11 @@ OOBB approximateMVBBDiam(const MatrixBase<Derived>& points, const PREC epsilon, 
 
 template <typename Derived>
 OOBB approximateMVBB(const MatrixBase<Derived>& points,
-                     const PREC                 epsilon,
-                     const unsigned int         pointSamples       = 400,
-                     const unsigned int         gridSize           = 5,
-                     const unsigned int         mvbbDiamOptLoops   = 2,
-                     const unsigned int         gridSearchOptLoops = 6)
+                     const PREC epsilon,
+                     const unsigned int pointSamples       = 400,
+                     const unsigned int gridSize           = 5,
+                     const unsigned int mvbbDiamOptLoops   = 2,
+                     const unsigned int gridSearchOptLoops = 6)
 {
     EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived, 3, Eigen::Dynamic)
 

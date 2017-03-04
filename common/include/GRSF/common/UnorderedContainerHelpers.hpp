@@ -26,7 +26,7 @@ UnorderedOut makeIntersection(const UnorderedIn1& in1, const UnorderedIn2& in2)
     }
 
     UnorderedOut out;
-    auto         e = in2.end();
+    auto e = in2.end();
     for (auto& v : in1)
     {
         if (in2.find(v) != e)

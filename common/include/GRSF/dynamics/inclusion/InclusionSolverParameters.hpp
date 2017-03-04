@@ -55,7 +55,7 @@ struct ContactParameter
     {
     }
 
-    std::vector<PREC>   m_params;
+    std::vector<PREC> m_params;
     ContactModels::Enum m_contactModel;
 
     /** Copy constructors

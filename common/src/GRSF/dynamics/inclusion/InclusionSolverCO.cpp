@@ -25,7 +25,7 @@ const unsigned int InclusionSolverCO::NDOFFriction = CONTACTMODELTYPE(ContactMod
 const unsigned int InclusionSolverCO::ContactDim   = CONTACTMODELTYPE(ContactModels::Enum::UCF)::ConvexSet::Dimension;
 
 InclusionSolverCO::InclusionSolverCO(std::shared_ptr<CollisionSolverType> pCollisionSolver,
-                                     std::shared_ptr<DynamicsSystemType>  pDynSys)
+                                     std::shared_ptr<DynamicsSystemType> pDynSys)
     : m_simBodies(pDynSys->m_simBodies)
     , m_staticBodies(pDynSys->m_staticBodies)
     , m_contactGraph(&(pDynSys->m_ContactParameterMap))
@@ -159,11 +159,11 @@ void InclusionSolverCO::solveInclusionProblem()
         // Assemble W_N and W_T and xi_N and xi_T =====================================================
         static const CollisionData* pCollData;
 
-        static VectorDyn             I_plus_eps(ContactDim);
-        static MatrixDynDyn          G_part(ContactDim, ContactDim);
+        static VectorDyn I_plus_eps(ContactDim);
+        static MatrixDynDyn G_part(ContactDim, ContactDim);
         static const MatrixUBodyDyn* W_j_body;
         static const MatrixUBodyDyn* W_i_body;
-        static MatrixDynUBody        W_i_bodyT_M_body;
+        static MatrixDynUBody W_i_bodyT_M_body;
 
         for (auto& currentContactNode : nodes)
         {
@@ -182,7 +182,7 @@ void InclusionSolverCO::solveInclusionProblem()
 
             // iterate over all edges in current contact to build up G;
             typename ContactGraphType::EdgeListIteratorType it;
-            RigidBodyType*                                  edgesBody;
+            RigidBodyType* edgesBody;
 
             for (it = currentContactNode->m_edgeList.begin(); it != currentContactNode->m_edgeList.end(); ++it)
             {
@@ -313,7 +313,7 @@ void InclusionSolverCO::solveInclusionProblem()
 
         // Add deltaVelocities from lambdas to front velocity
         static VectorUBody delta_u_E;
-        RigidBodyType*     pBody;
+        RigidBodyType* pBody;
 
         for (auto& node : nodes)
         {
@@ -426,7 +426,7 @@ void InclusionSolverCO::doJorProx()
 
 void InclusionSolverCO::doSorProx()
 {
-    static VectorDyn    PContact_back(NDOFFriction);
+    static VectorDyn PContact_back(NDOFFriction);
     static unsigned int counterConverged;
 
 #if HAVE_CUDA_SUPPORT == 1

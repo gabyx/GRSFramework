@@ -16,7 +16,6 @@
 
 #include <boost/variant.hpp>
 #include <memory>
-#include <memory>
 
 //#define SRUTIL_DELEGATE_PREFERRED_SYNTAX
 #include <srutil/delegate/delegate.hpp>  // Use fast SR delegates
@@ -88,7 +87,7 @@ protected:
         m_Collider;  ///< The collider class, which is used as a functor which handles the different collisions.
     friend class Collider;
 
-    Logging::Log*     m_pSolverLog;  ///< Ogre::Log
+    Logging::Log* m_pSolverLog;  ///< Ogre::Log
     std::stringstream logstream;
 
     inline void

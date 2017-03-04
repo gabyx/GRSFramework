@@ -28,14 +28,14 @@ class Table<N, 0>
 {
 public:
     static const int dummy;
-    static int       array[N];
+    static int array[N];
 };
 
 template <int N, int I>
 const int Table<N, I>::dummy = Table<N, 0>::array[I] = I* I + 0 * Table<N, I - 1>::dummy;
 
 template <int N>
-int           Table<N, 0>::array[N];
+int Table<N, 0>::array[N];
 
 template class Table<ARRAY_SIZE>;
 

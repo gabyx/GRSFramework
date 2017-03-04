@@ -53,16 +53,16 @@ public:
     std::shared_ptr<VideoDropper> m_pVideoDropper;
     struct VideoDropSettings
     {
-        bool   m_bVideoDrop;
+        bool m_bVideoDrop;
         double m_FPS;
     } m_VideoDropSettings;
 
     std::shared_ptr<StateRecorderResampler> m_pStateRecorderResampler;
     struct SimFileDropSettings
     {
-        bool   m_bSimFileDrop;
+        bool m_bSimFileDrop;
         double m_FPS;
-        bool   m_bSimFileDropInterpolate;
+        bool m_bSimFileDropInterpolate;
         double m_startTime;
         double m_endTime;
     } m_SimFileDropSettings;
@@ -86,7 +86,7 @@ private:
     Logging::Log* m_pThreadLog;
 
     std::shared_ptr<Ogre::SceneManager> m_pSceneMgr;
-    Ogre::SceneNode*                    m_pBaseNode;
+    Ogre::SceneNode* m_pBaseNode;
 
     std::string m_KeyListenerName;
 

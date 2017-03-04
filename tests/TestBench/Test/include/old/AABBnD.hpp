@@ -202,10 +202,10 @@ public:
      * default extent */
     void expandToMinExtentRelative(PREC p, PREC defaultExtent, PREC eps)
     {
-        ArrayStat<Dim>                 e = extent();
-        VectorStat<Dim>                c = center();
+        ArrayStat<Dim> e  = extent();
+        VectorStat<Dim> c = center();
         typename ArrayStat<Dim>::Index idx;
-        PREC                           ext = std::abs(e.maxCoeff(&idx)) * p;
+        PREC ext = std::abs(e.maxCoeff(&idx)) * p;
 
         if (ext < eps)
         {  // extent of max axis almost zero, set all axis to defaultExtent --> cube
@@ -229,7 +229,7 @@ public:
     /** Adjust box that all axes have at least a minimal extent  minExtent*/
     void expandToMinExtentAbsolute(PREC minExtent)
     {
-        Array3  e = extent();
+        Array3 e  = extent();
         Vector3 c = center();
 
         PREC l = 0.5 * minExtent;
@@ -246,7 +246,7 @@ public:
     /** Adjust box that all axes have at least a minimal extent  minExtent for each axis*/
     void expandToMinExtentAbsolute(ArrayStat<3> minExtent)
     {
-        Array3  e = extent();
+        Array3 e  = extent();
         Vector3 c = center();
 
         for (int i = 0; i < Dim; ++i)
@@ -275,13 +275,13 @@ DEFINE_LAYOUT_CONFIG_TYPES;
 void AABBnDTest()
 {
     const unsigned int N = 1000;
-    MatrixStatDyn<3>   v(3, N);
+    MatrixStatDyn<3> v(3, N);
     v.setRandom();
-    AABB      aabb;
-    AABB      aabb1(Vector3(1, 1, 1));
+    AABB aabb;
+    AABB aabb1(Vector3(1, 1, 1));
     AABBnD<3> aabb1nD(Vector3(1, 1, 1));
     AABBnD<3> aabb2;
-    bool      t;
+    bool t;
     {
         START_TIMER(start)
         for (int j = 0; j < 100000; j++)

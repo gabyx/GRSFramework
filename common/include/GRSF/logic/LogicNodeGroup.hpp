@@ -44,10 +44,10 @@ public:
     {
     }
 
-    virtual void   addNode(LogicNode*) protected : bool m_hasLinks;
+    virtual void addNode(LogicNode*) protected : bool m_hasLinks;
     SocketListType m_inputs;
     SocketListType m_outputs;
-    unsigned int   m_priority;
+    unsigned int m_priority;
 
     // SocketListType m_sockets;
 };

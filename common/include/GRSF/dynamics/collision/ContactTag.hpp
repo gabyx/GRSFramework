@@ -32,11 +32,11 @@ public:
         std::tuple<RigidBodyIdType, unsigned char, unsigned int, RigidBodyIdType, unsigned char, unsigned int>;
 
     void set(const RigidBodyIdType& b1,
-             unsigned char          type1,
-             unsigned int           id1,
+             unsigned char type1,
+             unsigned int id1,
              const RigidBodyIdType& b2,
-             unsigned char          type2,
-             unsigned int           id2);
+             unsigned char type2,
+             unsigned int id2);
 
     bool operator==(ContactTag const& c2) const;
 

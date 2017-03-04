@@ -54,7 +54,7 @@ public:
 
 private:
     std::stringstream m_s;
-    unsigned int      m_id;
+    unsigned int m_id;
 };
 
 #endif

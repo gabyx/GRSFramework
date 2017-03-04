@@ -47,7 +47,7 @@ private:
 
     /** XML Declarations */
     std::shared_ptr<pugi::xml_document> m_xmlDoc;
-    pugi::xml_node                      m_xmlRootNode;
+    pugi::xml_node m_xmlRootNode;
 
     /** Log */
     LogType* m_pLog;

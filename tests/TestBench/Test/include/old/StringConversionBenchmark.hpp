@@ -65,8 +65,8 @@ void PrintStats(std::vector<double> timings)
 
 double naive(const char* p)
 {
-    double r   = 0.0;
-    bool   neg = false;
+    double r = 0.0;
+    bool neg = false;
     if (*p == '-')
     {
         neg = true;
@@ -80,7 +80,7 @@ double naive(const char* p)
     if (*p == '.')
     {
         double f = 0.0;
-        int    n = 0;
+        int n    = 0;
         ++p;
         while (*p >= '0' && *p <= '9')
         {
@@ -239,7 +239,7 @@ bool naive(T& r, const char* p)
 
 double atofNew(const char* p)
 {
-    int    frac;
+    int frac;
     double sign, value, scale;
 
     // Skip leading white space, if any.
@@ -335,7 +335,7 @@ int convertSomeNumbers()
     std::string y = ".3";
     std::cout << naive(y.c_str()) << std::endl;
     double d;
-    bool   r = naive(d, y.c_str());
+    bool r = naive(d, y.c_str());
 
     y = " 3.123e-3";
     r = naive(d, y.c_str());
@@ -404,7 +404,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -415,7 +415,7 @@ int doBenchmark()
                 double x = naive(nums[i].c_str());
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -427,7 +427,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -439,7 +439,7 @@ int doBenchmark()
                 naive(x, nums[i].c_str());
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -450,7 +450,7 @@ int doBenchmark()
         std::cout << tsum << std::endl;
     }
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -461,7 +461,7 @@ int doBenchmark()
                 double x = atofNew(nums[i].c_str());
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -473,7 +473,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -484,7 +484,7 @@ int doBenchmark()
                 double x = atof(nums[i].c_str());
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -496,7 +496,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -507,7 +507,7 @@ int doBenchmark()
                 double x = strtod(nums[i].c_str(), 0);
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -519,7 +519,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -531,7 +531,7 @@ int doBenchmark()
                 sscanf(nums[i].c_str(), "%lf", &x);
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -543,7 +543,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -554,7 +554,7 @@ int doBenchmark()
                 double x = boost::lexical_cast<double>(nums[i]);
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -568,7 +568,7 @@ int doBenchmark()
     {
         using boost::spirit::qi::double_;
         using boost::spirit::qi::parse;
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -576,12 +576,12 @@ int doBenchmark()
             ticks start = getticks();
             for (size_t i = 0; i < nums.size(); ++i)
             {
-                double      x   = 0.0;
+                double x        = 0.0;
                 char const* str = nums[i].c_str();
                 parse(str, &str[nums[i].size()], double_, x);
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -593,7 +593,7 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
@@ -602,11 +602,11 @@ int doBenchmark()
             for (size_t i = 0; i < nums.size(); ++i)
             {
                 std::istringstream ss(nums[i]);
-                double             x = 0.0;
+                double x = 0.0;
                 ss >> x;
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }
@@ -618,12 +618,12 @@ int doBenchmark()
     }
 
     {
-        double              tsum = 0.0;
+        double tsum = 0.0;
         std::vector<double> timings;
         timings.reserve(R);
         for (size_t r = 0; r < R; ++r)
         {
-            ticks              start = getticks();
+            ticks start = getticks();
             std::istringstream ss;
             for (size_t i = 0; i < nums.size(); ++i)
             {
@@ -633,7 +633,7 @@ int doBenchmark()
                 ss >> x;
                 tsum += x;
             }
-            ticks  end   = getticks();
+            ticks end    = getticks();
             double timed = elapsed(end, start) / scaleSize;
             timings.push_back(timed);
         }

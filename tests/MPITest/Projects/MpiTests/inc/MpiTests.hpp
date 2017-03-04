@@ -17,12 +17,12 @@
 
 void mpi_greetings(int argc, char** argv)
 {
-    int        my_rank;
-    int        p;
-    int        source;
-    int        dest;
-    int        tag = 0;
-    char       message[100];
+    int my_rank;
+    int p;
+    int source;
+    int dest;
+    int tag = 0;
+    char message[100];
     MPI_Status status;
 
     MPI_Init(&argc, &argv);
@@ -50,8 +50,8 @@ void mpi_greetings(int argc, char** argv)
 
 struct A
 {
-    int     a;
-    int     b;
+    int a;
+    int b;
     double* c;
     void fill(int v, int count = 1)
     {
@@ -67,7 +67,7 @@ struct A
 struct B
 {
     std::vector<int> a;
-    void             print()
+    void print()
     {
         for (int i = 0; i < a.size(); i++)
         {
@@ -88,7 +88,7 @@ struct B
 struct C
 {
     std::vector<int> a;
-    void             print()
+    void print()
     {
         for (int i = 0; i < a.size(); i++)
         {
@@ -134,12 +134,12 @@ void TypeTest()
 
 void TypeTestMPI(int argc, char** argv)
 {
-    typedef B  AType;
-    int        my_rank;
-    int        p;
-    int        source;
-    int        dest;
-    int        tag = 0;
+    typedef B AType;
+    int my_rank;
+    int p;
+    int source;
+    int dest;
+    int tag = 0;
     MPI_Status status;
 
     C test;
@@ -187,11 +187,11 @@ void TypeTestMPI(int argc, char** argv)
 
 void fileTestMPI(int argc, char** argv)
 {
-    int        my_rank;
-    int        p;
-    int        source;
-    int        dest;
-    int        tag = 0;
+    int my_rank;
+    int p;
+    int source;
+    int dest;
+    int tag = 0;
     MPI_Status status;
 
     MPI_Init(&argc, &argv);
@@ -199,7 +199,7 @@ void fileTestMPI(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &p);
 
-    std::ofstream     f;
+    std::ofstream f;
     std::stringstream s;
     s << "MpiMessageID_" << my_rank << ".log";
     f.open(s.str());

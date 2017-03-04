@@ -37,8 +37,8 @@ private:
     template <int N, typename THead, typename... TTail>
     size_t combine_hash(const Tuple& value) const
     {
-        constexpr int Index = N - sizeof...(TTail)-1;
-        size_t        seed  = combine_hash<N, TTail...>(value);  // get seed of last value
+        constexpr int Index = N - sizeof...(TTail) - 1;
+        size_t seed         = combine_hash<N, TTail...>(value);  // get seed of last value
         seed ^= std::hash<THead>()(std::get<Index>(value)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         return seed;
     }

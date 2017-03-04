@@ -69,7 +69,7 @@ public:
     {
         m_buffer.clear();  // Clear serializable string, no allocation if we push less or equal as much into the string
                            // next time!
-        boost::iostreams::back_insert_device<std::vector<char>>                           inserter(m_buffer);
+        boost::iostreams::back_insert_device<std::vector<char>> inserter(m_buffer);
         boost::iostreams::stream<boost::iostreams::back_insert_device<std::vector<char>>> s(inserter);
         boost::archive::binary_oarchive oa(s, boost::archive::no_codecvt | boost::archive::no_header);
         oa << t;
@@ -82,7 +82,7 @@ public:
     template <typename T>
     MessageBinarySerializer& operator>>(T& t)
     {
-        boost::iostreams::basic_array_source<char>                           device(data(), size());
+        boost::iostreams::basic_array_source<char> device(data(), size());
         boost::iostreams::stream<boost::iostreams::basic_array_source<char>> s(device);
         boost::archive::binary_iarchive ia(s, boost::archive::no_codecvt | boost::archive::no_header);
         ia >> t;
@@ -134,7 +134,7 @@ Vector3List getPointsFromFile3D(std::string filePath)
         ApproxMVBB_ERRORMSG("Could not open file: " << filePath)
     }
 
-    PREC        a, b, c;
+    PREC a, b, c;
     Vector3List v;
     while (file.good())
     {
@@ -155,7 +155,7 @@ Vector3List getPointsFromFile3DBin(std::string filePath)
         ApproxMVBB_ERRORMSG("Could not open file: " << filePath)
     }
 
-    PREC        a, b, c;
+    PREC a, b, c;
     Vector3List v;
     while (file.good())
     {
@@ -169,15 +169,15 @@ Vector3List getPointsFromFile3DBin(std::string filePath)
 }
 
 template <typename Tree>
-void saveTreeToXML(Tree&                          tree,
+void saveTreeToXML(Tree& tree,
                    const boost::filesystem::path& filePath = "./TopologyInfo_1.xml",
-                   Vector3List*                   points   = nullptr)
+                   Vector3List* points                     = nullptr)
 {
     std::stringstream ss;
 
     // Open XML and write structure!
     pugi::xml_document dataXML;
-    std::stringstream  xml(
+    std::stringstream xml(
         "<TopologyBuilder type=\"KdTree\" buildMode=\"\" time=\"0\" builtTime=\"0 \" >"
         "<Description>"
         "A_IK is tranformation matrix, which transforms points from frame K to frame I\n"
@@ -201,9 +201,9 @@ void saveTreeToXML(Tree&                          tree,
     // Write data
 
     using XMLNodeType = pugi::xml_node;
-    XMLNodeType       node;
+    XMLNodeType node;
     static const auto nodePCData = pugi::node_pcdata;
-    XMLNodeType       root       = dataXML.child("TopologyBuilder");
+    XMLNodeType root             = dataXML.child("TopologyBuilder");
 
     tree.appendToXML(root);
 
@@ -253,9 +253,9 @@ void kdTreeTest()
         static const unsigned int Dimension = NodeDataType::Dimension;
         using PointListType                 = NodeDataType::PointListType;
 
-        TestFunctions::Vector3List t   = TestFunctions::getPointsFromFile3D("Points.txt");
-        auto                       vec = std::unique_ptr<PointListType>(new PointListType());
-        AABB<Dimension>            aabb;
+        TestFunctions::Vector3List t = TestFunctions::getPointsFromFile3D("Points.txt");
+        auto vec                     = std::unique_ptr<PointListType>(new PointListType());
+        AABB<Dimension> aabb;
         for (unsigned int i = 0; i < t.size(); ++i)
         {
             aabb += t[i];
@@ -288,7 +288,7 @@ void kdTreeTest()
         auto list = tree.buildLeafNeighbours(minExtent);
         STOP_TIMER_SEC(count, start);
 
-        PREC        avgNeighbours = 0;
+        PREC avgNeighbours        = 0;
         std::size_t minNeighbours = std::numeric_limits<std::size_t>::max();
         std::size_t maxNeighbours = std::numeric_limits<std::size_t>::lowest();
 
@@ -311,9 +311,9 @@ void kdTreeTest()
         static const unsigned int Dimension = NodeDataType::Dimension;
         using PointListType                 = NodeDataType::PointListType;
 
-        TestFunctions::Vector3List t   = TestFunctions::getPointsFromFile3D("Points.txt");
-        auto                       vec = std::unique_ptr<PointListType>(new PointListType());
-        AABB<Dimension>            aabb;
+        TestFunctions::Vector3List t = TestFunctions::getPointsFromFile3D("Points.txt");
+        auto vec                     = std::unique_ptr<PointListType>(new PointListType());
+        AABB<Dimension> aabb;
         for (unsigned int i = 0; i < t.size(); ++i)
         {
             aabb += t[i];
@@ -346,7 +346,7 @@ void kdTreeTest()
         auto list = tree.buildLeafNeighbours(minExtent);
         STOP_TIMER_SEC(count, start);
 
-        PREC        avgNeighbours = 0;
+        PREC avgNeighbours        = 0;
         std::size_t minNeighbours = std::numeric_limits<std::size_t>::max();
         std::size_t maxNeighbours = std::numeric_limits<std::size_t>::lowest();
 
@@ -632,7 +632,7 @@ void serializeKdTree()
     TestFunctions::Vector3List t = TestFunctions::getPointsFromFile3DBin("Points.bin");
     //            TestFunctions::Vector3List t = TestFunctions::getPointsFromFile3D("Bunny.txt");
 
-    auto            vec = std::unique_ptr<PointListType>(new PointListType());
+    auto vec = std::unique_ptr<PointListType>(new PointListType());
     AABB<Dimension> aabb;
     for (unsigned int i = 0; i < t.size(); ++i)
     {
@@ -767,7 +767,7 @@ void serializeKdTree()
     KdTreeSerializer<Tree2> ser(tree2);
     m << ser;
 
-    Tree2                   treeDes;
+    Tree2 treeDes;
     KdTreeSerializer<Tree2> des(treeDes);
     m >> des;
     std::cout << treeDes.getStatisticsString() << std::endl;
@@ -834,7 +834,7 @@ void serializeKdTree()
     // Test lowest Ancestor
     for (int i = 0; i < 100; i++)
     {
-        auto  k = rand() % leafs;
+        auto k  = rand() % leafs;
         auto* a = tree2.getLeaf(rand() % leafs);
         auto* b = tree2.getLeaf(rand() % leafs);
         auto* n = tree2.getLowestCommonAncestor(a, b);

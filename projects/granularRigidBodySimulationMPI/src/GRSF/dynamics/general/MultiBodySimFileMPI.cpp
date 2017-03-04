@@ -41,7 +41,7 @@ void MultiBodySimFileMPI::close()
     ASSERTMPIERROR(err, "Type free");
 }
 
-void MultiBodySimFileMPI::writeBySharedPtr(double                                                        time,
+void MultiBodySimFileMPI::writeBySharedPtr(double time,
                                            const typename DynamicsSystemType::RigidBodySimContainerType& bodyList)
 {
     int err;
@@ -73,7 +73,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double                               
 
     // std::vector<int> nbodiesPerProc(m_processes);
     unsigned int nBodies = bodyList.size();
-    MPI_Status   s;
+    MPI_Status s;
 
     if (m_rank == 0)
     {
@@ -87,7 +87,7 @@ void MultiBodySimFileMPI::writeBySharedPtr(double                               
     ASSERTMPIERROR(err, "write states");
 }
 
-void MultiBodySimFileMPI::writeByOffsets(double                                                        time,
+void MultiBodySimFileMPI::writeByOffsets(double time,
                                          const typename DynamicsSystemType::RigidBodySimContainerType& bodyList)
 {
     std::size_t nBodies = bodyList.size();
@@ -132,7 +132,7 @@ void MultiBodySimFileMPI::writeByOffsets(double                                 
     ASSERTMPIERROR(err, "gather");
     // Calculate our offset
     std::size_t bodyOffset = 0;
-    MPI_Offset  offsetMPI  = 0;
+    MPI_Offset offsetMPI   = 0;
     // All calculate offset [begin, begin + rank)
     GRSF_ASSERTMSG(std::accumulate(nbodiesPerProc.begin(), nbodiesPerProc.end(), 0) == m_nSimBodies,
                    " accumulation not the same");
@@ -173,7 +173,7 @@ void MultiBodySimFileMPI::writeByOffsets(double                                 
     ASSERTMPIERROR(err, " seek new state");
 }
 
-void MultiBodySimFileMPI::writeByOffsets2(double                                                        time,
+void MultiBodySimFileMPI::writeByOffsets2(double time,
                                           const typename DynamicsSystemType::RigidBodySimContainerType& bodyList)
 {
     std::size_t nBodies = bodyList.size();
@@ -219,7 +219,7 @@ void MultiBodySimFileMPI::writeByOffsets2(double                                
     ASSERTMPIERROR(err, "gather");
     // Calculate our offset
     std::size_t bodyOffset = 0;
-    MPI_Offset  offsetMPI  = 0;
+    MPI_Offset offsetMPI   = 0;
     // All calculate offset
     GRSF_ASSERTMSG(std::accumulate(nbodiesPerProc.begin(), nbodiesPerProc.end(), 0) == m_nSimBodies,
                    " accumulation not the same");
@@ -285,7 +285,7 @@ void MultiBodySimFileMPI::writeHeader()
         memcpy((void*)p, &t, sizeof(t));
 
         MPI_Status status;
-        int        err;
+        int err;
         err = MPI_File_write(m_file_handle, header, m_headerLength, MPI_BYTE, &status);
         ASSERTMPIERROR(err, "");
 
@@ -313,12 +313,12 @@ void MultiBodySimFileMPI::setByteLengths()
     GRSF_ASSERTMSG(size == m_nBytesPerBody, "MPI type has not the same byte size");
 }
 
-bool MultiBodySimFileMPI::openWrite(MPI_Comm                       comm,
+bool MultiBodySimFileMPI::openWrite(MPI_Comm comm,
                                     const boost::filesystem::path& file_path,
-                                    unsigned int                   nDOFqBody,
-                                    unsigned int                   nDOFuBody,
-                                    const unsigned int             nSimBodies,
-                                    bool                           truncate)
+                                    unsigned int nDOFqBody,
+                                    unsigned int nDOFuBody,
+                                    const unsigned int nSimBodies,
+                                    bool truncate)
 {
     m_nDOFuBody  = nDOFuBody;
     m_nDOFqBody  = nDOFqBody;
@@ -336,7 +336,7 @@ bool MultiBodySimFileMPI::openWrite(MPI_Comm                       comm,
     setByteLengths();
 
     std::string filepath_tmp = file_path.string();
-    char*       file_path_c  = const_cast<char*>(filepath_tmp.c_str());
+    char* file_path_c        = const_cast<char*>(filepath_tmp.c_str());
 
     if (truncate)
     {

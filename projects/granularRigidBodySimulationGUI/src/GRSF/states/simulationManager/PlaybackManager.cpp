@@ -143,7 +143,7 @@ bool PlaybackManager::parseScene()
 
 void PlaybackManager::updateScene(double timeSinceLastFrame)
 {
-    static bool       bStateChanged;
+    static bool bStateChanged;
     std::stringstream logstream;
 
     if (isSimThreadRunning() && m_bSetupSuccessful)
@@ -175,8 +175,8 @@ void PlaybackManager::updateSimBodies()
 {
     // update objects...
     static decltype(m_pDynSys->m_SceneNodeSimBodies.begin()) gBodyIt;
-    static decltype(m_pVisBuffer->m_SimBodyStates.begin())   stateIt;
-    static unsigned int                                      size;
+    static decltype(m_pVisBuffer->m_SimBodyStates.begin()) stateIt;
+    static unsigned int size;
 
     gBodyIt = m_pDynSys->m_SceneNodeSimBodies.begin();
     stateIt = m_pVisBuffer->m_SimBodyStates.begin();
@@ -248,7 +248,7 @@ void PlaybackManager::initBeforeThreads()
 
 void PlaybackManager::threadRunSimulation()
 {
-    static bool   bchangedState;
+    static bool bchangedState;
     static double timelineSimulation, state_time, old_state_time, deltaT;
 
     m_pThreadLog->logMessage("---> PlaybackManager: SimThread entering...");
@@ -265,7 +265,7 @@ void PlaybackManager::threadRunSimulation()
 
     // Update Simbuffer
     DynamicsState* currentState;
-    bool           updated = false;
+    bool updated = false;
 
     //    while(!updated && i < 100){
     //        currentState = m_pSharedBuffer->advanceSimBuffer(updated);
@@ -384,7 +384,7 @@ void PlaybackManager::initSimThread()
         boost::filesystem::path resampleFolderPath =
             FileManager::getSingleton().getNewSimFolderPath(SIMULATION_FOLDER_PATH, SIM_FOLDER_PREFIX_RESAMPLE);
         boost::filesystem::path file_path = resampleFolderPath;
-        std::string             filename  = SIM_FILE_PREFIX;
+        std::string filename              = SIM_FILE_PREFIX;
         filename += SIM_FILE_EXTENSION;
         file_path /= filename;
         if (!m_pStateRecorderResampler->createSimFile(file_path))

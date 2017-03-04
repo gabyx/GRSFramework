@@ -218,10 +218,10 @@ public:
     *   \return if node m_nonAddedNode is overlapped or not
     */
     template <typename ResultIdxSet>
-    inline bool checkOverlap(ResultIdxSet&        overlapLeafIndices,
-                             const NodeType*      startNode,
+    inline bool checkOverlap(ResultIdxSet& overlapLeafIndices,
+                             const NodeType* startNode,
                              const RigidBodyType* pBody,
-                             const Matrix33&      A_KI) const
+                             const Matrix33& A_KI) const
     {
         // early rejection if aabb/oobb is not overlapped
         // this test is crucial, if we dont do this
@@ -238,8 +238,8 @@ public:
     }
 
     template <typename ResultIdxSet>
-    inline bool checkOverlap(ResultIdxSet&        overlapLeafIndices,
-                             const NodeType*      startNode,
+    inline bool checkOverlap(ResultIdxSet& overlapLeafIndices,
+                             const NodeType* startNode,
                              const RigidBodyType* pBody) const
     {
         if (!checkOverlapNode(pBody, startNode))
@@ -251,13 +251,13 @@ public:
     }
 
     template <bool aligned, bool enableNonAddedLeaf = true, typename ResultIdxSet>
-    inline bool checkOverlap_imp(ResultIdxSet&        overlapLeafIndices,
+    inline bool checkOverlap_imp(ResultIdxSet& overlapLeafIndices,
                                  const RigidBodyType* pBody,
-                                 const Matrix33*      A_KI = nullptr) const
+                                 const Matrix33* A_KI = nullptr) const
     {
         const NodeType* currNode;
-        char            res;
-        bool            ret = false;  // if m_nonAddedNode is overlapped
+        char res;
+        bool ret = false;  // if m_nonAddedNode is overlapped
 
         // Breath first traversal
         while (!m_nodeStack.empty())
@@ -378,14 +378,14 @@ public:
             return 0;
         }
 
-        mutable Matrix33*                        m_A_KI;
-        mutable RigidBodyType*                   m_body;
+        mutable Matrix33* m_A_KI;
+        mutable RigidBodyType* m_body;
         mutable typename NodeType::SplitAxisType m_splitAxis;
-        mutable PREC                             m_splitPos;
+        mutable PREC m_splitPos;
     };
 
 private:
-    LeftRightAxisHalfspace<true>  m_isLRAligned;
+    LeftRightAxisHalfspace<true> m_isLRAligned;
     LeftRightAxisHalfspace<false> m_isLR;
 
     ColliderAABB m_colliderAABB;
@@ -459,7 +459,7 @@ public:
     }
 
 private:
-    Ray*           m_ray;
+    Ray* m_ray;
     CollisionData* m_pCollData;
 
     bool m_bIntersectionSimple;
@@ -543,7 +543,7 @@ public:
     inline void operator()(const std::shared_ptr<const CapsuleGeometry>& capsule)
     {  ///< Calls Capsule/Point collision detection.
         const CapsuleGeometry* caps = capsule.get();
-        Vector3                n    = m_pBody->m_A_IK * caps->m_normal;
+        Vector3 n                   = m_pBody->m_A_IK * caps->m_normal;
         m_bIntersection =
             CollisionFunctions::collideCapsulePointAndProx(m_pBody->m_r_S, n, caps->m_length, caps->m_radius, *m_p);
     }
@@ -665,7 +665,7 @@ public:
     {
         collide(box1.get(), box2.get());
     }
-    void operator()(const std::shared_ptr<const BoxGeometry>&       box,
+    void operator()(const std::shared_ptr<const BoxGeometry>& box,
                     const std::shared_ptr<const HalfspaceGeometry>& halfspaceGeom)
     {
         collide(box.get(), halfspaceGeom.get());
@@ -691,10 +691,10 @@ private:
 
     boost::variant<const AABB3d*> otherGeoms;  ///< Used for other intersection tests
 
-    bool              m_bObjectsSwapped;  ///< Boolean indicating if the bodies are swapped.
-    CollisionSetType* m_pColSet;          ///< List of found contacts for each query, gets cleard every time
-    bool              m_bDeleteColSet;    ///< Boolean to decide if we own and should delete the m_pColSet pointer
-    CollisionData*    m_pColData;         ///< Temporary which is used always!
+    bool m_bObjectsSwapped;       ///< Boolean indicating if the bodies are swapped.
+    CollisionSetType* m_pColSet;  ///< List of found contacts for each query, gets cleard every time
+    bool m_bDeleteColSet;         ///< Boolean to decide if we own and should delete the m_pColSet pointer
+    CollisionData* m_pColData;    ///< Temporary which is used always!
 
     /**
     * @brief The collision functions. First geometry belongs to first body, second to second body!
@@ -704,15 +704,15 @@ private:
                         const SphereGeometry* sphereGeom2);  ///< Sphere/Sphere collision.
     inline void collideSphereSphere(PREC r1, PREC r2, const Vector3& c1, const Vector3& c2);
 
-    inline void collide(const SphereGeometry*    sphereGeom,
+    inline void collide(const SphereGeometry* sphereGeom,
                         const HalfspaceGeometry* halfspaceGeom);  ///< Sphere/Halfspace collision.
 
-    inline void collide(const SphereGeometry*  sphereGeom,
+    inline void collide(const SphereGeometry* sphereGeom,
                         const CapsuleGeometry* capsuleGeom);  ///< Sphere/Capsule collision.
 
     inline void collide(const BoxGeometry* boxA, const BoxGeometry* boxB);  ///< Box/Box collision.
 
-    inline void collide(const BoxGeometry*       boxGeom,
+    inline void collide(const BoxGeometry* boxGeom,
                         const HalfspaceGeometry* halfspaceGeom);  ///< Box/Halfspace collision.
 
     inline void collide(const SphereGeometry* sphereGeom, const MeshGeometry* meshGeom);  ///< Sphere/Mesh collision.
@@ -750,8 +750,8 @@ template <typename TCollisionSet>
 void ColliderBody<TCollisionSet>::collideSphereSphere(PREC r1, PREC r2, const Vector3& c1, const Vector3& c2)
 {
     Vector3 dist = c2 - c1;  // I frame
-    PREC    dsqr = dist.squaredNorm();
-    PREC    rsqr = (r1 + r2);
+    PREC dsqr    = dist.squaredNorm();
+    PREC rsqr    = (r1 + r2);
     rsqr *= rsqr;
 
     if (dsqr < rsqr)
@@ -839,7 +839,7 @@ void ColliderBody<TCollisionSet>::collide(const SphereGeometry* sphereGeom, cons
     // Calculating the component in the normal direction of the sphere in the frame K of the capsule
     // sphere->m_r_S - capsule->m_r_S  projecting onto the transformed normal in the I frame
     Vector3 I_normal(m_pBody[1]->m_A_IK * capsuleGeom->m_normal);
-    PREC    z = I_normal.dot(m_pBody[0]->m_r_S - m_pBody[1]->m_r_S);
+    PREC z = I_normal.dot(m_pBody[0]->m_r_S - m_pBody[1]->m_r_S);
 
     // Calculation the center of the sphere representing the capsule
     // limit the capsule representing sphere to the interval [-halfL, halfL]

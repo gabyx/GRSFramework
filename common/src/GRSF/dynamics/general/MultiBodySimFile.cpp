@@ -93,10 +93,10 @@ std::streamoff MultiBodySimFile::getAdditionalBytesPerBody()
 }
 
 bool MultiBodySimFile::openWrite(const boost::filesystem::path& file_path,
-                                 unsigned int                   nDOFqBody,
-                                 unsigned int                   nDOFuBody,
-                                 const unsigned int             nSimBodies,
-                                 bool                           truncate)
+                                 unsigned int nDOFqBody,
+                                 unsigned int nDOFuBody,
+                                 const unsigned int nSimBodies,
+                                 bool truncate)
 {
     if (nDOFqBody == 0 || nDOFuBody == 0 || nSimBodies == 0)
     {
@@ -111,12 +111,12 @@ bool MultiBodySimFile::openWrite(const boost::filesystem::path& file_path,
 }
 
 bool MultiBodySimFile::openWrite_impl(const boost::filesystem::path& file_path,
-                                      unsigned int                   nDOFqBody,
-                                      unsigned int                   nDOFuBody,
-                                      const unsigned int             nSimBodies,
-                                      bool                           truncate,
-                                      AdditionalBodyData::TypeEnum   additionalBytesType,
-                                      std::streamsize                additionalBytesPerBody)
+                                      unsigned int nDOFqBody,
+                                      unsigned int nDOFuBody,
+                                      const unsigned int nSimBodies,
+                                      bool truncate,
+                                      AdditionalBodyData::TypeEnum additionalBytesType,
+                                      std::streamsize additionalBytesPerBody)
 {
     close();
 
@@ -190,10 +190,10 @@ void MultiBodySimFile::writeHeader()
 }
 
 bool MultiBodySimFile::openRead(const boost::filesystem::path& file_path,
-                                bool                           readVelocities,
-                                unsigned int                   nDOFqBody,
-                                unsigned int                   nDOFuBody,
-                                unsigned int                   nSimBodies)
+                                bool readVelocities,
+                                unsigned int nDOFqBody,
+                                unsigned int nDOFuBody,
+                                unsigned int nSimBodies)
 {
     close();
 
@@ -374,7 +374,7 @@ MultiBodySimFile& MultiBodySimFile::operator<<(MultiBodySimFile& file)
 
     // Calculate bytes to write to this file;
     file.m_file_stream.seekg(0, std::ios::cur);
-    std::streampos  currentLoc  = file.m_file_stream.tellg();
+    std::streampos currentLoc   = file.m_file_stream.tellg();
     std::streamsize states_rest = (file.m_nBytes - currentLoc) / file.m_nBytesPerState;
 
     if (states_rest > 0)

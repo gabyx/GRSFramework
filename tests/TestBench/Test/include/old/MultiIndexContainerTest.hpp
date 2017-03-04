@@ -49,7 +49,7 @@ MapType::index<by_insertion>::type::iterator projectFoo(MapType& map, MapType::i
 void multiIndexContainerTest()
 {
     MapType map;
-    Data    data;
+    Data data;
     data.a = 2;
     //    map.get<by_insertion>().insert(data);   no insertion over random_access ()not assignable)
     map.get<by_id>().insert(data);
