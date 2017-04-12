@@ -2,14 +2,14 @@
 # **************************************************************
 # *         C++ Mathematical Expression Toolkit Library        *
 # *                                                            *
-# * Author: Arash Partow (1999-2014)                           *
+# * Author: Arash Partow (1999-2017)                           *
 # * URL: http://www.partow.net/programming/exprtk/index.html   *
 # *                                                            *
 # * Copyright notice:                                          *
 # * Free use of the Mathematical Expression Toolkit Library is *
 # * permitted under the guidelines and in accordance with the  *
-# * most current version of the Common Public License.         *
-# * http://www.opensource.org/licenses/cpl1.0.php              *
+# * most current version of the MIT License.                   *
+# * http://www.opensource.org/licenses/MIT                     *
 # *                                                            *
 # **************************************************************
 #
@@ -21,6 +21,9 @@ OPTIMIZATION_OPT = -O1
 BASE_OPTIONS     = -pedantic-errors -Wall -Wextra -Werror -Wno-long-long
 OPTIONS          = $(BASE_OPTIONS) $(OPTIMIZATION_OPT)
 LINKER_OPT       = -L/usr/lib -lstdc++ -lm
+ASAN_OPT         = -g -fsanitize=address -fno-omit-frame-pointer
+MSAN_OPT         = -g -fsanitize=memory  -fno-omit-frame-pointer
+LSAN_OPT         = -g -fsanitize=leak    -fno-omit-frame-pointer
 
 BUILD_LIST+=exprtk_test
 BUILD_LIST+=exprtk_benchmark
@@ -40,6 +43,9 @@ BUILD_LIST+=exprtk_simple_example_13
 BUILD_LIST+=exprtk_simple_example_14
 BUILD_LIST+=exprtk_simple_example_15
 BUILD_LIST+=exprtk_simple_example_16
+BUILD_LIST+=exprtk_simple_example_17
+BUILD_LIST+=exprtk_simple_example_18
+BUILD_LIST+=exprtk_simple_example_19
 
 
 all: $(BUILD_LIST)

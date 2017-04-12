@@ -3,14 +3,14 @@
  *         C++ Mathematical Expression Toolkit Library        *
  *                                                            *
  * Simple Example 15                                          *
- * Author: Arash Partow (1999-2014)                           *
+ * Author: Arash Partow (1999-2017)                           *
  * URL: http://www.partow.net/programming/exprtk/index.html   *
  *                                                            *
  * Copyright notice:                                          *
  * Free use of the Mathematical Expression Toolkit Library is *
  * permitted under the guidelines and in accordance with the  *
- * most current version of the Common Public License.         *
- * http://www.opensource.org/licenses/cpl1.0.php              *
+ * most current version of the MIT License.                   *
+ * http://www.opensource.org/licenses/MIT                     *
  *                                                            *
  **************************************************************
 */
@@ -32,9 +32,9 @@ void black_scholes_merton_model()
                   " var d1 := (log(s / x) + (r + v^2 / 2) * t) / (v * sqrt(t)); "
                   " var d2 := d1 - v * sqrt(t);                                 "
                   "                                                             "
-                  " if(callput_flag == 'call')                                  "
+                  " if (callput_flag == 'call')                                 "
                   "   s * ncdf(d1) - x * e^(-r * t) * ncdf(d2);                 "
-                  " else if(callput_flag == 'put')                              "
+                  " else if (callput_flag == 'put')                             "
                   "   x * e^(-r * t) * ncdf(-d2) - s * ncdf(-d1);               "
                   "                                                             ";
 
@@ -61,11 +61,11 @@ void black_scholes_merton_model()
    expression.register_symbol_table(symbol_table);
 
    parser_t parser;
-
    parser.compile(bsm_model_program,expression);
 
    {
       callput_flag = "call";
+
       T bsm = expression.value();
 
       printf("BSM(%s,%5.3f,%5.3f,%5.3f,%5.3f,%5.3f) = %10.6f\n",
@@ -76,6 +76,7 @@ void black_scholes_merton_model()
 
    {
       callput_flag = "put";
+
       T bsm = expression.value();
 
       printf("BSM(%s,%5.3f,%5.3f,%5.3f,%5.3f,%5.3f) = %10.6f\n",
