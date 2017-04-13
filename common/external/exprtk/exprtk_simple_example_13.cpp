@@ -3,14 +3,14 @@
  *         C++ Mathematical Expression Toolkit Library        *
  *                                                            *
  * Simple Example 13                                          *
- * Author: Arash Partow (1999-2014)                           *
+ * Author: Arash Partow (1999-2017)                           *
  * URL: http://www.partow.net/programming/exprtk/index.html   *
  *                                                            *
  * Copyright notice:                                          *
  * Free use of the Mathematical Expression Toolkit Library is *
  * permitted under the guidelines and in accordance with the  *
- * most current version of the Common Public License.         *
- * http://www.opensource.org/licenses/cpl1.0.php              *
+ * most current version of the MIT License.                   *
+ * http://www.opensource.org/licenses/MIT                     *
  *                                                            *
  **************************************************************
 */
@@ -54,12 +54,6 @@ void savitzky_golay_filter()
                   "   };                                                      "
                   "                                                           "
                   "   v_out /= sum(weight);                                   "
-                  "                                                           "
-                  "   for (var i := 0; i < lower_bound; i += 1)               "
-                  "   {                                                       "
-                  "     v_out[i] := 0;                                        "
-                  "     v_out[v_out[] - i - 1] := 0;                          "
-                  "   };                                                      "
                   " }                                                         ";
 
    const std::size_t n = 1024;
@@ -67,7 +61,7 @@ void savitzky_golay_filter()
    std::vector<T> v_in;
    std::vector<T> v_out;
 
-   const T pi = T(3.141592653589793238462);
+   const T pi = T(3.141592653589793238462643383279502);
 
    srand(static_cast<unsigned int>(time(0)));
 
@@ -88,7 +82,6 @@ void savitzky_golay_filter()
    expression.register_symbol_table(symbol_table);
 
    parser_t parser;
-
    parser.compile(sgfilter_program,expression);
 
    expression.value();

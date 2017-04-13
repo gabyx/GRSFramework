@@ -3,14 +3,14 @@
  *         C++ Mathematical Expression Toolkit Library        *
  *                                                            *
  * Simple Example 16                                          *
- * Author: Arash Partow (1999-2014)                           *
+ * Author: Arash Partow (1999-2017)                           *
  * URL: http://www.partow.net/programming/exprtk/index.html   *
  *                                                            *
  * Copyright notice:                                          *
  * Free use of the Mathematical Expression Toolkit Library is *
  * permitted under the guidelines and in accordance with the  *
- * most current version of the Common Public License.         *
- * http://www.opensource.org/licenses/cpl1.0.php              *
+ * most current version of the MIT License.                   *
+ * http://www.opensource.org/licenses/MIT                     *
  *                                                            *
  **************************************************************
 */
@@ -54,19 +54,16 @@ void linear_least_squares()
    T rmse  = T(0);
 
    symbol_table_t symbol_table;
-
    symbol_table.add_variable("alpha",alpha);
    symbol_table.add_variable("beta" ,beta );
    symbol_table.add_variable("rmse" ,rmse );
-
-   symbol_table.add_vector("x",x);
-   symbol_table.add_vector("y",y);
+   symbol_table.add_vector  ("x"    ,x    );
+   symbol_table.add_vector  ("y"    ,y    );
 
    expression_t expression;
    expression.register_symbol_table(symbol_table);
 
    parser_t parser;
-
    parser.compile(linear_least_squares_program,expression);
 
    expression.value();
