@@ -3,6 +3,8 @@
 
 ![BuildStatus](https://travis-ci.org/gabyx/GRSFramework.svg?branch=master)
 
-![C++](https://img.shields.io/badge/c%2B%2B-11/14-green.svg) ![Deps](https://img.shields.io/badge/dependencies-Ogre|boost| Assimp|MPI|HDF5|eigen3|pugixml|meta|ApproxMVBB|CudaFramework|python3-blue.svg) ![System](https://img.shields.io/badge/system-linux,osx,{windows}-lightgrey.svg)
+![C++](https://img.shields.io/badge/c%2B%2B-11/14-green.svg) 
+![Deps](https://img.shields.io/badge/dependencies-Ogre|boost| Assimp|MPI|HDF5|eigen3|pugixml|meta|ApproxMVBB|CudaFramework|python3-blue.svg) 
+![System](https://img.shields.io/badge/system-linux,osx,{windows}-lightgrey.svg)
 [Homepage](http://gabyx.github.io/GRSFramework/)
 
