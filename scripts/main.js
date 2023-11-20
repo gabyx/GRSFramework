@@ -55,16 +55,16 @@ marked.setOptions({
   pedantic: false,
   sanitize: false, // IMPORTANT, because we do MathJax before markdown,
   //            however we do escaping in 'CreatePreview'.
-  smartLists: true,
-  smartypants: false,
   // highlight: function(code) {
   //   return hljs.highlightAuto(code).value;
   // }
 });
 
+marked.use(markedGfmHeadingId.gfmHeadingId({}));
+
 // use marked
 var renderMKtoHTML = function (text) {
-  return marked(text);
+  return marked.parse(text);
 };
 
 // use showdown
@@ -90,9 +90,6 @@ function renderAll() {
     client1.onreadystatechange = function () {
       if (client1.readyState == 4) {
         console.log("loaded: ", fileUrl);
-
-        // put loaded markdown text into content
-        //document.getElementById('content').innerHTML = client1.responseText;
 
         console.log("render markdown");
         markdownBufferDiv.innerHTML = renderMKtoHTML(client1.responseText);
@@ -166,7 +163,7 @@ function parseTOC(from, to) {
   var staticContent = $(from);
 
   //console.log(staticContent)
-  staticContent.find("h1").each(function () {
+  staticContent.find("h1").each(function (el) {
     tocPlaceholder.append(
       '<li id="' +
         $(this).attr("id") +
