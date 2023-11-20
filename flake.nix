@@ -48,6 +48,7 @@
               yarn
               zsh
               just
+              jekyll
               nodePackages_latest.browser-sync
             ];
           };
