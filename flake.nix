@@ -35,6 +35,7 @@
     ...
   } @ inputs:
     flake-utils.lib.eachDefaultSystem
+    # Creates an attribute map `{ devShells.<system>.default = ...}`
     (
       system: let
         pkgs = import nixpkgs {
