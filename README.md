@@ -16,21 +16,21 @@
 <table>
 <tr>
 <td width="50%">
-   <a href="https://player.vimeo.com/video/160352926?title=0&byline=0"><img src="https://vumbnail.com/160352926.png" width="100%"></a>
+   <a href="https://player.vimeo.com/video/160352926?title=0&byline=0"><img src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/Avalanche-P-9Tracking.png" width="100%"></a>
     <span>Coloring: Velocity</span>
 </td>
 <td width="50%">
-   <a href="https://player.vimeo.com/video/160352927?title=0&byline=0"><img src="https://vumbnail.com/160352927.png" width="100%"></a>
+   <a href="https://player.vimeo.com/video/160352927?title=0&byline=0"><img src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/Avalanche-P-9StaticFarProcs.png" width="100%"></a>
     <span>Coloring: Process Domain</span>
 </td>
 </tr>
 <tr>
 <td width="50%">
-   <a href="https://player.vimeo.com/video/160352928?title=0&byline=0"><img src="https://vumbnail.com/160352928.png" width="100%"></a>
+   <a href="https://player.vimeo.com/video/160352928?title=0&byline=0"><img src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/Avalanche-P-9CloseUpColored.png" width="100%"></a>
     <span>Coloring: Random</span>
 </td>
 <td width="50%">
-   <a href="https://player.vimeo.com/video/160352925?title=0&byline=0"><img src="https://vumbnail.com/160352925.png" width="100%"></a>
+   <a href="https://player.vimeo.com/video/160352925?title=0&byline=0"><img src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/SimVsCIV-VelocityMag-P-9.png" width="100%"></a>
     <span>Coloring: Velocity</span>
 </td>
 </tr>
