@@ -35,3 +35,11 @@
 </td>
 </tr>
 </table>
+
+**Chute flow simulation & experiment with 1 million spheres:**
+
+- _method:_ Moreau time-stepping with unilateral contacts and Coulomb friction
+- computed on 384 cores with `GRSFSimMPI` in 12 h, rendered with `GRSFConverter` and `prman` in 24 h.
+- _time step:_ 0.0002 s, _friction coefficient:_ 0.8
+- _restitution coefficient:_ 0.0 (fully inelastic impacts)
+- _global contact iterations:_ 1000
