@@ -17,7 +17,7 @@
   <tr>
     <td width="50%">
       <!-- https://player.vimeo.com/video/160352926?title=0&byline=0 -->
-      <a href="https://gabyx.github.io/GRSFramework/videos/video-1.html"
+      <a href="https://gabyx.github.io/GRSFramework/videos/video-1.html" target="_blank"
         ><img
           src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/Avalanche-P-9Tracking.png"
           width="100%"
@@ -26,7 +26,7 @@
     </td>
     <td width="50%">
       <!-- https://player.vimeo.com/video/160352927?title=0&byline=0 -->
-      <a href="https://gabyx.github.io/GRSFramework/videos/video-2.html"
+      <a href="https://gabyx.github.io/GRSFramework/videos/video-2.html" target="_blank"
         ><img
           src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/Avalanche-P-9StaticFarProcs.png"
           width="100%"
@@ -37,7 +37,7 @@
   <tr>
     <td width="50%">
       <!-- https://player.vimeo.com/video/160352928?title=0&byline=0 -->
-      <a href="https://gabyx.github.io/GRSFramework/videos/video-3.html"
+      <a href="https://gabyx.github.io/GRSFramework/videos/video-3.html" target="_blank"
         ><img
           src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/Avalanche-P-9CloseUpColored.png"
           width="100%"
@@ -46,7 +46,7 @@
     </td>
     <td width="50%">
       <!-- https://player.vimeo.com/video/160352925?title=0&byline=0 -->
-      <a href="https://gabyx.github.io/GRSFramework/videos/video-4.html"
+      <a href="https://gabyx.github.io/GRSFramework/videos/video-4.html" target="_blank"
         ><img
           src="https://raw.githubusercontent.com/gabyx/GRSFramework/gh-pages/videos/SimVsCIV-VelocityMag-P-9.png"
           width="100%"
