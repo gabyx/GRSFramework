@@ -81,7 +81,7 @@ function renderAll() {
   // load wiki Home markup -> render markdown -> render mathjax -> replace videos -> parse/apply toc
   {
     //var fileUrl = "MathJaxTest.md" ;
-    var fileUrl = "https://rawgit.com/wiki/gabyx/GRSFramework/Home.md";
+    var fileUrl = "https://cdn.githubraw.com/wiki/gabyx/GRSFramework/Home.md";
     var client1 = new XMLHttpRequest();
 
     console.log("get: ", fileUrl);
